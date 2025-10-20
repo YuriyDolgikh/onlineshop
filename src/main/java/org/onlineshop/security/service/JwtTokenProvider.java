@@ -17,9 +17,8 @@ public class JwtTokenProvider {
     private final long jwtLifeTime = 3600000; // 60 minutes
 
     /**
-     * Create new JWT token for user with username
-     *
-     * @param username - username (email)
+     * Create new JWT token for user with username (email)
+     * @param username - username (email of user)
      * @return String variable with a complete JWT token
      */
     public String createToken(String username) {
@@ -36,7 +35,6 @@ public class JwtTokenProvider {
 
     /**
      * Validation of JWT token, received from User
-     *
      * @param token JWT token
      * @return boolean variable with a result of validation. True, if the token is valid, otherwise will be thrown an exception:
      * @SignatureException - Invalid JWT Signature
@@ -57,14 +55,12 @@ public class JwtTokenProvider {
 
     /**
      * Get username from JWT token, received from User
-     *
-     * @param token JWT token
-     * @return - String variable with username (email)
+     * @param token JWT token - String variable
+     * @return - String variable with username (email of user)
      */
     public String getUsernameFromJwt(String token) {
         Key key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
         Claims claimsPayload = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
         return claimsPayload.getSubject();
     }
-
 }

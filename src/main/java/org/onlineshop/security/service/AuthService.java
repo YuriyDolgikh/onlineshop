@@ -20,27 +20,23 @@ public class AuthService {
 
     /**
      * Generate a JWT token for a user with a username (email)
+     *
      * @param request - object with username and password
      * @return String variable with JWT token
      */
     public String generateJwt(AuthRequestDto request) {
-
         try {
             customUserDetailService.loadUserByUsername(request.getUsername());
-        } catch (UsernameNotFoundException e){
+        } catch (UsernameNotFoundException e) {
             throw new NotFoundException("User with email: " + request.getUsername() + " is not registered");
         }
-
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getUsername(),
                         request.getPassword()
                 )
         );
-
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
         return jwtTokenProvider.createToken(request.getUsername());
     }
-
 }

@@ -36,15 +36,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             if (jwt != null && jwtTokenProvider.validateToken(jwt)) {
                 // get the username from JWT from request (this is 'email' in our case)
                 String userName = jwtTokenProvider.getUsernameFromJwt(jwt);
-
                 // create an object UserDetail, which knows Spring Security to fill it with our user data
                 UserDetails userDetails = customUserDetailService.loadUserByUsername(userName);
-
                 // create a necessary object from Spring Security to fill SecurityContext
                 Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
-
         } catch (InvalidJwtException e) {
             System.out.println("ERROR !!! " + e.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -52,7 +49,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             response.getWriter().write("error: " + e.getMessage());
             return;
         }
-
         // definitely we need to apply changes to the object with the list of filters
         filterChain.doFilter(request, response);
     }
@@ -63,9 +59,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         /*
             If in the request there is a jwt, then in the request body will be a string
             that looks like: "Bearer askjhfgaskjhfgbas.asdfgareghaerhaerhaerh.arehgareharhaerhaerh"
-
             That is, we have to take from this line ALL to the end starting with the first character after "Bearer "
-            begins from 7 characters in the line and to the end
+            begins from 7 characters in the line and to the end.
          */
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);

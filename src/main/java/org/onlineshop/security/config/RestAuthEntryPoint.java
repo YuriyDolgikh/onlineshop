@@ -1,7 +1,6 @@
 package org.onlineshop.security.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
@@ -15,8 +14,6 @@ import java.util.Map;
 
 public class RestAuthEntryPoint implements AuthenticationEntryPoint {
     private final ObjectMapper om = new ObjectMapper();
-
-
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
