@@ -1,6 +1,5 @@
 package org.onlineshop.entity;
 
-
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -21,7 +20,7 @@ public class ConfirmationCode {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @NotBlank
     @NotNull
@@ -36,5 +35,4 @@ public class ConfirmationCode {
     private LocalDateTime expireDataTime;
 
     private boolean isConfirmed;
-
 }

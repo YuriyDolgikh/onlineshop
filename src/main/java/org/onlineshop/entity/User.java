@@ -19,7 +19,6 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-
 @Table(name = "users")
 @Entity
 public class User {
@@ -40,21 +39,32 @@ public class User {
     private String hashPassword;
 
     @NotBlank
-    private String phoneNumber;
+    @Size(max = 20)
+    @Column(unique = true, nullable = false)
+    private String phoneNumber;     //TODO add regex for a phone number
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Status status;
+
     @OneToOne( cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    @JoinColumn(name = "card_id", referencedColumnName = "id")
+    @JoinColumn(name = "cart_id", referencedColumnName = "cartId")
     private Cart cart;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Order> orders = new ArrayList<>();
 
-    private Set<Product> favouriteProducts = new HashSet<>();
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Favourite> favourites = new HashSet<>();
+
     public enum Role {
-        ADMIN, MANAGER, USER,
+        ADMIN,
+        MANAGER,
+        USER,
     }
 
     public enum Status {

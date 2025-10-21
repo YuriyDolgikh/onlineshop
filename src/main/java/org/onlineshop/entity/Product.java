@@ -10,19 +10,17 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.validator.constraints.URL;
 
 import java.math.BigDecimal;
-import java.net.URL;
 import java.time.LocalDateTime;
 
-
+@Entity
+@Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-
 @Table(name = "products")
-@Entity
 public class Product {
 
     @Id
@@ -44,11 +42,12 @@ public class Product {
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
-    @Column(length = 500)
-    private URL image;
+    @URL
+    @Column(length = 256)
+    private String imageUrl;
 
-    @Column(precision = 10, scale = 2, nullable = true)
-    private BigDecimal discountPrice;
+    @Column(precision = 10, scale = 2, nullable = true)     //TODO why nullable true?
+    private BigDecimal discountPrice;                       //TODO why type is BigDecimal?
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
@@ -56,6 +55,4 @@ public class Product {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
-
-
 }

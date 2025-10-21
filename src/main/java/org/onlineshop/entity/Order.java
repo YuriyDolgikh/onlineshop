@@ -12,19 +12,17 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
+@Entity
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-
 @Table(name = "orders")
-@Entity
 public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer orderId;
-
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -36,15 +34,15 @@ public class Order {
 
     @NotBlank
     @Size(max = 100)
-    private String deliveryAdress;
+    private String deliveryAddress;
 
     @NotBlank
-    @Size(max = 20)
+    @Size(max = 20)     //TODO add regex for a phone number
     private String contactPhone;
 
     @NotBlank
     @Size(max = 100)
-    private String deliveryMethod;
+    private String deliveryMethod;      // TODO add delivery method enum ?????
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -52,7 +50,6 @@ public class Order {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
-
 
     public enum Status {
         PENDING_PAYMENT,
