@@ -1,6 +1,7 @@
 package org.onlineshop.security.service;
 
 import lombok.RequiredArgsConstructor;
+import org.onlineshop.repository.UserRepository;
 import org.onlineshop.security.entity.MyUserToUserDetails;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
