@@ -5,6 +5,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.onlineshop.security.exception.InvalidJwtException;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
