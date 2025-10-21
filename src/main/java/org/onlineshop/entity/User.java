@@ -36,12 +36,12 @@ public class User {
     private String email;
 
     @NotBlank
-    private String hashPassword;
-
-    @NotBlank
     @Size(max = 20)
     @Column(unique = true, nullable = false)
     private String phoneNumber;     //TODO add regex for a phone number
+
+    @NotBlank
+    private String hashPassword;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
