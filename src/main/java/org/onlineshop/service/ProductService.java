@@ -1,4 +1,4 @@
-package org.onlineshop.service.mail;
+package org.onlineshop.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
