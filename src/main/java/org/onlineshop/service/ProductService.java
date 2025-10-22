@@ -25,9 +25,9 @@ public class ProductService {
         return productRepository.findAll();
     }
 
-    public List<Product> getByNameOrderByName(String name, Sort.Direction sort) {
-        return productRepository.findByNameOrderByName(name, sort);
-    }
+//    public List<Product> getByNameOrderByName(String name, Sort.Direction sort) {
+//        return productRepository.findByNameOrderByName(name, sort);
+//    }
 
     public Product getProductById(Integer productId) {
         return productRepository.findById(productId)
