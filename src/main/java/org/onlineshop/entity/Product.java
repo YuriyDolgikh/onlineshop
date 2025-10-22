@@ -28,7 +28,7 @@ public class Product {
     private Integer id;
 
     @Column(nullable = false, length = 50)
-    @NotBlank(message = "city name is required and must be not blank)")
+    @NotBlank(message = "product title is required and must be not blank)")
     @Size(min = 3, max = 20)
     private String name;
 
@@ -46,7 +46,7 @@ public class Product {
     @Column(length = 256)
     private String imageUrl;
 
-    @Column(precision = 10, scale = 2, nullable = true)     //TODO why nullable true?
+    @Column(precision = 10, scale = 2, nullable = false)     //TODO why nullable true?
     private BigDecimal discountPrice;                       //TODO why type is BigDecimal?
 
     @CreationTimestamp
