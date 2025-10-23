@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.URL;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,10 @@ public class Category {
 
     @Column(nullable = false, unique = true)
     public String categoryName;
+
+    @URL
+    @Column(length = 256)
+    private String image;
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
     @Builder.Default

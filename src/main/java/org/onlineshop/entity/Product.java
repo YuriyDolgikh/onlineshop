@@ -44,7 +44,7 @@ public class Product {
 
     @URL
     @Column(length = 256)
-    private String imageUrl;
+    private String image;
 
     @Column(precision = 10, scale = 2, nullable = false)     //TODO why nullable true?
     private BigDecimal discountPrice;                       //TODO why type is BigDecimal?

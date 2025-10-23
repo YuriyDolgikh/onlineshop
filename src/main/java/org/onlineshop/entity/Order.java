@@ -2,6 +2,7 @@ package org.onlineshop.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,6 +12,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -37,12 +40,16 @@ public class Order {
     private String deliveryAddress;
 
     @NotBlank
-    @Size(max = 20)     //TODO add regex for a phone number
+    @Pattern(
+            regexp = "^\\+?[0-9]{7,15}$",
+            message = "Phone number must contain only digits and may start with +, length 7–15"
+    )
+    @Column(nullable = false)
     private String contactPhone;
 
-    @NotBlank
-    @Size(max = 100)
-    private String deliveryMethod;      // TODO add delivery method enum ?????
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private DeliveryMethod deliveryMethod;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -51,11 +58,20 @@ public class Order {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderItem> orderItems = new ArrayList<>();
+
     public enum Status {
         PENDING_PAYMENT,
         PAID,
         IN_TRANSIT,
         DELIVERED,
         CANCELLED
+    }
+
+    public enum DeliveryMethod {
+        STANDARD,
+        EXPRESS,
+        SELF_DELIVERY
     }
 }
