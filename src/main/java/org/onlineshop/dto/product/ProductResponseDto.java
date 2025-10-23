@@ -1,4 +1,4 @@
-package org.onlineshop.dto;
+package org.onlineshop.dto.product;
 
 import lombok.Builder;
 import lombok.Data;
