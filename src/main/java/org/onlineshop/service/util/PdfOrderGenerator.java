@@ -50,9 +50,9 @@ public class PdfOrderGenerator {
         for (OrderItem item : order.getOrderItems()) {
             String product = item.getProduct().getName();
             Integer quantity = item.getQuantity();
-            BigDecimal price = item.getPrice();
+            BigDecimal price = item.getProduct().getPrice();
             BigDecimal discount = item.getPriceAtPurchase();
-            BigDecimal finalPrice = item.getPriceAtPurchase() != null ? item.getPriceAtPurchase() : item.getPrice();
+            BigDecimal finalPrice = item.getPriceAtPurchase() != null ? item.getPriceAtPurchase() : item.getProduct().getPrice();
             BigDecimal total = finalPrice.multiply(BigDecimal.valueOf(quantity));
             totalSumm = totalSumm.add(total);
 
