@@ -34,5 +34,5 @@ public class OrderItem {
     private Integer quantity;
 
     @Column(nullable = false)
-    private BigDecimal priceAtPurchase;
+    private BigDecimal priceAtPurchase;     // priceAtPurchase = price - price * discount / 100
 }

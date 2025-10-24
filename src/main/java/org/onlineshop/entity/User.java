@@ -42,7 +42,7 @@ public class User {
             message = "Phone number must contain only digits and may start with +, length 7–15"
     )
     @Column(unique = true, nullable = false)
-    private String phoneNumber;     //TODO add regex for a phone number
+    private String phoneNumber;
 
     @NotBlank
     private String hashPassword;
