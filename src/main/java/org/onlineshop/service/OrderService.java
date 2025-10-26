@@ -97,8 +97,8 @@ public class OrderService implements OrderServiceInterface {
         if (orderId == null) {
             throw new BadRequestException("OrderId cannot be null");
         }
-        if (newStatus == null) {
-            throw new BadRequestException("newStatus cannot be null");
+        if (newStatus == null || newStatus.isBlank()) {
+            throw new BadRequestException("newStatus cannot be null or blunk");
         }
         Order order  = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Order not found with ID: " + orderId));
