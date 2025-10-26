@@ -1,0 +1,221 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: 050525group
+      comment: "Create table users"
+      changes:
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: user_id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: username
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: email
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+                    unique: true
+
+              - column:
+                  name: phone_number
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: hash_password
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: role
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: status
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: cart_id
+                  type: INT
+
+
+  - changeSet:
+      id: 2
+      author: 050525group
+      comment: "Create table confirmation_codes"
+      changes:
+        - createTable:
+            tableName: confirmation_codes
+            columns:
+              - column:
+                  name: id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: code
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+
+              - column:
+                  name: user_id
+                  type: INT
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: expire_data_time
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: is_confirmed
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+
+        - addForeignKeyConstraint:
+            constraintName: fk_confirmation_user
+            baseTableName: confirmation_codes
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: user_id
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+
+
+  - changeSet:
+      id: 3
+      author: 050525group
+      comment: "Create admin and manager"
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column: { name: username,      value: "admin" }
+              - column: { name: email,         value: "admin@example.com" }
+              - column: { name: phone_number,  value: "+49111111111" }
+              - column: { name: hash_password, value: "$2a$10$WiAt7dmC1vLIxjY9/9n7P.I5RQU1MKKSOI1Dy1pNLPPIts7K5RJR2" }
+              - column: { name: role,          value: "ADMIN" }
+              - column: { name: status,        value: "CONFIRMED" }
+
+        - insert:
+            tableName: users
+            columns:
+              - column: { name: username,      value: "manager" }
+              - column: { name: email,         value: "manager@example.com" }
+              - column: { name: phone_number,  value: "+49222222222" }
+              - column: { name: hash_password, value: "$2a$10$35bmYiB2kQKydbNporsKfeYTff58vhJc0K0mSNXzbxetiXUJWSWFe" }
+              - column: { name: role,          value: "MANAGER" }
+              - column: { name: status,        value: "CONFIRMED" }
+
+
+  - changeSet:
+      id: 4
+      author: 050525group
+      comment: "Create confirmation codes for admin and manager"
+      changes:
+        - sql: >
+            INSERT INTO confirmation_codes (code, user_id, expire_data_time, is_confirmed)
+            SELECT UUID(), u.user_id, NOW(), TRUE
+            FROM users u
+            WHERE u.username IN ('admin','manager')
+              AND NOT EXISTS (
+                SELECT 1 FROM confirmation_codes c WHERE c.user_id = u.user_id
+              );
+
+  - changeSet:
+      id: 5
+      author: 050525group
+      comment: "Create table category"
+      changes:
+        - createTable:
+            tableName: category
+            columns:
+              - column:
+                  name: category_id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: category_name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: image
+                  type: VARCHAR(256)
+
+  - changeSet:
+      id: 6
+      author: 050525group
+      comment: "Create default product categories"
+      changes:
+        - insert:
+            tableName: category
+            columns:
+              - column: { name: category_name, value: "Fertilizer" }
+              - column: { name: image, value: "https://images.example1" }
+        - insert:
+            tableName: category
+            columns:
+              - column: { name: category_name, value: "Protective products and septic tanks" }
+              - column: { name: image, value: "https://images.example2" }
+        - insert:
+            tableName: category
+            columns:
+              - column: { name: category_name, value: "Tools and equipment" }
+              - column: { name: image, value: "https://images.example3" }
+        - insert:
+            tableName: category
+            columns:
+              - column: { name: category_name, value: "Pots and planters" }
+              - column: { name: image, value: "https://images.example4" }
+        - insert:
+            tableName: category
+            columns:
+              - column: { name: category_name, value: "Building materials" }
+              - column: { name: image, value: "https://images.example5" }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
