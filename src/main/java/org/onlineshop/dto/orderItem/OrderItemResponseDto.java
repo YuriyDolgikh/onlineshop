@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.onlineshop.entity.OrderItem;
 
 import java.math.BigDecimal;
 
@@ -20,4 +21,5 @@ public class OrderItemResponseDto {
     private Integer quantity;
 
     private BigDecimal priceAtPurchase;
+
 }
