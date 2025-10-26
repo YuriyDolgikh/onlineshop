@@ -33,6 +33,7 @@ public class OrderService implements OrderServiceInterface {
     private final PdfOrderGenerator pdfOrderGenerator;
     private final MailUtil mailUtil;
 
+    @Transactional
     @Override
     public OrderResponseDto saveOrder(OrderRequestDto dto) {
         if (dto == null) {
@@ -62,6 +63,7 @@ public class OrderService implements OrderServiceInterface {
 
     }
 
+    @Transactional
     @Override
     public OrderResponseDto getOrderById(Integer orderId) {
         if (orderId == null) {
