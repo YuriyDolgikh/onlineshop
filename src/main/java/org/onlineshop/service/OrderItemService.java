@@ -25,7 +25,6 @@ import java.math.BigDecimal;
 public class OrderItemService implements OrderItemServiceInterface {
 
     private final OrderItemRepository orderItemRepository;
-    private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final OrderItemConverter orderItemConverter;
     private final UserService userService;
