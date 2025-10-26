@@ -7,12 +7,14 @@ import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 import org.onlineshop.entity.Order;
 import org.onlineshop.entity.OrderItem;
+import org.springframework.stereotype.Service;
 
 import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 
+@Service
 public class PdfOrderGenerator {
     public static byte[] generatePdfOrder(Order order) {
 
