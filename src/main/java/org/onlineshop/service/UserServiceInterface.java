@@ -16,9 +16,9 @@ public interface UserServiceInterface {
 
     String confirmationEmail(String code);
 
-    UserResponseDto updateUser(UserUpdateRequestDto updateRequest);
+    UserResponseDto updateUser(Integer userId, UserUpdateRequestDto updateRequest);
 
-    boolean deleteUser(Integer userId);
+    UserResponseDto deleteUser(Integer userId);
 
     UserResponseDto renewUser(String email);
 

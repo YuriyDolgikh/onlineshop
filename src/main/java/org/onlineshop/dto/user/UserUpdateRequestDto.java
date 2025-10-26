@@ -1,6 +1,5 @@
 package org.onlineshop.dto.user;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -14,10 +13,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class UserUpdateRequestDto {
-
-    @NotBlank(message = "Email is required and must be not blank)")
-    @Email(message = "Email is not valid")
-    private String email;
 
     @NotNull
     @NotBlank(message = "Username is required and must be not blank)")
