@@ -140,7 +140,7 @@ databaseChangeLog:
       changes:
         - sql: >
             INSERT INTO confirmation_codes (code, user_id, expire_data_time, is_confirmed)
-            SELECT UUID(), u.user_id, DATE_ADD(NOW(), INTERVAL 3 DAY), TRUE
+            SELECT UUID(), u.user_id, NOW(), TRUE
             FROM users u
             WHERE u.username IN ('admin','manager')
               AND NOT EXISTS (
