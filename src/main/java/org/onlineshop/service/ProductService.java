@@ -29,6 +29,16 @@ public class ProductService {
 //        return productRepository.findByNameOrderByName(name, sort);
 //    }
 
+    List<Product> getProductsByPartOfNameIgnoreCase(String partOfName, Sort sort) {
+        return productRepository.findByNameContainingIgnoreCase(partOfName, sort);
+    }
+
+    List<Product> sortTest() {
+        Sort sort = Sort.by(Sort.Direction.DESC, "partOfName");
+        return productRepository.findByNameContainingIgnoreCase("test", sort);
+    }
+
+
     public Product getProductById(Integer productId) {
         return productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Product with id: " + productId + " does not exist"));
