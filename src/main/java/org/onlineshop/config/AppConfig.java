@@ -18,8 +18,4 @@ public class AppConfig {
         return new RestTemplate();
     }
 
-    @Bean
-    public JavaMailSender javaMailSender() {
-        return new JavaMailSenderImpl();
-    }
 }
