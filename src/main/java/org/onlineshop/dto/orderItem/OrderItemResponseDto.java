@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 @Builder
 public class OrderItemResponseDto {
 
-    private Integer orderId;
+    private Integer orderItemId;
 
     private Integer productId;
 

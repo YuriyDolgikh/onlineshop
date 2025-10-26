@@ -19,4 +19,6 @@ public class OrderRequestDto {
     private String deliveryAddress;
 
     private String deliveryMethod;
+
+    private String contactPhone;
 }

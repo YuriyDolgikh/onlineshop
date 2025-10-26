@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.onlineshop.dto.orderItem.OrderItemRequestDto;
+import org.onlineshop.dto.orderItem.OrderItemResponseDto;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -31,6 +32,6 @@ public class OrderResponseDto {
 
     private LocalDateTime updatedAt;
 
-    private List<OrderItemRequestDto> items;
+    private List<OrderItemResponseDto> items;
 
 }
