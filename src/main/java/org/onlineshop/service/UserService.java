@@ -12,12 +12,10 @@ import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.repository.UserRepository;
 import org.onlineshop.service.converter.UserConverter;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +24,7 @@ public class UserService implements UserServiceInterface {
     private final UserRepository userRepository;
     private final UserConverter userConverter;
     private final ConfirmationCodeService confirmationCodeService;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
@@ -74,19 +73,16 @@ public class UserService implements UserServiceInterface {
     }
 
     @Override
-    public UserResponseDto updateUser(UserUpdateRequestDto updateRequest) {
+    public UserResponseDto updateUser(Integer userId, UserUpdateRequestDto updateRequest) {
 
-        if (updateRequest.getEmail() == null || updateRequest.getEmail().isBlank()) {
-            throw new BadRequestException("Email must be provided to update user");
+        Optional<User> userToUpdateOptional = userRepository.findById(userId);
+        if (userToUpdateOptional.isEmpty()) {
+            throw new NotFoundException("User with id = " + userId + " not found");
         }
-
-        String userEmail = updateRequest.getEmail();
-        // Find the user by email
-        User userByEmail = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new NotFoundException("User with email: " + userEmail + " not found"));
+        User userToUpdate = userToUpdateOptional.get();
         // Check that the user for update is the same as the current user
         User currentUser = getCurrentUser();
-        if (!currentUser.getEmail().equals(updateRequest.getEmail())) {
+        if (!currentUser.getUserId().equals(userId)) {
             throw new BadRequestException("You can't update another user");
         }
         // Update all presented fields.
@@ -94,37 +90,35 @@ public class UserService implements UserServiceInterface {
         // so in the JSON (in the request body) there will be only those fields (that are not empty),
         // which the user wants to change (not obligatory all)
         if (updateRequest.getUsername() != null && !updateRequest.getUsername().isBlank()) {
-            userByEmail.setUsername(updateRequest.getUsername());
+            userToUpdate.setUsername(updateRequest.getUsername());
         }
         if (updateRequest.getPhoneNumber() != null && !updateRequest.getPhoneNumber().isBlank()) {
-            userByEmail.setPhoneNumber(updateRequest.getPhoneNumber());
+            userToUpdate.setPhoneNumber(updateRequest.getPhoneNumber());
         }
         if (updateRequest.getHashPassword() != null && !updateRequest.getHashPassword().isBlank()) {
-            userByEmail.setHashPassword(updateRequest.getHashPassword());
+            userToUpdate.setHashPassword(passwordEncoder.encode(updateRequest.getHashPassword()));
         }
         // Save the updated user
-        userRepository.save(userByEmail);
-        return userConverter.toDto(userByEmail);
+        userRepository.save(currentUser);
+        return userConverter.toDto(currentUser);
     }
 
     @Transactional
     @Override
-    public boolean deleteUser(Integer userId) {
-        User user = null;
-        // Check that such id exists
-        // If not - return false and do nothing
-        if (!userRepository.existsById(userId)) {
-            user = userRepository.findById(userId).get();
-            if (user.getRole().equals(User.Role.ADMIN)) {
-                throw new BadRequestException("You can't delete an admin");
-            }
-            return false;
+    public UserResponseDto deleteUser(Integer userId) {
+        User userToDelete = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User with id = " + userId + " not found"));
+        User currentUser = getCurrentUser();
+        if (userToDelete.getRole().equals(User.Role.ADMIN)) {
+            throw new BadRequestException("User with role ADMIN can't be deleted");
         }
-        // If exists - delete confirmation code for this user and set status to DELETED
+        if (!currentUser.getUserId().equals(userId) && !currentUser.getRole().equals(User.Role.ADMIN)) {
+            throw new BadRequestException("You can't delete another user");
+        }
         userRepository.deleteConfirmationCodeByUserId(userId);
-        user.setStatus(User.Status.DELETED);
-        userRepository.save(user);
-        return true;
+        userToDelete.setStatus(User.Status.DELETED);
+        userRepository.save(userToDelete);
+        return userConverter.toDto(userToDelete);
     }
 
     @Override

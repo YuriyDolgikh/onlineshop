@@ -22,7 +22,7 @@ public class ConfirmationCodeService implements ConfirmationCodeServiceInterface
 
     private final int EXPIRATION_PERIOD = 180; // in days
 
-    private final String LINK_PATH = "http://localhost:8080/api/public/confirmation?code=";
+    private final String LINK_PATH = "http://localhost:8080/v1/users/confirmation?code=";
 
     /**
      * Main service to generate and send a confirmation code for the given user.
