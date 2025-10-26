@@ -28,7 +28,6 @@ public class OrderService implements OrderServiceInterface {
     private final OrderRepository orderRepository;
     private final UserService userService;
     private final UserRepository userRepository;
-    private final OrderItemRepository orderItemRepository;
     private final OrderConverter orderConverter;
     private final OrderItemService orderItemService;
     private final PdfOrderGenerator pdfOrderGenerator;
