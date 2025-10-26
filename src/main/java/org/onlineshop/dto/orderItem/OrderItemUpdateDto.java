@@ -11,13 +11,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @Builder
-public class OrderItemRequestDto {
+public class OrderItemUpdateDto {
 
     @NotNull
-    private Integer productId;
+    private Integer orderItemId; // конкретный элемент заказа
 
     @NotNull
-    @Min(value = 1, message = "Quantity must be at least 1")
+    @Min(1)
     private Integer quantity;
-
 }
