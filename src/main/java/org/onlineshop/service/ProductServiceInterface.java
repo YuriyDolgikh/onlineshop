@@ -2,9 +2,11 @@ package org.onlineshop.service;
 
 import org.onlineshop.dto.product.ProductRequestDto;
 import org.onlineshop.dto.product.ProductResponseDto;
+import org.onlineshop.entity.Product;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 public interface ProductServiceInterface {
     ProductResponseDto addProduct(ProductRequestDto productRequestDto);
@@ -26,4 +28,6 @@ public interface ProductServiceInterface {
     List<ProductResponseDto> getAllProducts();
 
     List<ProductResponseDto> getProductsByCriteria(String paramName, String paramValue, String sortDirection);
+
+    Optional<Product> getProductById(Integer productId);
 }
