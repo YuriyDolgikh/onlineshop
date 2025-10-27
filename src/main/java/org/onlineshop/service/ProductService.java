@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -186,5 +187,10 @@ public class ProductService implements ProductServiceInterface {
             return Sort.Direction.DESC;
         }
         throw new IllegalArgumentException("Invalid sort direction: " + sortDirection);
+    }
+
+    @Override
+    public Optional<Product> getProductById(Integer productId) {
+        return productRepository.findById(productId);
     }
 }
