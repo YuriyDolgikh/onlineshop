@@ -90,6 +90,11 @@ public class UserController {
         return ResponseEntity.ok(userService.deleteUser(userId));
     }
 
+    /**
+     * Renews the currently authenticated user's email.
+     * @param email - email for a renewal user account
+     * @return a ResponseEntity containing the renewed UserResponseDto with HTTP status 200 (OK)
+     */
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MANAGER', 'ROLE_ADMIN')")
     @GetMapping("/renew/{email}")
     public ResponseEntity<UserResponseDto> renewUser(@PathVariable String email) {
