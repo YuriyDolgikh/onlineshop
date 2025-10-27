@@ -12,7 +12,7 @@ public class OrderItemConverter {
         }
 
         return OrderItemResponseDto.builder()
-                .orderId(orderItem.getOrderItemId())
+                .orderItemId(orderItem.getOrderItemId())
                 .productId(orderItem.getProduct().getId())
                 .quantity(orderItem.getQuantity())
                 .priceAtPurchase(orderItem.getPriceAtPurchase())

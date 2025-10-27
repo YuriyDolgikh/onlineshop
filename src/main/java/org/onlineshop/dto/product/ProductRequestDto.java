@@ -30,6 +30,6 @@ public class ProductRequestDto {
 
     private BigDecimal productDiscountPrice;
 
-    private String productImageUrl;
+    private String image;
 
 }

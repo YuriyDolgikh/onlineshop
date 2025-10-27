@@ -22,7 +22,7 @@ public class ProductResponseDto {
 
     private BigDecimal productDiscountPrice;
 
-    private String productImageUrl;
+    private String image;
 
     private LocalDateTime createdAt;
 
