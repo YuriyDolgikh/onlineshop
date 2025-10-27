@@ -1,6 +1,7 @@
 package org.onlineshop.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.user.UserRequestDto;
 import org.onlineshop.dto.user.UserResponseDto;
@@ -71,7 +72,7 @@ public class UserController {
      */
     @PutMapping("/{userId}")
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MANAGER', 'ROLE_ADMIN')")
-    public ResponseEntity<UserResponseDto> updateUser(@Valid @PathVariable Integer userId, @RequestBody UserUpdateRequestDto requestDto) {
+    public ResponseEntity<UserResponseDto> updateUser(@Valid @PathVariable Integer userId, @Valid @RequestBody UserUpdateRequestDto requestDto) {
         return ResponseEntity.ok(userService.updateUser(userId, requestDto));
     }
 
@@ -86,13 +87,13 @@ public class UserController {
      */
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MANAGER', 'ROLE_ADMIN')")
     @DeleteMapping("/{userId}")
-    public ResponseEntity<UserResponseDto> deleteUser(@PathVariable Integer userId) {
+    public ResponseEntity<UserResponseDto> deleteUser(@Valid @PathVariable Integer userId) {
         return ResponseEntity.ok(userService.deleteUser(userId));
     }
 
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MANAGER', 'ROLE_ADMIN')")
     @GetMapping("/renew/{email}")
-    public ResponseEntity<UserResponseDto> renewUser(@PathVariable String email) {
+    public ResponseEntity<UserResponseDto> renewUser(@Email @PathVariable String email) {
         return ResponseEntity.ok(userService.renewUser(email));
     }
 
