@@ -2,8 +2,6 @@ package org.onlineshop.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.onlineshop.dto.category.CategoryRequestDto;
-import org.onlineshop.dto.category.CategoryResponseDto;
 import org.onlineshop.dto.order.OrderRequestDto;
 import org.onlineshop.dto.order.OrderResponseDto;
 import org.onlineshop.service.OrderService;
