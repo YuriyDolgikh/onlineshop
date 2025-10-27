@@ -15,6 +15,7 @@ public class CategoryConverter {
     public Category fromDto(CategoryRequestDto categoryRequestDto){
         return Category.builder()
                 .categoryName(categoryRequestDto.getCategoryName())
+                .image(categoryRequestDto.getImage())
                 .build();
     }
 
