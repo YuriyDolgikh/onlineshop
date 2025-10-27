@@ -5,8 +5,10 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import org.onlineshop.entity.Order;
 import org.onlineshop.entity.User;
 import org.onlineshop.exception.MailSendingException;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -45,6 +47,48 @@ public class MailUtil {
         model.put("name", user.getUsername());
         model.put("link", linkToSend);
         return FreeMarkerTemplateUtils.processTemplateIntoString(template, model);
+    }
+
+    public void sendOrderPaidEmail(User user, Order order, byte[] pdfBytes) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(user.getEmail());
+            helper.setSubject("Order Payment Confirmation - Order #" + order.getOrderId());
+
+            // Email body text
+            String text = """
+                Hello %s,
+
+                Your order #%d has been successfully paid.
+
+                Delivery method: %s
+                Delivery address: %s
+
+                Thank you for shopping with us!
+                You can find your order details in the attached PDF file.
+
+                Best regards,
+                The Online Shop Team
+                """.formatted(
+                    user.getUsername(),
+                    order.getOrderId(),
+                    order.getDeliveryMethod(),
+                    order.getDeliveryAddress()
+            );
+
+            helper.setText(text, false);
+
+
+            helper.addAttachment("order_" + order.getOrderId() + ".pdf",
+                    new ByteArrayResource(pdfBytes));
+
+            mailSender.send(message);
+
+        } catch (Exception e) {
+            throw new MailSendingException("Error sending order payment email: " + e.getMessage());
+        }
     }
 }
 
