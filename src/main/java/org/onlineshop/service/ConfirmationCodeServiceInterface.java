@@ -16,4 +16,6 @@ interface ConfirmationCodeServiceInterface {
     User changeConfirmationStatusByCode(String code);
 
     ConfirmationCode findCodeByUser(User user);
+
+    void deleteConfirmationCodeByUser(User user);
 }
