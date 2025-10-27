@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 
 @Data
 @Builder
-public class ProductRequestDto {
+public class        ProductRequestDto {
 
     @NotBlank(message = "product title is required and must be not blank)")
     @Size(min = 3, max = 20, message = "Product title must be between 3 and 20 characters")

@@ -1,0 +1,53 @@
+package org.onlineshop.service.converter;
+
+import lombok.RequiredArgsConstructor;
+import org.onlineshop.dto.product.ProductRequestDto;
+import org.onlineshop.dto.product.ProductResponseDto;
+import org.onlineshop.entity.Category;
+import org.onlineshop.entity.Product;
+import org.onlineshop.service.CategoryService;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class ProductConverter {
+
+    private final CategoryService categoryService;
+
+    public Product fromDto(ProductRequestDto productRequestDto){
+
+        Category category = categoryService.getCategoryByName(productRequestDto.getProductCategory());
+
+        return Product.builder()
+                .name(productRequestDto.getProductName())
+                .description(productRequestDto.getProductDescription())
+                .price(productRequestDto.getProductPrice())
+                .category(category)
+                .discountPrice(productRequestDto.getProductDiscountPrice())
+                .image(productRequestDto.getImage())
+                .build();
+    }
+
+    public ProductResponseDto toDto(Product product){
+        return ProductResponseDto.builder()
+                .productId(product.getId())
+                .productName(product.getName())
+                .productDescription(product.getDescription())
+                .productCategory(product.getCategory().getCategoryName())
+                .productPrice(product.getPrice())
+                .productDiscountPrice(product.getDiscountPrice())
+                .image(product.getImage())
+                .createdAt(product.getCreatedAt())
+                .updatedAt(product.getUpdatedAt())
+                .build();
+    }
+
+    public List<ProductResponseDto> toDtos(List<Product> products){
+        return products.stream()
+                .map(this::toDto)
+                .toList();
+    }
+
+}
