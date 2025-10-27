@@ -115,7 +115,7 @@ public class UserService implements UserServiceInterface {
         if (!currentUser.getUserId().equals(userId) && !currentUser.getRole().equals(User.Role.ADMIN)) {
             throw new BadRequestException("You can't delete another user");
         }
-        userRepository.deleteConfirmationCodeByUserId(userId);
+        confirmationCodeService.deleteConfirmationCodeByUser(userToDelete);
         userToDelete.setStatus(User.Status.DELETED);
         userRepository.save(userToDelete);
         return userConverter.toDto(userToDelete);

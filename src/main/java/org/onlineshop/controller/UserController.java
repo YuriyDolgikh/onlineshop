@@ -90,4 +90,10 @@ public class UserController {
         return ResponseEntity.ok(userService.deleteUser(userId));
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MANAGER', 'ROLE_ADMIN')")
+    @GetMapping("/renew/{email}")
+    public ResponseEntity<UserResponseDto> renewUser(@PathVariable String email) {
+        return ResponseEntity.ok(userService.renewUser(email));
+    }
+
 }

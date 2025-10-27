@@ -101,4 +101,14 @@ public class ConfirmationCodeService implements ConfirmationCodeServiceInterface
                 .orElseThrow(() -> new NotFoundException("Confirmation code for user: " + user.getUsername() + " not found"));
         return confirmationCode;
     }
+
+    @Override
+    public void deleteConfirmationCodeByUser(User user) {
+        if (user == null) {
+            throw new IllegalArgumentException("User must be provided");
+        }
+        ConfirmationCode confirmationCode = repository.findByUser(user)
+                .orElseThrow(() -> new NotFoundException("Confirmation code for user: " + user.getUsername() + " not found"));
+        repository.delete(confirmationCode);
+    }
 }
