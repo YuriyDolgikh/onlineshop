@@ -76,7 +76,6 @@ public class CategoryService implements CategoryServiceInterface {
         Category categoryToDelete = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new BadRequestException("Category with id: " + categoryId + " not found"));
         categoryToDelete.getProducts()
-                .stream()
                 .forEach(product -> product.setCategory(null));      //TODO: null must be changed to DEFAULT category
         categoryRepository.delete(categoryToDelete);
         return categoryConverter.toDto(categoryToDelete);
@@ -87,4 +86,14 @@ public class CategoryService implements CategoryServiceInterface {
         return categoryConverter.fromCategories(categoryRepository.findAll());
     }
 
+    @Override
+    public Category getCategoryById(Integer categoryId) {
+        return categoryRepository.findByCategoryId(categoryId)
+                .orElseThrow(() -> new BadRequestException("Category with id: " + categoryId + " not found"));
+    }
+
+    public Category getCategoryByName(String categoryName){
+        return categoryRepository.findByCategoryName(categoryName)
+                .orElseThrow(() -> new BadRequestException("Category with name: " + categoryName + " not found"));
+    }
 }
