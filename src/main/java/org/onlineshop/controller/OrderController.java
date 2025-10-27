@@ -19,14 +19,14 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping
-    public ResponseEntity<OrderResponseDto> saveOrder(@RequestBody OrderRequestDto orderRequestDto){
+    public ResponseEntity<OrderResponseDto> saveOrder(@RequestBody OrderRequestDto orderRequestDto) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(orderService.saveOrder(orderRequestDto));
     }
 
     @GetMapping("/getOrderById/{orderId}")
-    public ResponseEntity<OrderResponseDto> getOrderById(@Valid @PathVariable Integer orderId){
+    public ResponseEntity<OrderResponseDto> getOrderById(@Valid @PathVariable Integer orderId) {
         return ResponseEntity
                 .status(HttpStatus.FOUND)
                 .body(orderService.getOrderById(orderId));
@@ -40,25 +40,25 @@ public class OrderController {
     }
 
     @PutMapping("/updateStatus")
-    public ResponseEntity<OrderResponseDto> updateStatus(@Valid @RequestBody Integer orderId, @Valid @RequestBody String newStatus){
+    public ResponseEntity<OrderResponseDto> updateStatus(@Valid @RequestBody Integer orderId, @Valid @RequestBody String newStatus) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(orderService.updateOrderStatus(orderId, newStatus));
     }
 
     @PutMapping("/cancelOrder/{orderId}")
-    public ResponseEntity<Void> cancelOrder(@Valid @PathVariable Integer orderId){
+    public ResponseEntity<HttpStatus> cancelOrder(@Valid @PathVariable Integer orderId) {
 
         orderService.cancelOrder(orderId);
 
-       return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().build();
 
     }
 
     @PutMapping("/confirmOrder")
-    public ResponseEntity<OrderResponseDto> confirmOrder(@Valid @RequestBody Integer orderId,@Valid @RequestBody String payMethod){
+    public ResponseEntity<OrderResponseDto> confirmOrder(@Valid @RequestBody Integer orderId, @Valid @RequestBody String payMethod) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(orderService.confirmPayment(orderId,payMethod));
+                .body(orderService.confirmPayment(orderId, payMethod));
     }
 }
