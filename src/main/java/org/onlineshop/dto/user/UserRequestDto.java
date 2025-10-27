@@ -2,6 +2,7 @@ package org.onlineshop.dto.user;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,6 +24,10 @@ public class UserRequestDto {
     private String email;
 
     @NotBlank
+    @Pattern(
+            regexp = "^\\+?[0-9]{7,15}$",
+            message = "Phone number must contain only digits and may start with +, length 7–15"
+    )
     private String phoneNumber;
 
     @NotBlank
