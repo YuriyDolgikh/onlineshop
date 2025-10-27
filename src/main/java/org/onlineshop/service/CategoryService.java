@@ -35,6 +35,7 @@ public class CategoryService implements CategoryServiceInterface {
         Category category = Category.builder()
                 .categoryId(null)
                 .categoryName(categoryRequestDto.getCategoryName())
+                .image(categoryRequestDto.getImage())
                 .build();
         Category savedCategory = categoryRepository.save(category);
         return categoryConverter.toDto(savedCategory);

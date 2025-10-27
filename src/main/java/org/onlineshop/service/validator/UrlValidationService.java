@@ -1,6 +1,5 @@
 package org.onlineshop.service.validator;
 
-import lombok.RequiredArgsConstructor;
 import org.onlineshop.config.ImageServiceConfig;
 import org.springframework.stereotype.Service;
 
@@ -10,56 +9,94 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.Optional;
 
+/**
+ * Service for validating URLs based on length, domain, file extension, and reachability.
+ * This service provides functionalities to ensure URLs meet predefined criteria
+ * before being processed further.
+ */
 @Service
-@RequiredArgsConstructor
 public class UrlValidationService {
+    private static final String HEAD_METHOD = "HEAD";
+    private static final int HTTP_OK = 200;
+    private static final int HTTP_BAD_REQUEST = 400;
+
     private final ImageServiceConfig config;
+    private final HttpClient httpClient;
 
-    public boolean isLengthOk(String url) {
-        return url != null && url.length() <= config.getUrl().getMaxLength();
+    public UrlValidationService(ImageServiceConfig config) {
+        this.config = config;
+        this.httpClient = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofMillis(config.getValidation().getTimeoutMillis()))
+                .build();
     }
 
-    public URI toUri(String url) {
+    public boolean isLengthOk(final String url) {
+        return Optional.ofNullable(url)
+                .map(u -> u.length() <= config.getUrl().getMaxLength())
+                .orElse(false);
+    }
+
+    private Optional<URI> toUri(final String url) {
         try {
-            return new URI(url);
+            return Optional.of(new URI(url));
         } catch (URISyntaxException e) {
-            return null;
+            return Optional.empty();
         }
     }
 
-    public boolean isAllowedByDomainOrExtension(String url) {
-        URI uri = toUri(url);
-        if (uri == null) return false;
-        String host = uri.getHost();
-
-        boolean hostAllowed = host != null &&
-                config.getAllowedDomains().stream().anyMatch(host::endsWith);
-
-        boolean extAllowed = config.getAllowedExtensions().isEmpty() ||
-                config.getAllowedExtensions().stream()
-                        .anyMatch(ext -> url.toLowerCase().endsWith(ext.toLowerCase()));
-
-        return hostAllowed || extAllowed;
+    public boolean isAllowedByDomainOrExtension(final String url) {
+        return toUri(url)
+                .map(uri -> isHostAllowed(uri) || isExtensionAllowed(url))
+                .orElse(false);
     }
 
-    public boolean isReachable(String url) {
-        if (!config.getValidate().isHeadRequestEnabled()) return true;
+    private boolean isHostAllowed(final URI uri) {
+        return Optional.ofNullable(uri.getHost())
+                .map(host -> config.getAllowedDomains().stream()
+                        .anyMatch(host::endsWith))
+                .orElse(false);
+    }
+
+    private boolean isExtensionAllowed(final String url) {
+        if (config.getAllowedExtensions().isEmpty()) {
+            return true;
+        }
+        final String lowercaseUrl = url.toLowerCase();
+        return config.getAllowedExtensions().stream()
+                .map(String::toLowerCase)
+                .anyMatch(lowercaseUrl::endsWith);
+    }
+
+    public boolean isReachable(final String url) {
+        if (!config.getValidation().isHeadRequestEnabled()) {
+            return true;
+        }
+        return sendHeadRequest(url)
+                .map(this::isSuccessStatusCode)
+                .orElse(false);
+    }
+
+    private Optional<HttpResponse<Void>> sendHeadRequest(final String url) {
         try {
-            HttpClient client = HttpClient.newBuilder()
-                    .connectTimeout(Duration.ofMillis(config.getValidate().getTimeoutMillis()))
-                    .build();
-            HttpRequest httpRequest = HttpRequest.newBuilder()
-                    .uri(new URI(url))
-                    .timeout(Duration.ofMillis(config.getValidate().getTimeoutMillis()))
-                    .method("HEAD", HttpRequest.BodyPublishers.noBody())
-                    .build();
-            HttpResponse<Void> statusResponse = client.send(httpRequest, HttpResponse.BodyHandlers.discarding());
-            int httpStatusCode = statusResponse.statusCode();
-            return httpStatusCode >= 200 && httpStatusCode < 400;
+            final HttpRequest request = createHeadRequest(url);
+            return Optional.of(httpClient.send(request, HttpResponse.BodyHandlers.discarding()));
         } catch (Exception e) {
-            return false;
+            return Optional.empty();
         }
+    }
+
+    private HttpRequest createHeadRequest(final String url) throws URISyntaxException {
+        return HttpRequest.newBuilder()
+                .uri(new URI(url))
+                .timeout(Duration.ofMillis(config.getValidation().getTimeoutMillis()))
+                .method(HEAD_METHOD, HttpRequest.BodyPublishers.noBody())
+                .build();
+    }
+
+    private boolean isSuccessStatusCode(final HttpResponse<Void> response) {
+        return response.statusCode() >= HTTP_OK && response.statusCode() < HTTP_BAD_REQUEST;
     }
 
 }
