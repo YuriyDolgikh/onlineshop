@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class CartService implements CartServiceInterface {
     private final OrderRepository orderRepository;
     private final UserService userService;
@@ -52,8 +51,7 @@ public class CartService implements CartServiceInterface {
     @Transactional
     @Override
     public CartResponseDto getCartFullData() {
-
-      User user = userService.getCurrentUser();
+        User user = userService.getCurrentUser();
         Order openOrder = getCurrentCart(user);
 
         List<OrderItem> items = orderItemRepository.findByOrder(openOrder);
@@ -67,7 +65,7 @@ public class CartService implements CartServiceInterface {
             BigDecimal itemTotal = item.getProduct().getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
             totalPrice = totalPrice.add(itemTotal);
         }
-        return  CartResponseDto.builder()
+        return CartResponseDto.builder()
                 .userId(user.getUserId())
                 .cartItems(cartItems)
                 .totalPrice(totalPrice)

@@ -22,9 +22,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class OrderService implements OrderServiceInterface {
-
     private final OrderRepository orderRepository;
     private final UserService userService;
     private final UserRepository userRepository;
@@ -60,7 +58,6 @@ public class OrderService implements OrderServiceInterface {
         orderRepository.save(order);
 
         return orderConverter.fromEntity(order);
-
     }
 
     @Transactional
@@ -85,7 +82,6 @@ public class OrderService implements OrderServiceInterface {
                 .orElseThrow(() -> new NotFoundException("User not found with ID: " + userId));
 
         List<Order> orders = orderRepository.findByUser(currentUser);
-
 
         return orders.stream()
                 .map(o -> orderConverter.fromEntity(o))

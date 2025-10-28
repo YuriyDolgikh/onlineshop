@@ -11,7 +11,6 @@ import org.onlineshop.entity.User;
 import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.repository.OrderItemRepository;
-import org.onlineshop.repository.OrderRepository;
 import org.onlineshop.repository.ProductRepository;
 import org.onlineshop.service.converter.OrderItemConverter;
 import org.springframework.stereotype.Service;
@@ -21,9 +20,7 @@ import java.math.BigDecimal;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class OrderItemService implements OrderItemServiceInterface {
-
     private final OrderItemRepository orderItemRepository;
     private final ProductRepository productRepository;
     private final OrderItemConverter orderItemConverter;
@@ -78,7 +75,6 @@ public class OrderItemService implements OrderItemServiceInterface {
         Order currentOrder = orderItem.getOrder();
         currentOrder.getOrderItems().remove(orderItem); // orphanRemoval сработает
         orderItemRepository.delete(orderItem);
-
     }
 
     @Transactional
@@ -98,7 +94,6 @@ public class OrderItemService implements OrderItemServiceInterface {
 
         return orderItemConverter.fromEntity(orderItem);
     }
-
 
     private Order getCurrentOrder(User user) {
         return user.getOrders().stream()
