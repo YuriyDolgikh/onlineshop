@@ -6,7 +6,6 @@ import org.onlineshop.entity.Order;
 import org.onlineshop.entity.OrderItem;
 import org.onlineshop.entity.Product;
 import org.onlineshop.entity.User;
-import org.onlineshop.repository.CartItemRepository;
 import org.onlineshop.repository.OrderItemRepository;
 import org.onlineshop.repository.OrderRepository;
 import org.onlineshop.repository.ProductRepository;
@@ -21,7 +20,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional
 public class CartItemService implements CartItemServiceInterface {
-    private final CartItemRepository cartItemRepository;
+
     private final ProductRepository productRepository;
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
@@ -115,9 +114,6 @@ public class CartItemService implements CartItemServiceInterface {
 
     //возвращает конкретный товар из корзины.
     private OrderItem getOrderItemFromCart(User user, Integer productId) {
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("Product not found with ID: " + productId));
-
         Order openOrder = getCurrentCart(user);
 
         return orderItemRepository.findByOrder(openOrder).stream()
