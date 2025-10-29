@@ -12,4 +12,5 @@ public interface OrderServiceInterface {
     OrderResponseDto updateOrderStatus(Integer orderId, String newStatus);
     void cancelOrder(Integer orderId);
     OrderResponseDto confirmPayment(Integer orderId, String paymentMethod);
+    OrderResponseDto updateOrderDelivery(Integer orderId, OrderRequestDto orderRequestDto);
 }
