@@ -54,7 +54,7 @@ public class UserService implements UserServiceInterface {
 
     @Override
     public List<UserResponseDto> getAllUsers() {
-        return userConverter.fromUsers(userRepository.findAll());
+        return userConverter.toDtos(userRepository.findAll());
     }
 
     @Override

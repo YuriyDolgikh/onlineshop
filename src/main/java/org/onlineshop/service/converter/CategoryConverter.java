@@ -27,7 +27,7 @@ public class CategoryConverter {
                 .build();
     }
 
-    public List<CategoryResponseDto> fromCategories(List<Category> categories){
+    public List<CategoryResponseDto> toDtos(List<Category> categories){
         return categories.stream()
                 .map(this::toDto)
                 .toList();

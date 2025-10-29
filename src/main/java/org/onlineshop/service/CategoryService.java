@@ -83,7 +83,7 @@ public class CategoryService implements CategoryServiceInterface {
 
     @Override
     public List<CategoryResponseDto> getAllCategories() {
-        return categoryConverter.fromCategories(categoryRepository.findAll());
+        return categoryConverter.toDtos(categoryRepository.findAll());
     }
 
     @Override

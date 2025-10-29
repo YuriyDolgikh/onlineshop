@@ -38,7 +38,7 @@ public class UserConverter {
                 .build();
     }
 
-    public List<UserResponseDto> fromUsers(List<User> users){
+    public List<UserResponseDto> toDtos(List<User> users){
         return users.stream()
                 .map(this::toDto)
                 .toList();
