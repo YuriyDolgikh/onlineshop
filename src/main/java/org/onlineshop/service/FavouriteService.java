@@ -1,0 +1,75 @@
+package org.onlineshop.service;
+
+import lombok.RequiredArgsConstructor;
+import org.onlineshop.dto.favourite.FavouriteResponseDto;
+import org.onlineshop.entity.Favourite;
+import org.onlineshop.entity.Product;
+import org.onlineshop.entity.User;
+import org.onlineshop.repository.FavouriteRepository;
+import org.onlineshop.repository.ProductRepository;
+import org.onlineshop.service.converter.FavouriteConverter;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class FavouriteService implements FavouriteServiceInterface {
+    private final FavouriteRepository favouriteRepository;
+    private final UserService userService;
+    private final ProductRepository productRepository;
+    private final FavouriteConverter favouriteConverter;
+
+    @Transactional
+    @Override
+    public FavouriteResponseDto addFavourite(Integer productId) {
+        if (productId == null) {
+            throw new IllegalArgumentException("Product Id cannot be null");
+        }
+        User user = userService.getCurrentUser();
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Product not found with ID: " + productId));
+        boolean exist = favouriteRepository.findByUser(user).stream()
+                .anyMatch(f -> f.getProduct().getId().equals(product.getId()));
+        if (exist) {
+            throw new IllegalArgumentException("Product is already in favourites");
+        }
+
+        Favourite favourite = new Favourite();
+        favourite.setUser(user);
+        favourite.setProduct(product);
+        Favourite savedFavourite = favouriteRepository.save(favourite);
+
+        return favouriteConverter.fromEntity(savedFavourite);
+    }
+
+    @Transactional
+    @Override
+    public FavouriteResponseDto deleteFavourite(Integer productId) {
+        if (productId == null) {
+            throw new IllegalArgumentException("Product not found in favourites");
+        }
+
+        User user = userService.getCurrentUser();
+        Favourite favourite = favouriteRepository.findByUser(user).stream()
+                .filter(f -> f.getProduct().getId().equals(productId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Product not found in favourites"));
+        favouriteRepository.delete(favourite);
+
+        return favouriteConverter.fromEntity(favourite);
+    }
+
+    @Transactional
+    @Override
+    public List<FavouriteResponseDto> getFavourites() {
+        User user = userService.getCurrentUser();
+        List<Favourite> favourites = favouriteRepository.findByUser(user);
+
+        return favourites.stream()
+                .map(favouriteConverter::fromEntity)
+                .collect(Collectors.toList());
+    }
+}

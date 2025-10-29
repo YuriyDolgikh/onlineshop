@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class CartItemService implements CartItemServiceInterface {
 
     private final ProductRepository productRepository;
@@ -51,7 +50,6 @@ public class CartItemService implements CartItemServiceInterface {
             orderItem.setOrder(openOrder);
             orderItem.setProduct(product);
             orderItem.setQuantity(quantity);
-
         }
 
         OrderItem savedItem = orderItemRepository.save(orderItem);
