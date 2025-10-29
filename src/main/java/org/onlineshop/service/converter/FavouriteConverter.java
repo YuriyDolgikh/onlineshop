@@ -11,10 +11,10 @@ public class FavouriteConverter {
     public FavouriteResponseDto fromEntity(Favourite favourite) {
         if (favourite == null) {
             throw new IllegalArgumentException("Favourite cannot be null");
-        };
+        }
         return FavouriteResponseDto.builder()
                 .favouriteId(favourite.getFavouriteId())
                 .productName(favourite.getProduct().getName())
                 .build();
-    };
+    }
 }
