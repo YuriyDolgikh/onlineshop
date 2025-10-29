@@ -16,5 +16,5 @@ public class FavouriteConverter {
                 .favouriteId(favourite.getFavouriteId())
                 .productName(favourite.getProduct().getName())
                 .build();
-    }
+    };
 }
