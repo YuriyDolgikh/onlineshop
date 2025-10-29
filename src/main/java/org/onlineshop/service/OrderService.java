@@ -27,7 +27,6 @@ public class OrderService implements OrderServiceInterface {
     private final UserRepository userRepository;
     private final OrderConverter orderConverter;
     private final OrderItemService orderItemService;
-    private final PdfOrderGenerator pdfOrderGenerator;
     private final MailUtil mailUtil;
 
     @Transactional
@@ -94,7 +93,7 @@ public class OrderService implements OrderServiceInterface {
             throw new BadRequestException("OrderId cannot be null");
         }
         if (newStatus == null || newStatus.isBlank()) {
-            throw new BadRequestException("newStatus cannot be null or blunk");
+            throw new BadRequestException("newStatus cannot be null or blank");
         }
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Order not found with ID: " + orderId));
@@ -136,7 +135,7 @@ public class OrderService implements OrderServiceInterface {
         order.setStatus(Order.Status.PAID);
         orderRepository.save(order);
 
-        byte[] pdfBytes = pdfOrderGenerator.generatePdfOrder(order);
+        byte[] pdfBytes = PdfOrderGenerator.generatePdfOrder(order);
 
         try {
             mailUtil.sendOrderPaidEmail(order.getUser(), order, pdfBytes);
