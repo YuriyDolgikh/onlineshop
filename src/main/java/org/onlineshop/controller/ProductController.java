@@ -63,7 +63,7 @@ public class ProductController {
     }
 
     @GetMapping("/getProductsByCriteria")
-    public ResponseEntity<List<ProductResponseDto>> getProductsByCriteria(@Valid @RequestBody String paramName, @Valid @RequestBody String paramValue, @Valid @RequestBody String sortDirection) {
+    public ResponseEntity<List<ProductResponseDto>> getProductsByCriteria(@Valid @RequestParam String paramName, @Valid @RequestParam String paramValue, @Valid @RequestParam String sortDirection) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(productService.getProductsByCriteria(paramName, paramValue, sortDirection));
