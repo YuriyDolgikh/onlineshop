@@ -3,7 +3,7 @@ package org.onlineshop.service.converter;
 import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.product.ProductRequestDto;
 import org.onlineshop.dto.product.ProductResponseDto;
-import org.onlineshop.dto.product.ProductResponseDtoForUser;
+import org.onlineshop.dto.product.ProductResponseForUserDto;
 import org.onlineshop.entity.Category;
 import org.onlineshop.entity.Product;
 import org.onlineshop.service.CategoryService;
@@ -51,23 +51,21 @@ public class ProductConverter {
                 .toList();
     }
 
-    public ProductResponseDtoForUser toDtoUser(Product product) {
-        return ProductResponseDtoForUser.builder()
+    public ProductResponseForUserDto toUserDto(ProductResponseDto productResponseDto) {
+        return ProductResponseForUserDto.builder()
 
-                .productName(product.getName())
-                .productDescription(product.getDescription())
-                .productCategory(product.getCategory().getCategoryName())
-                .productPrice(product.getPrice())
-                .productDiscountPrice(product.getDiscountPrice())
-                .image(product.getImage())
+                .productName(productResponseDto.getProductName())
+                .productDescription(productResponseDto.getProductDescription())
+                .productCategory(productResponseDto.getProductCategory())
+                .productPrice(productResponseDto.getProductPrice())
+                .productDiscountPrice(productResponseDto.getProductDiscountPrice())
+                .image(productResponseDto.getImage())
                 .build();
     }
 
-    public List<ProductResponseDtoForUser> toDtosUser(List<Product> products) {
+    public List<ProductResponseForUserDto> toUserDtos(List<ProductResponseDto> products) {
         return products.stream()
-                .map(this::toDtoUser)
+                .map(this::toUserDto)
                 .toList();
     }
-
-
 }

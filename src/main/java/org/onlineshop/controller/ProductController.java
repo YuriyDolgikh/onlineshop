@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.product.ProductRequestDto;
 import org.onlineshop.dto.product.ProductResponseDto;
-import org.onlineshop.dto.product.ProductResponseDtoForUser;
+import org.onlineshop.dto.product.ProductResponseForUserDto;
 import org.onlineshop.service.ProductService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -62,13 +62,6 @@ public class ProductController {
                 .body(productService.getAllProducts());
     }
 
-    @GetMapping("/getProductByPartOfName")
-    public ResponseEntity<List<ProductResponseDto>> getProductByPartOfNameOfIgnoreCase(@Valid @RequestBody String partOfName, @Valid @RequestBody String sortDirection) {
-        return ResponseEntity
-                .status(HttpStatus.FOUND)
-                .body(productService.getProductsByPartOfNameIgnoreCase(partOfName, sortDirection));
-    }
-
     @GetMapping("/getProductsByCriteria")
     public ResponseEntity<List<ProductResponseDto>> getProductsByCriteria(@Valid @RequestBody String paramName, @Valid @RequestBody String paramValue, @Valid @RequestBody String sortDirection) {
         return ResponseEntity
@@ -76,54 +69,18 @@ public class ProductController {
                 .body(productService.getProductsByCriteria(paramName, paramValue, sortDirection));
     }
 
-    @GetMapping("/getProductByCategory")
-    public ResponseEntity<List<ProductResponseDto>> getProductByCategory(@Valid @RequestBody String categoryName, @Valid @RequestBody String sortDirection) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(productService.getProductsByCategory(categoryName, sortDirection));
-    }
-
-    @GetMapping("/getProductsByPriceRange")
-    public ResponseEntity<List<ProductResponseDto>> getProductsByPriceRange(@Valid @RequestBody BigDecimal minPrice, @Valid @RequestBody BigDecimal maxPrice, @Valid @RequestBody String sortDirection) {
-        return ResponseEntity
-                .status(HttpStatus.FOUND)
-                .body(productService.getProductsByPriceRange(minPrice, maxPrice, sortDirection));
-    }
-
-    @GetMapping("/getProductsByCreateDate")
-    public ResponseEntity<List<ProductResponseDto>> getProductsByCreateDate(@Valid @RequestBody String sortDirection) {
-        return ResponseEntity
-                .status(HttpStatus.FOUND)
-                .body(productService.getProductsByCreateDate(sortDirection));
-    }
-
-    @GetMapping("/getProductsByDiscount")
-    public ResponseEntity<List<ProductResponseDto>> getProductsByDiscount(@Valid @RequestBody String sortDirection) {
-        return ResponseEntity
-                .status(HttpStatus.FOUND)
-                .body(productService.getProductsByDiscount(sortDirection));
-    }
-
     @GetMapping("/getAllProductForUser")
-    public ResponseEntity<List<ProductResponseDtoForUser>> getAllProductForUser() {
+    public ResponseEntity<List<ProductResponseForUserDto>> getAllProductForUser() {
         return ResponseEntity
                 .status(HttpStatus.FOUND)
                 .body(productService.getAllProductsForUser());
     }
 
-    @GetMapping("/getTopFiveDiscountedProductsOfTheDay")
-    @PreAuthorize("hasAnyRole('ROLE_MANAGER', 'ROLE_ADMIN')")
-    public ResponseEntity<List<ProductResponseDto>> getTopFiveDiscountedProductsOfTheDay() {
+    @GetMapping("/getTopFiveProducts")
+    public ResponseEntity<List<ProductResponseForUserDto>> getTopFiveDiscountedProductsOfTheDay() {
         return ResponseEntity
                 .status(HttpStatus.FOUND)
                 .body(productService.getTopFiveDiscountedProductsOfTheDay());
-    }
-
-    @GetMapping("/getTopFiveDiscountedProductsOfTheDayForUser")
-    public ResponseEntity<List<ProductResponseDtoForUser>> getTopFiveDiscountedProductsOfTheDayForUser() {
-        return ResponseEntity
-                .status(HttpStatus.FOUND)
-                .body(productService.getTopFiveDiscountedProductsOfTheDayForUser());
     }
 
 }

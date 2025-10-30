@@ -4,7 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.product.ProductRequestDto;
 import org.onlineshop.dto.product.ProductResponseDto;
-import org.onlineshop.dto.product.ProductResponseDtoForUser;
+import org.onlineshop.dto.product.ProductResponseForUserDto;
 import org.onlineshop.entity.Category;
 import org.onlineshop.entity.Product;
 import org.onlineshop.repository.ProductRepository;
@@ -15,10 +15,8 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -192,31 +190,12 @@ public class ProductService implements ProductServiceInterface {
         return productConverter.toDtos(productRepository.findAll());
     }
 
-    public List<ProductResponseDtoForUser> getAllProductsForUser() {
-        return productConverter.toDtosUser(productRepository.findAll());
+    public List<ProductResponseForUserDto> getAllProductsForUser() {
+        return productConverter.toUserDtos(getAllProducts());
     }
 
-
-    public List<ProductResponseDtoForUser> getTopFiveDiscountedProductsOfTheDayForUser() {
-        List<ProductResponseDtoForUser> allProducts = getAllProductsForUser();
-
-        return allProducts.stream()
-                .filter(p -> p.getProductDiscountPrice().compareTo(BigDecimal.valueOf(0)) > 0)
-                .sorted(Comparator.comparing(ProductResponseDtoForUser::getProductDiscountPrice).reversed())
-                .limit(5)
-                .collect(Collectors.toList());
-
-    }
-
-    public List<ProductResponseDto> getTopFiveDiscountedProductsOfTheDay() {
-        List<ProductResponseDto> allProducts = getAllProducts();
-
-        return allProducts.stream()
-                .filter(p -> p.getProductDiscountPrice().compareTo(BigDecimal.valueOf(0)) > 0)
-                .sorted(Comparator.comparing(ProductResponseDto::getProductDiscountPrice).reversed())
-                .limit(5)
-                .collect(Collectors.toList());
-
+    public List<ProductResponseForUserDto> getTopFiveDiscountedProductsOfTheDay() {
+        return productConverter.toUserDtos(getProductsByDiscount("desc").stream().limit(5).toList());
     }
 
     private Sort.Direction getSortDirection(String sortDirection) {
