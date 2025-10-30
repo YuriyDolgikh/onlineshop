@@ -7,5 +7,6 @@ public class Gen {
         var enc = new BCryptPasswordEncoder();
         System.out.println(enc.encode("admin123"));
         System.out.println(enc.encode("manager123"));
+        System.out.println(enc.encode("user123"));
     }
 }

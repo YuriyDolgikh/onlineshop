@@ -3,6 +3,7 @@ package org.onlineshop.service.converter;
 import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.product.ProductRequestDto;
 import org.onlineshop.dto.product.ProductResponseDto;
+import org.onlineshop.dto.product.ProductResponseDtoForUser;
 import org.onlineshop.entity.Category;
 import org.onlineshop.entity.Product;
 import org.onlineshop.service.CategoryService;
@@ -16,7 +17,7 @@ public class ProductConverter {
 
     private final CategoryService categoryService;
 
-    public Product fromDto(ProductRequestDto productRequestDto){
+    public Product fromDto(ProductRequestDto productRequestDto) {
 
         Category category = categoryService.getCategoryByName(productRequestDto.getProductCategory());
 
@@ -30,7 +31,7 @@ public class ProductConverter {
                 .build();
     }
 
-    public ProductResponseDto toDto(Product product){
+    public ProductResponseDto toDto(Product product) {
         return ProductResponseDto.builder()
                 .productId(product.getId())
                 .productName(product.getName())
@@ -44,10 +45,29 @@ public class ProductConverter {
                 .build();
     }
 
-    public List<ProductResponseDto> toDtos(List<Product> products){
+    public List<ProductResponseDto> toDtos(List<Product> products) {
         return products.stream()
                 .map(this::toDto)
                 .toList();
     }
+
+    public ProductResponseDtoForUser toDtoUser(Product product) {
+        return ProductResponseDtoForUser.builder()
+
+                .productName(product.getName())
+                .productDescription(product.getDescription())
+                .productCategory(product.getCategory().getCategoryName())
+                .productPrice(product.getPrice())
+                .productDiscountPrice(product.getDiscountPrice())
+                .image(product.getImage())
+                .build();
+    }
+
+    public List<ProductResponseDtoForUser> toDtosUser(List<Product> products) {
+        return products.stream()
+                .map(this::toDtoUser)
+                .toList();
+    }
+
 
 }

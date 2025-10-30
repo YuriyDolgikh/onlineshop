@@ -39,6 +39,9 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/v1/users/**").permitAll()
+                        .requestMatchers("/v1/products/**").permitAll()
+                        .requestMatchers("/v1/carts/**").permitAll()
+                        .requestMatchers("/v1/cartItems/**").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/v1/categories/**").hasAnyRole("ADMIN", "MANAGER")

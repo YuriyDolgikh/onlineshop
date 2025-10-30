@@ -132,6 +132,16 @@ databaseChangeLog:
               - column: { name: role,          value: "MANAGER" }
               - column: { name: status,        value: "CONFIRMED" }
 
+        - insert:
+            tableName: users
+            columns:
+              - column: { name: username,      value: "user" }
+              - column: { name: email,         value: "user@example.com" }
+              - column: { name: phone_number,  value: "+49222222222" }
+              - column: { name: hash_password, value: "$2a$10$DBPg96Sl62tayvVs0Svr.u0xLD6MAmI2XAyQIWpDT06YGktnPi9be" }
+              - column: { name: role,          value: "USER" }
+              - column: { name: status,        value: "CONFIRMED" }
+
 
   - changeSet:
       id: 4
