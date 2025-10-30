@@ -71,8 +71,8 @@ public class Order {
     }
 
     public enum DeliveryMethod {
-        STANDARD,
-        EXPRESS,
-        SELF_DELIVERY
+        PICKUP,
+        COURIER,
+        POST
     }
 }

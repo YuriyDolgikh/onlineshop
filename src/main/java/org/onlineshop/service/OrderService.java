@@ -3,13 +3,13 @@ package org.onlineshop.service;
 import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.order.OrderRequestDto;
 import org.onlineshop.dto.order.OrderResponseDto;
+import org.onlineshop.dto.order.OrderStatusResponseDto;
 import org.onlineshop.dto.orderItem.OrderItemRequestDto;
 import org.onlineshop.entity.Order;
 import org.onlineshop.entity.User;
 import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.exception.MailSendingException;
 import org.onlineshop.exception.NotFoundException;
-import org.onlineshop.repository.OrderItemRepository;
 import org.onlineshop.repository.OrderRepository;
 import org.onlineshop.repository.UserRepository;
 import org.onlineshop.service.converter.OrderConverter;
@@ -28,7 +28,6 @@ public class OrderService implements OrderServiceInterface {
     private final UserRepository userRepository;
     private final OrderConverter orderConverter;
     private final OrderItemService orderItemService;
-    private final PdfOrderGenerator pdfOrderGenerator;
     private final MailUtil mailUtil;
 
     @Transactional
@@ -95,9 +94,9 @@ public class OrderService implements OrderServiceInterface {
             throw new BadRequestException("OrderId cannot be null");
         }
         if (newStatus == null || newStatus.isBlank()) {
-            throw new BadRequestException("newStatus cannot be null or blunk");
+            throw new BadRequestException("newStatus cannot be null or blank");
         }
-        Order order  = orderRepository.findById(orderId)
+        Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Order not found with ID: " + orderId));
 
         Order.Status updatedStatus;
@@ -137,7 +136,7 @@ public class OrderService implements OrderServiceInterface {
         order.setStatus(Order.Status.PAID);
         orderRepository.save(order);
 
-        byte[] pdfBytes = pdfOrderGenerator.generatePdfOrder(order);
+        byte[] pdfBytes = PdfOrderGenerator.generatePdfOrder(order);
 
         try {
             mailUtil.sendOrderPaidEmail(order.getUser(), order, pdfBytes);
@@ -145,5 +144,48 @@ public class OrderService implements OrderServiceInterface {
             throw new MailSendingException("Failed to send order confirmation email: " + e.getMessage());
         }
         return orderConverter.fromEntity(order);
+    }
+
+    @Transactional
+    @Override
+    public OrderResponseDto updateOrderDelivery(Integer orderId, OrderRequestDto dto) {
+        if (orderId == null) {
+            throw new IllegalArgumentException("Order ID cannot be null");
+        }
+        if (dto == null) {
+            throw new IllegalArgumentException("OrderRequestDto cannot be null");
+        }
+        if (dto.getDeliveryAddress() == null || dto.getDeliveryAddress().isBlank()) {
+            throw new IllegalArgumentException("Delivery address cannot be empty");
+        }
+
+        if (dto.getContactPhone() == null || dto.getContactPhone().isBlank()) {
+            throw new IllegalArgumentException("Contact phone cannot be empty");
+        }
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        try {
+            order.setDeliveryMethod(Order.DeliveryMethod.valueOf(dto.getDeliveryMethod().toUpperCase()));
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Invalid delivery method: " + dto.getDeliveryMethod());
+        }
+
+        order.setDeliveryAddress(dto.getDeliveryAddress());
+        order.setContactPhone(dto.getContactPhone());
+
+        orderRepository.save(order);
+        return orderConverter.fromEntity(order);
+    }
+
+    @Override
+    public OrderStatusResponseDto getOrderStatusDto(Integer orderId) {
+        if (orderId == null) {
+            throw new BadRequestException("OrderId cannot be null");
+        }
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new NotFoundException("Order not found with ID: " + orderId));
+
+        return new OrderStatusResponseDto(order.getStatus().name(), order.getUpdatedAt());
     }
 }
