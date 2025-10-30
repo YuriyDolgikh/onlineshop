@@ -3,6 +3,7 @@ package org.onlineshop.service;
 import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.order.OrderRequestDto;
 import org.onlineshop.dto.order.OrderResponseDto;
+import org.onlineshop.dto.order.OrderStatusResponseDto;
 import org.onlineshop.dto.orderItem.OrderItemRequestDto;
 import org.onlineshop.entity.Order;
 import org.onlineshop.entity.User;
@@ -175,5 +176,16 @@ public class OrderService implements OrderServiceInterface {
 
         orderRepository.save(order);
         return orderConverter.fromEntity(order);
+    }
+
+    @Override
+    public OrderStatusResponseDto getOrderStatusDto(Integer orderId) {
+        if (orderId == null) {
+            throw new BadRequestException("OrderId cannot be null");
+        }
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new NotFoundException("Order not found with ID: " + orderId));
+
+        return new OrderStatusResponseDto(order.getStatus().name(), order.getUpdatedAt());
     }
 }
