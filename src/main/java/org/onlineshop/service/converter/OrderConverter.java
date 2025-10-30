@@ -6,14 +6,15 @@ import org.onlineshop.dto.orderItem.OrderItemResponseDto;
 import org.onlineshop.entity.Order;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class OrderConverter {
-    public OrderResponseDto fromEntity(Order order) {
+    public OrderResponseDto toDto(Order order) {
         if (order == null) {
             return null;
         }
-
         return OrderResponseDto.builder()
                 .orderId(order.getOrderId())
                 .userId(order.getUser().getUserId())
@@ -32,7 +33,11 @@ public class OrderConverter {
                                 .build())
                         .toList())
                 .build();
+    }
 
+    public List<OrderResponseDto> toDtos(List<Order> orders){
+        return orders.stream()
+                .map(this::toDto).toList();
     }
 
 }

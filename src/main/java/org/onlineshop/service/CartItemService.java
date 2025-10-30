@@ -10,6 +10,7 @@ import org.onlineshop.repository.OrderItemRepository;
 import org.onlineshop.repository.OrderRepository;
 import org.onlineshop.repository.ProductRepository;
 import org.onlineshop.service.converter.CartItemConverter;
+import org.onlineshop.service.interfaces.CartItemServiceInterface;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,7 +54,7 @@ public class CartItemService implements CartItemServiceInterface {
         }
 
         OrderItem savedItem = orderItemRepository.save(orderItem);
-        return cartItemConverter.fromEntity(savedItem);
+        return cartItemConverter.toDto(savedItem);
     }
 
     @Transactional
@@ -66,7 +67,7 @@ public class CartItemService implements CartItemServiceInterface {
         OrderItem orderItem = getOrderItemFromCart(user, productId);
 
         orderItemRepository.delete(orderItem);
-        return cartItemConverter.fromEntity(orderItem);
+        return cartItemConverter.toDto(orderItem);
     }
 
     @Transactional
@@ -84,7 +85,7 @@ public class CartItemService implements CartItemServiceInterface {
         orderItem.setQuantity(quantity);
         OrderItem savedItem = orderItemRepository.save(orderItem);
 
-        return cartItemConverter.fromEntity(savedItem);
+        return cartItemConverter.toDto(savedItem);
     }
 
     @Transactional
@@ -92,9 +93,7 @@ public class CartItemService implements CartItemServiceInterface {
     public List<CartItemResponseDto> getCartItems() {
         User user = userService.getCurrentUser();
         Order openOrder = getCurrentCart(user);
-        return orderItemRepository.findByOrder(openOrder).stream()
-                .map(cartItemConverter::fromEntity)
-                .collect(Collectors.toList());
+        return cartItemConverter.toDtos(orderItemRepository.findByOrder(openOrder));
     }
 
     //возвращает корзину пользователя.

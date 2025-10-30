@@ -13,6 +13,7 @@ import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.repository.OrderItemRepository;
 import org.onlineshop.repository.ProductRepository;
 import org.onlineshop.service.converter.OrderItemConverter;
+import org.onlineshop.service.interfaces.OrderItemServiceInterface;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,7 +61,7 @@ public class OrderItemService implements OrderItemServiceInterface {
 
         currentOrder.getOrderItems().add(orderItem);
         OrderItem savedOrderItem = orderItemRepository.save(orderItem);
-        return orderItemConverter.fromEntity(savedOrderItem);
+        return orderItemConverter.toDto(savedOrderItem);
     }
 
     @Transactional
@@ -92,7 +93,7 @@ public class OrderItemService implements OrderItemServiceInterface {
         orderItem.setQuantity(dto.getQuantity());
         orderItemRepository.save(orderItem);
 
-        return orderItemConverter.fromEntity(orderItem);
+        return orderItemConverter.toDto(orderItem);
     }
 
     private Order getCurrentOrder(User user) {

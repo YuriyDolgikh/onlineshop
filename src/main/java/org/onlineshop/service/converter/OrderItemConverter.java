@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class OrderItemConverter {
-    public  OrderItemResponseDto fromEntity(OrderItem orderItem) {
+    public  OrderItemResponseDto toDto(OrderItem orderItem) {
         if (orderItem == null) {
             return null;
         }

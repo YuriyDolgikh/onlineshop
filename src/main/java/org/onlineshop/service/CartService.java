@@ -9,6 +9,7 @@ import org.onlineshop.entity.User;
 import org.onlineshop.repository.OrderItemRepository;
 import org.onlineshop.repository.OrderRepository;
 import org.onlineshop.service.converter.CartItemConverter;
+import org.onlineshop.service.interfaces.CartServiceInterface;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,7 +58,7 @@ public class CartService implements CartServiceInterface {
         List<OrderItem> items = orderItemRepository.findByOrder(openOrder);
 
         List<CartItemResponseDto> cartItems = items.stream()
-                .map(cartItemConverter::fromEntity)
+                .map(cartItemConverter::toDto)
                 .collect(Collectors.toList());
 
         BigDecimal totalPrice = BigDecimal.ZERO;

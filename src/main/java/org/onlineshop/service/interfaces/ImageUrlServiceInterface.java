@@ -1,4 +1,4 @@
-package org.onlineshop.service;
+package org.onlineshop.service.interfaces;
 
 /**
  * Service interface for handling image URL operations.

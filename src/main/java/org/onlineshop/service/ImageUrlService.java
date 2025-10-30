@@ -1,9 +1,9 @@
-package org.onlineshop.service.impl;
+package org.onlineshop.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.onlineshop.exception.ValidationException;
-import org.onlineshop.service.ImageUrlServiceInterface;
+import org.onlineshop.service.interfaces.ImageUrlServiceInterface;
 import org.onlineshop.service.util.GoogleDriveLinkNormalizer;
 import org.onlineshop.service.validator.UrlValidationService;
 import org.springframework.stereotype.Service;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class ImageUrlServiceInterfaceImpl implements ImageUrlServiceInterface {
+public class ImageUrlService implements ImageUrlServiceInterface {
     private static final String ERROR_URL_TOO_LONG = "Image URL too long";
     private static final String ERROR_INVALID_DOMAIN = "Image URL domain/extension not allowed";
     private static final String ERROR_NOT_REACHABLE = "Image URL not reachable";

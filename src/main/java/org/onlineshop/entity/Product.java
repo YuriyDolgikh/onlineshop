@@ -46,8 +46,8 @@ public class Product {
     @Column(length = 256)
     private String image;
 
-    @Column(precision = 10, scale = 2, nullable = false)     //TODO why nullable true?
-    private BigDecimal discountPrice;                       //TODO why type is BigDecimal?
+    @Column(precision = 10, scale = 2, nullable = false)
+    private BigDecimal discountPrice;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)

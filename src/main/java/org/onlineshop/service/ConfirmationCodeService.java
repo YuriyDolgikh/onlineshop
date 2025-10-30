@@ -6,6 +6,7 @@ import org.onlineshop.entity.ConfirmationCode;
 import org.onlineshop.entity.User;
 import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.repository.ConfirmationCodeRepository;
+import org.onlineshop.service.interfaces.ConfirmationCodeServiceInterface;
 import org.onlineshop.service.mail.MailUtil;
 import org.springframework.stereotype.Service;
 

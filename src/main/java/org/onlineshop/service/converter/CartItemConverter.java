@@ -4,9 +4,11 @@ import org.onlineshop.dto.cartItem.CartItemResponseDto;
 import org.onlineshop.entity.OrderItem;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class CartItemConverter {
-    public CartItemResponseDto fromEntity(OrderItem orderItem) {
+    public CartItemResponseDto toDto(OrderItem orderItem) {
         if (orderItem == null) {
             return null;
         }
@@ -14,6 +16,12 @@ public class CartItemConverter {
                .product(orderItem.getProduct())
                .quantity(orderItem.getQuantity())
                .build();
+    }
+
+    public List<CartItemResponseDto> toDtos(List<OrderItem> orderItems){
+        return orderItems.stream()
+                .map(this::toDto)
+                .toList();
     }
 
 }

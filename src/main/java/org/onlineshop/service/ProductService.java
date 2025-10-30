@@ -8,6 +8,7 @@ import org.onlineshop.entity.Category;
 import org.onlineshop.entity.Product;
 import org.onlineshop.repository.ProductRepository;
 import org.onlineshop.service.converter.ProductConverter;
+import org.onlineshop.service.interfaces.ProductServiceInterface;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 

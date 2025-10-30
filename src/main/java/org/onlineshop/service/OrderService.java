@@ -13,6 +13,7 @@ import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.repository.OrderRepository;
 import org.onlineshop.repository.UserRepository;
 import org.onlineshop.service.converter.OrderConverter;
+import org.onlineshop.service.interfaces.OrderServiceInterface;
 import org.onlineshop.service.mail.MailUtil;
 import org.onlineshop.service.util.PdfOrderGenerator;
 import org.springframework.stereotype.Service;
@@ -56,7 +57,7 @@ public class OrderService implements OrderServiceInterface {
         order.setStatus(Order.Status.PENDING_PAYMENT);
         orderRepository.save(order);
 
-        return orderConverter.fromEntity(order);
+        return orderConverter.toDto(order);
     }
 
     @Transactional
@@ -68,7 +69,7 @@ public class OrderService implements OrderServiceInterface {
 
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Order not found with ID: " + orderId));
-        return orderConverter.fromEntity(order);
+        return orderConverter.toDto(order);
     }
 
     @Transactional
@@ -82,9 +83,7 @@ public class OrderService implements OrderServiceInterface {
 
         List<Order> orders = orderRepository.findByUser(currentUser);
 
-        return orders.stream()
-                .map(o -> orderConverter.fromEntity(o))
-                .toList();
+        return orderConverter.toDtos(orders);
     }
 
     @Transactional
@@ -108,7 +107,7 @@ public class OrderService implements OrderServiceInterface {
 
         order.setStatus(updatedStatus);
         orderRepository.save(order);
-        return orderConverter.fromEntity(order);
+        return orderConverter.toDto(order);
     }
 
     @Transactional
@@ -143,7 +142,7 @@ public class OrderService implements OrderServiceInterface {
         } catch (Exception e) {
             throw new MailSendingException("Failed to send order confirmation email: " + e.getMessage());
         }
-        return orderConverter.fromEntity(order);
+        return orderConverter.toDto(order);
     }
 
     @Transactional
@@ -175,7 +174,7 @@ public class OrderService implements OrderServiceInterface {
         order.setContactPhone(dto.getContactPhone());
 
         orderRepository.save(order);
-        return orderConverter.fromEntity(order);
+        return orderConverter.toDto(order);
     }
 
     @Override

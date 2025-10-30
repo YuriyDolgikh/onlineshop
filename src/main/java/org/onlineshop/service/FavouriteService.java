@@ -8,6 +8,7 @@ import org.onlineshop.entity.User;
 import org.onlineshop.repository.FavouriteRepository;
 import org.onlineshop.repository.ProductRepository;
 import org.onlineshop.service.converter.FavouriteConverter;
+import org.onlineshop.service.interfaces.FavouriteServiceInterface;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,7 +43,7 @@ public class FavouriteService implements FavouriteServiceInterface {
         favourite.setProduct(product);
         Favourite savedFavourite = favouriteRepository.save(favourite);
 
-        return favouriteConverter.fromEntity(savedFavourite);
+        return favouriteConverter.toDto(savedFavourite);
     }
 
     @Transactional
@@ -59,7 +60,7 @@ public class FavouriteService implements FavouriteServiceInterface {
                 .orElseThrow(() -> new IllegalArgumentException("Product not found in favourites"));
         favouriteRepository.delete(favourite);
 
-        return favouriteConverter.fromEntity(favourite);
+        return favouriteConverter.toDto(favourite);
     }
 
     @Transactional
@@ -68,8 +69,6 @@ public class FavouriteService implements FavouriteServiceInterface {
         User user = userService.getCurrentUser();
         List<Favourite> favourites = favouriteRepository.findByUser(user);
 
-        return favourites.stream()
-                .map(favouriteConverter::fromEntity)
-                .collect(Collectors.toList());
+        return favouriteConverter.toDtos(favourites);
     }
 }

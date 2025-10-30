@@ -1,4 +1,4 @@
-package org.onlineshop.service;
+package org.onlineshop.service.interfaces;
 
 import org.onlineshop.dto.orderItem.OrderItemRequestDto;
 import org.onlineshop.dto.orderItem.OrderItemResponseDto;

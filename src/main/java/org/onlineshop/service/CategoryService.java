@@ -8,6 +8,7 @@ import org.onlineshop.entity.Category;
 import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.repository.CategoryRepository;
 import org.onlineshop.service.converter.CategoryConverter;
+import org.onlineshop.service.interfaces.CategoryServiceInterface;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -76,7 +77,7 @@ public class CategoryService implements CategoryServiceInterface {
         Category categoryToDelete = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new BadRequestException("Category with id: " + categoryId + " not found"));
         categoryToDelete.getProducts()
-                .forEach(product -> product.setCategory(null));      //TODO: null must be changed to DEFAULT category
+                .forEach(product -> product.setCategory(null));      //TODO: null must be changed to OTHER category
         categoryRepository.delete(categoryToDelete);
         return categoryConverter.toDto(categoryToDelete);
     }

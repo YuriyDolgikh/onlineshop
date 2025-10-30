@@ -1,9 +1,9 @@
-package org.onlineshop.service;
+package org.onlineshop.service.interfaces;
 
 import org.onlineshop.entity.ConfirmationCode;
 import org.onlineshop.entity.User;
 
-interface ConfirmationCodeServiceInterface {
+public interface ConfirmationCodeServiceInterface {
 
     void confirmationCodeManager(User user);
 
