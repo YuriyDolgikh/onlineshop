@@ -203,6 +203,12 @@ databaseChangeLog:
               - column: { name: category_name, value: "Building materials" }
               - column: { name: image, value: "https://drive.google.com/file/d/1DTdfw6ukNcvzUZAy2-TcUAANdnPE-JfR/view?usp=drive_link" }
 
+        - insert:
+            tableName: category
+            columns:
+              - column: { name: category_name, value: "Other" }
+              - column: { name: image, value: "https://drive.google.com/file/other" }
+
 
 
 
