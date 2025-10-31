@@ -20,31 +20,37 @@ public class ChangeOrderStatusService {
     @Transactional
     public void processOrderStatus() {
         List<Order> ordersForProcess = getOrdersForChangeStatus();
+        if (ordersForProcess.isEmpty()) {
+            System.err.println("No active orders found");
+            return;
+        }
+        System.out.println("Orders for change status: " + ordersForProcess.size());
         for (Order order : ordersForProcess) {
             setNextOrderStatus(order);
         }
     }
 
-    private List<Order> getOrdersForChangeStatus(){
+    private List<Order> getOrdersForChangeStatus() {
         return orderRepository.findAll()
                 .stream()
                 .filter(order ->
-                        (order.getStatus()== Order.Status.PAID || order.getStatus()== Order.Status.IN_TRANSIT))
+                        (order.getStatus() == Order.Status.PAID || order.getStatus() == Order.Status.IN_TRANSIT))
                 .toList();
     }
 
-    private void setNextOrderStatus(Order order){
-        Order.Status orderStatus=order.getStatus();
-        if(orderStatus==Order.Status.DELIVERED || orderStatus==Order.Status.CANCELLED){
+    private void setNextOrderStatus(Order order) {
+        Order.Status orderStatus = order.getStatus();
+        if (orderStatus == Order.Status.DELIVERED || orderStatus == Order.Status.CANCELLED) {
             return;
         }
-        if(orderStatus==Order.Status.PAID){
+        if (orderStatus == Order.Status.PAID) {
             order.setStatus(Order.Status.IN_TRANSIT);
         }
-        if(orderStatus==Order.Status.IN_TRANSIT){
+        if (orderStatus == Order.Status.IN_TRANSIT) {
             order.setStatus(Order.Status.DELIVERED);
         }
         order.setUpdatedAt(LocalDateTime.now());
         orderRepository.save(order);
+        System.out.println("Changed order status to " + order.getStatus() + " for order with ID = " + order.getOrderId());
     }
 }
