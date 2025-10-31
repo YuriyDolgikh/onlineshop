@@ -113,12 +113,12 @@ public class ProductService implements ProductServiceInterface {
         return productConverter.toDto(productToDelete);
     }
 
-
-    // localhost:8080/v1/products?param=price&value=100-300&sort=asc
-    // localhost:8080/v1/products?param=discount&value=35&sortDirection=desc
-    // localhost:8080/v1/products?param=category&value=categoryName&sortDirection=desc
-    // localhost:8080/v1/products?param=name&value=partName&sortDirection=desc
-    // localhost:8080/v1/products?param=createDate&sortDirection=desc
+    // localhost:8080/v1/products/getProductsByCriteria?paramName=price&paramValue=100-300&sortDirection=asc
+    // localhost:8080/v1/products/getProductsByCriteria?paramName=price&paramValue=100-300&sort=asc
+    // localhost:8080/v1/products/getProductsByCriteria?paramName=discount&paramValue=35&sortDirection=desc
+    // localhost:8080/v1/products/getProductsByCriteria?paramName=category&paramValue=categoryName&sortDirection=desc
+    // localhost:8080/v1/products/getProductsByCriteria?paramName=name&paramValue=partName&sortDirection=desc
+    // localhost:8080/v1/products/getProductsByCriteria?paramName=createDate&sortDirection=desc
     // localhost:8080/v1/products
     @Override
     public List<ProductResponseDto> getProductsByCriteria(String paramName, String paramValue, String sortDirection) {
