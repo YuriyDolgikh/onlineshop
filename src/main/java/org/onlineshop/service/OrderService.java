@@ -16,6 +16,7 @@ import org.onlineshop.service.converter.OrderConverter;
 import org.onlineshop.service.interfaces.OrderServiceInterface;
 import org.onlineshop.service.mail.MailUtil;
 import org.onlineshop.service.util.PdfOrderGenerator;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -63,10 +64,9 @@ public class OrderService implements OrderServiceInterface {
     @Transactional
     @Override
     public OrderResponseDto getOrderById(Integer orderId) {
-        if (orderId == null) {
-            throw new BadRequestException("OrderId cannot be null");
+        if (!isAllowedAccess(orderId)) {
+            throw new AccessDeniedException("Access denied");
         }
-
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Order not found with ID: " + orderId));
         return orderConverter.toDto(order);
@@ -89,8 +89,8 @@ public class OrderService implements OrderServiceInterface {
     @Transactional
     @Override
     public OrderResponseDto updateOrderStatus(Integer orderId, String newStatus) {
-        if (orderId == null) {
-            throw new BadRequestException("OrderId cannot be null");
+        if (!isAllowedAccess(orderId)) {
+            throw new AccessDeniedException("Access denied");
         }
         if (newStatus == null || newStatus.isBlank()) {
             throw new BadRequestException("newStatus cannot be null or blank");
@@ -113,8 +113,8 @@ public class OrderService implements OrderServiceInterface {
     @Transactional
     @Override
     public void cancelOrder(Integer orderId) {
-        if (orderId == null) {
-            throw new BadRequestException("OrderId cannot be null");
+        if (!isAllowedAccess(orderId)) {
+            throw new AccessDeniedException("Access denied");
         }
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Order not found with ID: " + orderId));
@@ -126,8 +126,8 @@ public class OrderService implements OrderServiceInterface {
     @Transactional
     @Override
     public OrderResponseDto confirmPayment(Integer orderId, String paymentMethod) {
-        if (orderId == null) {
-            throw new BadRequestException("OrderId cannot be null");
+        if (!isAllowedAccess(orderId)) {
+            throw new AccessDeniedException("Access denied");
         }
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Order not found with ID: " + orderId));
@@ -148,9 +148,9 @@ public class OrderService implements OrderServiceInterface {
     @Transactional
     @Override
     public OrderResponseDto updateOrderDelivery(Integer orderId, OrderRequestDto dto) {
-        if (orderId == null) {
-            throw new IllegalArgumentException("Order ID cannot be null");
-        }
+       if (!isAllowedAccess(orderId)) {
+           throw new AccessDeniedException("Access denied");
+       }
         if (dto == null) {
             throw new IllegalArgumentException("OrderRequestDto cannot be null");
         }
@@ -177,14 +177,33 @@ public class OrderService implements OrderServiceInterface {
         return orderConverter.toDto(order);
     }
 
+    @Transactional
     @Override
     public OrderStatusResponseDto getOrderStatusDto(Integer orderId) {
+       if (!isAllowedAccess(orderId)) {
+           throw new AccessDeniedException("Access denied");
+       }
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new NotFoundException("Order not found with ID: " + orderId));
+
+        return new OrderStatusResponseDto(order.getStatus().name(), order.getUpdatedAt());
+    }
+
+    public boolean isAllowedAccess(Integer orderId) {
         if (orderId == null) {
             throw new BadRequestException("OrderId cannot be null");
         }
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Order not found with ID: " + orderId));
+        User currentUser = userService.getCurrentUser();
+        if (currentUser.getRole() == User.Role.ADMIN || currentUser.getRole() == User.Role.MANAGER) {
+            return true;
+        }
 
-        return new OrderStatusResponseDto(order.getStatus().name(), order.getUpdatedAt());
+        // обычный пользователь — только свои заказы
+        return orderRepository.findById(orderId)
+                .map(o -> o.getUser() != null && o.getUser().getUserId().equals(currentUser.getUserId()))
+                .orElseThrow(() -> new NotFoundException("Order not found with ID: " + orderId));
     }
 }
