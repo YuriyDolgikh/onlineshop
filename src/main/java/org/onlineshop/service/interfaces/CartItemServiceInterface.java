@@ -1,12 +1,17 @@
 package org.onlineshop.service.interfaces;
 
+import org.onlineshop.dto.cartItem.CartItemRequestDto;
 import org.onlineshop.dto.cartItem.CartItemResponseDto;
+import org.onlineshop.dto.cartItem.CartItemUpdateDto;
 
 import java.util.List;
 
 public interface CartItemServiceInterface {
-    CartItemResponseDto addItemToCart(Integer productId, Integer quantity);
+    CartItemResponseDto addItemToCart(CartItemRequestDto cartItemRequestDto);
+
     CartItemResponseDto removeItemFromCart(Integer productId);
-    CartItemResponseDto updateItemInCart(Integer productId, Integer quantity);
+
+    CartItemResponseDto updateItemInCart(CartItemUpdateDto cartItemUpdateDto);
+
     List<CartItemResponseDto> getCartItems();
 }

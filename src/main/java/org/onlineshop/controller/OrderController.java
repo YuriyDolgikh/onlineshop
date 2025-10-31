@@ -25,28 +25,21 @@ public class OrderController {
                 .body(orderService.saveOrder(orderRequestDto));
     }
 
-    @GetMapping("/getOrderById/{orderId}")
+    @GetMapping("/{orderId}")
     public ResponseEntity<OrderResponseDto> getOrderById(@Valid @PathVariable Integer orderId) {
         return ResponseEntity
                 .status(HttpStatus.FOUND)
                 .body(orderService.getOrderById(orderId));
     }
 
-    @GetMapping("/getOrdersByUser/{userId}")
+    @GetMapping("/ordersHistory/{userId}")
     public ResponseEntity<List<OrderResponseDto>> getOrdersByUser(@Valid @PathVariable Integer userId) {
         return ResponseEntity
                 .status(HttpStatus.FOUND)
                 .body(orderService.getOrdersByUser(userId));
     }
 
-    @PutMapping("/updateStatus")
-    public ResponseEntity<OrderResponseDto> updateStatus(@Valid @RequestBody Integer orderId, @Valid @RequestBody String newStatus) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(orderService.updateOrderStatus(orderId, newStatus));
-    }
-
-    @PutMapping("/cancelOrder/{orderId}")
+    @GetMapping("/cancel/{orderId}")
     public ResponseEntity<HttpStatus> cancelOrder(@Valid @PathVariable Integer orderId) {
 
         orderService.cancelOrder(orderId);
@@ -55,8 +48,8 @@ public class OrderController {
 
     }
 
-    @PutMapping("/confirmOrder")
-    public ResponseEntity<OrderResponseDto> confirmOrder(@Valid @RequestBody Integer orderId, @Valid @RequestBody String payMethod) {
+    @GetMapping("/confirm/{orderId}/{payMethod}")
+    public ResponseEntity<OrderResponseDto> confirmOrder(@Valid @PathVariable Integer orderId, @Valid @PathVariable String payMethod) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(orderService.confirmPayment(orderId, payMethod));

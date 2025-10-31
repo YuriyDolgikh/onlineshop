@@ -1,7 +1,9 @@
 package org.onlineshop.service;
 
 import lombok.RequiredArgsConstructor;
+import org.onlineshop.dto.cartItem.CartItemRequestDto;
 import org.onlineshop.dto.cartItem.CartItemResponseDto;
+import org.onlineshop.dto.cartItem.CartItemUpdateDto;
 import org.onlineshop.entity.Order;
 import org.onlineshop.entity.OrderItem;
 import org.onlineshop.entity.Product;
@@ -29,28 +31,28 @@ public class CartItemService implements CartItemServiceInterface {
 
     @Transactional
     @Override
-    public CartItemResponseDto addItemToCart(Integer productId, Integer quantity) {
-        if (productId == null) {
+    public CartItemResponseDto addItemToCart(CartItemRequestDto cartItemRequestDto) {
+        if (cartItemRequestDto.getProductId() == null) {
             throw new IllegalArgumentException("Product Id cannot be null");
         }
-        if (quantity == null || quantity < 1) {
+        if (cartItemRequestDto.getQuantity() == null || cartItemRequestDto.getQuantity() < 1) {
             throw new IllegalArgumentException("Quantity must be at least 1");
         }
         User user = userService.getCurrentUser();
         OrderItem orderItem;
         try {
-            orderItem = getOrderItemFromCart(user, productId);
-            orderItem.setQuantity(orderItem.getQuantity() + quantity);
+            orderItem = getOrderItemFromCart(user, cartItemRequestDto.getProductId());
+            orderItem.setQuantity(orderItem.getQuantity() + cartItemRequestDto.getQuantity());
         } catch (IllegalArgumentException e) {
-            Product product = productRepository.findById(productId)
-                    .orElseThrow(() -> new IllegalArgumentException("Product not found with ID: " + productId));
+            Product product = productRepository.findById(cartItemRequestDto.getProductId())
+                    .orElseThrow(() -> new IllegalArgumentException("Product not found with ID: " + cartItemRequestDto.getProductId()));
 
             Order openOrder = getCurrentCart(user);
 
             orderItem = new OrderItem();
             orderItem.setOrder(openOrder);
             orderItem.setProduct(product);
-            orderItem.setQuantity(quantity);
+            orderItem.setQuantity(cartItemRequestDto.getQuantity());
         }
 
         OrderItem savedItem = orderItemRepository.save(orderItem);
@@ -72,17 +74,17 @@ public class CartItemService implements CartItemServiceInterface {
 
     @Transactional
     @Override
-    public CartItemResponseDto updateItemInCart(Integer productId, Integer quantity) {
-        if (productId == null) {
+    public CartItemResponseDto updateItemInCart(CartItemUpdateDto cartItemUpdateDto) {
+        if (cartItemUpdateDto.getProductId() == null) {
             throw new IllegalArgumentException("Product Id cannot be null");
         }
-        if (quantity == null || quantity < 1) {
+        if (cartItemUpdateDto.getQuantity() == null || cartItemUpdateDto.getQuantity() < 1) {
             throw new IllegalArgumentException("Quantity must be at least 1");
         }
         User user = userService.getCurrentUser();
-        OrderItem orderItem = getOrderItemFromCart(user, productId);
+        OrderItem orderItem = getOrderItemFromCart(user, cartItemUpdateDto.getProductId());
 
-        orderItem.setQuantity(quantity);
+        orderItem.setQuantity(cartItemUpdateDto.getQuantity());
         OrderItem savedItem = orderItemRepository.save(orderItem);
 
         return cartItemConverter.toDto(savedItem);
