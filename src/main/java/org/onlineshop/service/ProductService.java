@@ -59,7 +59,7 @@ public class ProductService implements ProductServiceInterface {
         Product productToUpdate = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Product with id = " + productId + " not found"));
         Category category = productToUpdate.getCategory();
-        if (productRequestDto.getProductCategory() != null) {
+        if (productRequestDto.getProductCategory() != null && !productRequestDto.getProductCategory().isBlank() ) {
             Category categoryAfterUpdate = categoryService.getCategoryByName(productRequestDto.getProductCategory());
             category = category.equals(categoryAfterUpdate) ? category : categoryAfterUpdate;
             productToUpdate.setCategory(category);
