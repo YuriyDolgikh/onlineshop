@@ -5,6 +5,8 @@ import org.onlineshop.dto.favourite.FavouriteResponseDto;
 import org.onlineshop.entity.Favourite;
 import org.onlineshop.entity.Product;
 import org.onlineshop.entity.User;
+import org.onlineshop.exception.BadRequestException;
+import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.repository.FavouriteRepository;
 import org.onlineshop.repository.ProductRepository;
 import org.onlineshop.service.converter.FavouriteConverter;
@@ -31,11 +33,11 @@ public class FavouriteService implements FavouriteServiceInterface {
         }
         User user = userService.getCurrentUser();
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("Product not found with ID: " + productId));
+                .orElseThrow(() -> new NotFoundException("Product not found with ID: " + productId));
         boolean exist = favouriteRepository.findByUser(user).stream()
                 .anyMatch(f -> f.getProduct().getId().equals(product.getId()));
         if (exist) {
-            throw new IllegalArgumentException("Product is already in favourites");
+            throw new BadRequestException("Product is already in favourites");
         }
 
         Favourite favourite = new Favourite();
@@ -50,14 +52,14 @@ public class FavouriteService implements FavouriteServiceInterface {
     @Override
     public FavouriteResponseDto deleteFavourite(Integer productId) {
         if (productId == null) {
-            throw new IllegalArgumentException("Product not found in favourites");
+            throw new NotFoundException("Product not found in favourites");
         }
 
         User user = userService.getCurrentUser();
         Favourite favourite = favouriteRepository.findByUser(user).stream()
                 .filter(f -> f.getProduct().getId().equals(productId))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Product not found in favourites"));
+                .orElseThrow(() -> new NotFoundException("Product not found in favourites"));
         favouriteRepository.delete(favourite);
 
         return favouriteConverter.toDto(favourite);

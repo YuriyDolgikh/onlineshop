@@ -10,11 +10,11 @@ import java.util.List;
 import java.util.Map;
 
 public interface StatisticServiceInterface {
-    List<ProductStatisticResponseDto> topTenPurchasedProducts();
-    List<ProductStatisticResponseDto> topTenCanceledProducts();
+    List<ProductStatisticResponseDto> getTopTenPurchasedProducts();
+    List<ProductStatisticResponseDto> getTenCanceledProducts();
     List<Product> productsInPendingPaymentStatus(Integer days);
     ProfitStatisticsResponseDto getProfitStatistics(
-            int periodCount,
+            Integer periodCount,
             ChronoUnit periodUnit,
             GroupByPeriod groupBy
     );
