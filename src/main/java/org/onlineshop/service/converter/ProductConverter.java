@@ -4,21 +4,22 @@ import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.product.ProductRequestDto;
 import org.onlineshop.dto.product.ProductResponseDto;
 import org.onlineshop.dto.product.ProductResponseForUserDto;
+import org.onlineshop.dto.statistic.ProductStatisticResponseDto;
 import org.onlineshop.entity.Category;
 import org.onlineshop.entity.Product;
 import org.onlineshop.service.CategoryService;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class ProductConverter {
-
     private final CategoryService categoryService;
 
     public Product fromDto(ProductRequestDto productRequestDto) {
-
         Category category = categoryService.getCategoryByName(productRequestDto.getProductCategory());
 
         return Product.builder()
@@ -67,5 +68,21 @@ public class ProductConverter {
         return products.stream()
                 .map(this::toUserDto)
                 .toList();
+    }
+
+    public List<ProductStatisticResponseDto> fromMapToList(Map<Product, Integer> statistic) {
+        List<ProductStatisticResponseDto> response = new ArrayList<>();
+        statistic.forEach((key, value) -> {
+            ProductStatisticResponseDto item = ProductStatisticResponseDto.builder()
+                    .productName(key.getName())
+                    .productCategory(key.getCategory().getCategoryName())
+                    .productPrice(key.getPrice())
+                    .productDiscountPrice(key.getDiscountPrice())
+                    .productQuantity(value)
+                    .build();
+
+            response.add(item);
+        });
+        return response;
     }
 }
