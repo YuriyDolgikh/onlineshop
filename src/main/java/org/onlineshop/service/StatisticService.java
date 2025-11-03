@@ -25,12 +25,12 @@ public class StatisticService implements StatisticServiceInterface {
     private final ProductConverter productConverter;
 
     @Override
-    public List<ProductStatisticResponseDto> topTenPurchasedProducts() {
+    public List<ProductStatisticResponseDto> getTopTenPurchasedProducts() {
         return getTopTenProducts(Order.Status.PAID);
     }
 
     @Override
-    public List<ProductStatisticResponseDto> topTenCanceledProducts() {
+    public List<ProductStatisticResponseDto> getTenCanceledProducts() {
         return getTopTenProducts(Order.Status.CANCELLED);
     }
 
@@ -48,7 +48,7 @@ public class StatisticService implements StatisticServiceInterface {
     }
 
     @Override
-    public ProfitStatisticsResponseDto getProfitStatistics(int periodCount, ChronoUnit periodUnit, GroupByPeriod groupBy) {
+    public ProfitStatisticsResponseDto getProfitStatistics(Integer periodCount, ChronoUnit periodUnit, GroupByPeriod groupBy) {
         LocalDateTime endDate = LocalDateTime.now();
         LocalDateTime startDate = endDate.minus(periodCount, periodUnit);
         List<Order> orders = orderRepository.findByStatusAndCreatedAtAfter(Order.Status.PAID, startDate);

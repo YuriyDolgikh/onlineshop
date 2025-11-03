@@ -42,6 +42,8 @@ public class SecurityConfig {
                         .requestMatchers("/v1/products/**").permitAll()
                         .requestMatchers("/v1/carts/**").permitAll()
                         .requestMatchers("/v1/cartItems/**").permitAll()
+                        .requestMatchers("/v1/favorites/**").hasAnyRole("ADMIN", "MANAGER", "USER")
+                        .requestMatchers("/v1/statistics/**").hasRole("ADMIN")
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/v1/categories/**").hasAnyRole("ADMIN", "MANAGER")

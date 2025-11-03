@@ -18,11 +18,11 @@ public class FavouriteController {
     @GetMapping
     public ResponseEntity<List<FavouriteResponseDto>> getFavorites() {
         return ResponseEntity
-                .status(HttpStatus.FOUND)
+                .status(HttpStatus.OK)
                 .body(favouriteService.getFavourites());
     }
 
-    @PostMapping("/{productId}")
+    @GetMapping("/{productId}")
     public ResponseEntity<FavouriteResponseDto> addFavourite(@PathVariable Integer productId) {
         FavouriteResponseDto response = favouriteService.addFavourite(productId);
         return ResponseEntity
