@@ -1,12 +1,13 @@
 package org.onlineshop.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.statistic.ProductStatisticResponseDto;
+import org.onlineshop.dto.statistic.ProfitStatisticRequestDto;
+import org.onlineshop.dto.statistic.ProfitStatisticsResponseDto;
 import org.onlineshop.service.StatisticService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -27,7 +28,19 @@ public class StatisticController {
         return ResponseEntity.ok(statisticService.getTenCanceledProducts());
     }
 
+    @GetMapping("/pendingPayment/{days}")
+    public ResponseEntity<List<ProductStatisticResponseDto>> getPendingPaymentProducts(@Valid @PathVariable Integer days) {
 
+        List<ProductStatisticResponseDto> response = statisticService.getProductsInPendingPaymentStatus(days);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/profit")
+    public ResponseEntity<ProfitStatisticsResponseDto> getProfitStatistics(@Valid @RequestBody ProfitStatisticRequestDto request) {
+        ProfitStatisticsResponseDto response = statisticService.getProfitStatistics(request);
+
+        return ResponseEntity.ok(response);
+    }
 
 
 }
