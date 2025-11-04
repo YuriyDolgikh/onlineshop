@@ -4,6 +4,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.onlineshop.dto.product.ProductRequestDto;
+import org.onlineshop.dto.product.ProductResponseDto;
 import org.onlineshop.entity.Category;
 import org.onlineshop.repository.CategoryRepository;
 import org.onlineshop.repository.ProductRepository;
@@ -23,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @TestPropertySource(locations = "classpath:application-test.yml")
-class ProductServiceTest {
+class ProductServiceAddProductTest {
 
     @Autowired
     private ProductService productService;
@@ -55,7 +56,7 @@ class ProductServiceTest {
     }
 
     @Test
-    void addProduct() {
+    void testAddProductIfOk() {
 
         ProductRequestDto requestDto = ProductRequestDto.builder()
                 .productName("TestProduct")
@@ -66,9 +67,10 @@ class ProductServiceTest {
                 .productDiscountPrice(BigDecimal.valueOf(5))
                 .build();
 
-        productService.addProduct(requestDto);
-        assertEquals("TestProduct", requestDto.getProductName());
-        assertEquals("testCategory", requestDto.getProductCategory());
+        ProductResponseDto savedProduct = productService.addProduct(requestDto);
+        assertEquals(savedProduct.getProductName(), requestDto.getProductName());
+        assertEquals(savedProduct.getProductCategory(), requestDto.getProductCategory());
+        assertEquals(1, productRepository.findAll().size());
 
     }
 }
