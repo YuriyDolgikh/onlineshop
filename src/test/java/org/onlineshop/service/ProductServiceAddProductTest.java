@@ -249,7 +249,7 @@ class ProductServiceAddProductTest {
     void testAddProductIfImageUrlInvalid() {
         ProductRequestDto product = ProductRequestDto.builder()
                 .productName("TestName")
-                .productCategory(" ")
+                .productCategory("testCategory")
                 .image("Invalid image URL")
                 .productDescription("TestProductText")
                 .productPrice(BigDecimal.valueOf(100))
@@ -257,13 +257,11 @@ class ProductServiceAddProductTest {
                 .build();
 
         Set<ConstraintViolation<ProductRequestDto>> violations = validatorFactory.getValidator().validate(product);
-        assertFalse(violations.isEmpty(), "Validation should fail for blank category");
+        assertFalse(violations.isEmpty(), "Validation should fail for invalid image");
         assertTrue(
                 violations.stream().anyMatch(v -> v.getMessage().equals("Invalid image URL")),
                 "Error message should be 'Invalid image URL'"
         );
 
     }
-
-
 }

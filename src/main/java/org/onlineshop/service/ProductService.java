@@ -1,6 +1,7 @@
 package org.onlineshop.service;
 
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.product.ProductRequestDto;
 import org.onlineshop.dto.product.ProductResponseDto;
@@ -13,6 +14,7 @@ import org.onlineshop.service.converter.ProductConverter;
 import org.onlineshop.service.interfaces.ProductServiceInterface;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -56,7 +58,7 @@ public class ProductService implements ProductServiceInterface {
 
     @Transactional
     @Override
-    public ProductResponseDto updateProduct(Integer productId, ProductUpdateDto productUpdateDto) {
+    public ProductResponseDto updateProduct(Integer productId,ProductUpdateDto productUpdateDto) {
         Product productToUpdate = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Product with id = " + productId + " not found"));
         Category category = productToUpdate.getCategory();
@@ -71,7 +73,7 @@ public class ProductService implements ProductServiceInterface {
                 .findFirst()
                 .ifPresent(productName -> {
                     throw new IllegalArgumentException("Product with name: " + productName
-                            + " already exist in category: ");
+                            + " already exist in category." );
                 });
         if (productUpdateDto.getProductName() != null && !productUpdateDto.getProductName().isBlank()) {
             productToUpdate.setName(productUpdateDto.getProductName());
