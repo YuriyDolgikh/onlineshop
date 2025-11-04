@@ -22,7 +22,7 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ROLE_MANAGER', 'ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     public ResponseEntity<ProductResponseDto> addNewProduct(@Valid @RequestBody ProductRequestDto requestDto) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -31,7 +31,7 @@ public class ProductController {
     }
 
     @PutMapping("{productId}")
-    @PreAuthorize("hasAnyRole('ROLE_MANAGER', 'ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     public ResponseEntity<ProductResponseDto> updateProduct(@Valid @PathVariable Integer productId, @RequestBody ProductRequestDto requestDto) {
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -39,7 +39,7 @@ public class ProductController {
     }
 
     @DeleteMapping("{productId}")
-    @PreAuthorize("hasAnyRole('ROLE_MANAGER', 'ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     public ResponseEntity<ProductResponseDto> deleteProduct(@Valid @PathVariable Integer productId) {
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -47,7 +47,7 @@ public class ProductController {
     }
 
     @PutMapping("/updateProductDiscount/{productId}/{newDiscount}")
-    @PreAuthorize("hasAnyRole('ROLE_MANAGER', 'ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     public ResponseEntity<ProductResponseDto> updateProductDiscount( @Valid @PathVariable Integer productId , @Valid @PathVariable BigDecimal newDiscount) {
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -55,7 +55,7 @@ public class ProductController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ROLE_MANAGER', 'ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     public ResponseEntity<List<ProductResponseDto>> getAllProductsForAdmin() {
         return ResponseEntity
                 .status(HttpStatus.OK)

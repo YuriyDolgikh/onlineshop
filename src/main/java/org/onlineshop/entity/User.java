@@ -26,14 +26,16 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Integer userId;
 
     @NotBlank
     @Size(min = 3, max = 15)
+    @Column(name = "username")
     private String username;
 
     @Email(regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", message = "Invalid email")
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false,name = "email")
     private String email;
 
     @NotBlank
@@ -41,17 +43,18 @@ public class User {
             regexp = "^\\+?[0-9]{7,15}$",
             message = "Phone number must contain only digits and may start with +, length 7–15"
     )
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false,name = "phone_number")
     private String phoneNumber;
 
     @NotBlank
+    @Column(name = "hash_password")
     private String hashPassword;
 
-    @Column(nullable = false)
+    @Column(nullable = false,name = "role")
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @Column(nullable = false)
+    @Column(nullable = false,name = "status")
     @Enumerated(EnumType.STRING)
     private Status status;
 
