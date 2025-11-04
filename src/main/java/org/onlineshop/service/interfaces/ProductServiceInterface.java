@@ -2,6 +2,7 @@ package org.onlineshop.service.interfaces;
 
 import org.onlineshop.dto.product.ProductRequestDto;
 import org.onlineshop.dto.product.ProductResponseDto;
+import org.onlineshop.dto.product.ProductUpdateDto;
 import org.onlineshop.entity.Product;
 
 import java.math.BigDecimal;
@@ -11,7 +12,7 @@ import java.util.Optional;
 public interface ProductServiceInterface {
     ProductResponseDto addProduct(ProductRequestDto productRequestDto);
 
-    ProductResponseDto updateProduct(Integer productId, ProductRequestDto productRequestDto);
+    ProductResponseDto updateProduct(Integer productId, ProductUpdateDto productRequestDto);
 
     ProductResponseDto deleteProduct(Integer productId);
 

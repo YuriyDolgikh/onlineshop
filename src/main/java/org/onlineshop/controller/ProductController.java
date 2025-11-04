@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.product.ProductRequestDto;
 import org.onlineshop.dto.product.ProductResponseDto;
 import org.onlineshop.dto.product.ProductResponseForUserDto;
+import org.onlineshop.dto.product.ProductUpdateDto;
 import org.onlineshop.service.ProductService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,10 +33,10 @@ public class ProductController {
 
     @PutMapping("{productId}")
     @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
-    public ResponseEntity<ProductResponseDto> updateProduct(@Valid @PathVariable Integer productId, @RequestBody ProductRequestDto requestDto) {
+    public ResponseEntity<ProductResponseDto> updateProduct(@Valid @PathVariable Integer productId, @RequestBody ProductUpdateDto updateDto) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(productService.updateProduct(productId, requestDto));
+                .body(productService.updateProduct(productId, updateDto));
     }
 
     @DeleteMapping("{productId}")

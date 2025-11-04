@@ -2,6 +2,7 @@ package org.onlineshop.entity;
 
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -36,6 +37,7 @@ public class Product {
     private String description;
 
     @Column(precision = 10, scale = 2, nullable = false)
+    @DecimalMin(value = "0.01", message = "Price must be greater than 0")
     private BigDecimal price;
 
     @ManyToOne(fetch = FetchType.LAZY)

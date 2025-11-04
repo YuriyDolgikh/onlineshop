@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.product.ProductRequestDto;
 import org.onlineshop.dto.product.ProductResponseDto;
 import org.onlineshop.dto.product.ProductResponseForUserDto;
+import org.onlineshop.dto.product.ProductUpdateDto;
 import org.onlineshop.entity.Category;
 import org.onlineshop.entity.Product;
 import org.onlineshop.repository.ProductRepository;
@@ -55,37 +56,37 @@ public class ProductService implements ProductServiceInterface {
 
     @Transactional
     @Override
-    public ProductResponseDto updateProduct(Integer productId, ProductRequestDto productRequestDto) {
+    public ProductResponseDto updateProduct(Integer productId, ProductUpdateDto productUpdateDto) {
         Product productToUpdate = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Product with id = " + productId + " not found"));
         Category category = productToUpdate.getCategory();
-        if (productRequestDto.getProductCategory() != null && !productRequestDto.getProductCategory().isBlank() ) {
-            Category categoryAfterUpdate = categoryService.getCategoryByName(productRequestDto.getProductCategory());
+        if (productUpdateDto.getProductCategory() != null && !productUpdateDto.getProductCategory().isBlank() ) {
+            Category categoryAfterUpdate = categoryService.getCategoryByName(productUpdateDto.getProductCategory());
             category = category.equals(categoryAfterUpdate) ? category : categoryAfterUpdate;
             productToUpdate.setCategory(category);
         }
         List<Product> productListFromCategory = category.getProducts();
         productListFromCategory.stream().map(Product::getName)
-                .filter(productName -> productName.equalsIgnoreCase(productRequestDto.getProductName()))
+                .filter(productName -> productName.equalsIgnoreCase(productUpdateDto.getProductName()))
                 .findFirst()
                 .ifPresent(productName -> {
                     throw new IllegalArgumentException("Product with name: " + productName
                             + " already exist in category: ");
                 });
-        if (productRequestDto.getProductName() != null && !productRequestDto.getProductName().isBlank()) {
-            productToUpdate.setName(productRequestDto.getProductName());
+        if (productUpdateDto.getProductName() != null && !productUpdateDto.getProductName().isBlank()) {
+            productToUpdate.setName(productUpdateDto.getProductName());
         }
-        if (productRequestDto.getProductDescription() != null && !productRequestDto.getProductDescription().isBlank()) {
-            productToUpdate.setDescription(productRequestDto.getProductDescription());
+        if (productUpdateDto.getProductDescription() != null && !productUpdateDto.getProductDescription().isBlank()) {
+            productToUpdate.setDescription(productUpdateDto.getProductDescription());
         }
-        if (productRequestDto.getProductPrice() != null) {
-            productToUpdate.setPrice(productRequestDto.getProductPrice());
+        if (productUpdateDto.getProductPrice() != null) {
+            productToUpdate.setPrice(productUpdateDto.getProductPrice());
         }
-        if (productRequestDto.getProductDiscountPrice() != null) {
-            productToUpdate.setDiscountPrice(productRequestDto.getProductDiscountPrice());
+        if (productUpdateDto.getProductDiscountPrice() != null) {
+            productToUpdate.setDiscountPrice(productUpdateDto.getProductDiscountPrice());
         }
-        if (productRequestDto.getImage() != null && !productRequestDto.getImage().isBlank()) {
-            productToUpdate.setImage(productRequestDto.getImage());
+        if (productUpdateDto.getImage() != null && !productUpdateDto.getImage().isBlank()) {
+            productToUpdate.setImage(productUpdateDto.getImage());
         }
         LocalDateTime now = LocalDateTime.now();
         productToUpdate.setUpdatedAt(now);
