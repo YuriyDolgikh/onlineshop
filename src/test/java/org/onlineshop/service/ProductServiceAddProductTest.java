@@ -50,7 +50,6 @@ class ProductServiceAddProductTest {
 
     @BeforeEach
     void setUp() {
-        LocalDateTime now = LocalDateTime.now();
 
         Category category = Category.builder()
                 .categoryName("testCategory")
@@ -127,7 +126,7 @@ class ProductServiceAddProductTest {
     }
 
     @Test
-    void testAddProductIfPriceIsZero(){
+    void testAddProductIfPriceIsZero() {
         ProductRequestDto product = ProductRequestDto.builder()
                 .productName("TestProduct")
                 .productCategory("testCategory")
@@ -145,4 +144,126 @@ class ProductServiceAddProductTest {
         );
 
     }
+
+    @Test
+    void testAddProductIfPriceIsNull() {
+        ProductRequestDto product = ProductRequestDto.builder()
+                .productName("TestProduct")
+                .productCategory("testCategory")
+                .image("https://drive.google.com/test")
+                .productDescription("TestProductText")
+                .productPrice(null)
+                .productDiscountPrice(BigDecimal.valueOf(5))
+                .build();
+
+        Set<ConstraintViolation<ProductRequestDto>> violations = validatorFactory.getValidator().validate(product);
+        assertFalse(violations.isEmpty(), "Validation should fail for price = null");
+        assertTrue(
+                violations.stream().anyMatch(v -> v.getMessage().equals("Price cannot be null")),
+                "Error message should be 'Price cannot be null'"
+        );
+
+    }
+
+    @Test
+    void testAddProductIfNameIsBlank() {
+        ProductRequestDto product = ProductRequestDto.builder()
+                .productName(" ")
+                .productCategory("testCategory")
+                .image("https://drive.google.com/test")
+                .productDescription("TestProductText")
+                .productPrice(BigDecimal.valueOf(100))
+                .productDiscountPrice(BigDecimal.valueOf(5))
+                .build();
+
+        Set<ConstraintViolation<ProductRequestDto>> violations = validatorFactory.getValidator().validate(product);
+        assertFalse(violations.isEmpty(), "Validation should fail for blank name");
+        assertTrue(
+                violations.stream().anyMatch(v -> v.getMessage().equals("Product title is required and must be not blank")),
+                "Error message should be 'Product title is required and must be not blank'"
+        );
+
+    }
+
+    @Test
+    void testAddProductIfNameIsTooShort() {
+        ProductRequestDto product = ProductRequestDto.builder()
+                .productName("Te")
+                .productCategory("testCategory")
+                .image("https://drive.google.com/test")
+                .productDescription("TestProductText")
+                .productPrice(BigDecimal.valueOf(100))
+                .productDiscountPrice(BigDecimal.valueOf(5))
+                .build();
+
+        Set<ConstraintViolation<ProductRequestDto>> violations = validatorFactory.getValidator().validate(product);
+        assertFalse(violations.isEmpty(), "Validation should fail for too short name");
+        assertTrue(
+                violations.stream().anyMatch(v -> v.getMessage().equals("Product title must be between 3 and 20 characters")),
+                "Error message should be 'Product title must be between 3 and 20 characters'"
+        );
+
+    }
+
+    @Test
+    void testAddProductIfNameIsTooLong() {
+        ProductRequestDto product = ProductRequestDto.builder()
+                .productName("TestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestName")
+                .productCategory("testCategory")
+                .image("https://drive.google.com/test")
+                .productDescription("TestProductText")
+                .productPrice(BigDecimal.valueOf(100))
+                .productDiscountPrice(BigDecimal.valueOf(5))
+                .build();
+
+        Set<ConstraintViolation<ProductRequestDto>> violations = validatorFactory.getValidator().validate(product);
+        assertFalse(violations.isEmpty(), "Validation should fail for too long name");
+        assertTrue(
+                violations.stream().anyMatch(v -> v.getMessage().equals("Product title must be between 3 and 20 characters")),
+                "Error message should be 'Product title must be between 3 and 20 characters'"
+        );
+
+    }
+
+    @Test
+    void testAddProductIfCategoryIsBlank() {
+        ProductRequestDto product = ProductRequestDto.builder()
+                .productName("TestName")
+                .productCategory(" ")
+                .image("https://drive.google.com/test")
+                .productDescription("TestProductText")
+                .productPrice(BigDecimal.valueOf(100))
+                .productDiscountPrice(BigDecimal.valueOf(5))
+                .build();
+
+        Set<ConstraintViolation<ProductRequestDto>> violations = validatorFactory.getValidator().validate(product);
+        assertFalse(violations.isEmpty(), "Validation should fail for blank category");
+        assertTrue(
+                violations.stream().anyMatch(v -> v.getMessage().equals("Product category is required and must be not blank")),
+                "Error message should be 'Product category is required and must be not blank'"
+        );
+
+    }
+
+    @Test
+    void testAddProductIfImageUrlInvalid() {
+        ProductRequestDto product = ProductRequestDto.builder()
+                .productName("TestName")
+                .productCategory(" ")
+                .image("Invalid image URL")
+                .productDescription("TestProductText")
+                .productPrice(BigDecimal.valueOf(100))
+                .productDiscountPrice(BigDecimal.valueOf(5))
+                .build();
+
+        Set<ConstraintViolation<ProductRequestDto>> violations = validatorFactory.getValidator().validate(product);
+        assertFalse(violations.isEmpty(), "Validation should fail for blank category");
+        assertTrue(
+                violations.stream().anyMatch(v -> v.getMessage().equals("Invalid image URL")),
+                "Error message should be 'Invalid image URL'"
+        );
+
+    }
+
+
 }
