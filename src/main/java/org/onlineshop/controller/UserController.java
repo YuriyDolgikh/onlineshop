@@ -71,7 +71,7 @@ public class UserController {
      * @return a ResponseEntity containing the updated UserResponseDto
      */
     @PutMapping("/{userId}")
-    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MANAGER', 'ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('USER', 'MANAGER', 'ADMIN')")
     public ResponseEntity<UserResponseDto> updateUser(@Valid @PathVariable Integer userId, @Valid @RequestBody UserUpdateRequestDto requestDto) {
         return ResponseEntity.ok(userService.updateUser(userId, requestDto));
     }
@@ -85,13 +85,13 @@ public class UserController {
      * or HTTP status 400 (Bad Request) if the user can't be deleted
      * or HTTP status 404 (Not Found) if the user with the specified ID does not exist.
      */
-    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MANAGER', 'ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('USER', 'MANAGER', 'ADMIN')")
     @DeleteMapping("/{userId}")
     public ResponseEntity<UserResponseDto> deleteUser(@Valid @PathVariable Integer userId) {
         return ResponseEntity.ok(userService.deleteUser(userId));
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MANAGER', 'ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('USER', 'MANAGER', 'ADMIN')")
     @GetMapping("/renew/{email}")
     public ResponseEntity<UserResponseDto> renewUser(@Email @PathVariable String email) {
         return ResponseEntity.ok(userService.renewUser(email));

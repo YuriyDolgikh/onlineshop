@@ -33,6 +33,7 @@ databaseChangeLog:
                   type: VARCHAR(20)
                   constraints:
                     nullable: false
+                    unique: true
 
               - column:
                   name: hash_password
@@ -52,13 +53,29 @@ databaseChangeLog:
                   constraints:
                     nullable: false
 
+  - changeSet:
+      id: 2
+      author: 050525group
+      comment: "Create table carts"
+      changes:
+        - createTable:
+            tableName: carts
+            columns:
               - column:
                   name: cart_id
                   type: INT
-
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: INT
+                  constraints:
+                    nullable: false
+                    unique: true
 
   - changeSet:
-      id: 2
+      id: 3
       author: 050525group
       comment: "Create table confirmation_codes"
       changes:
@@ -88,7 +105,7 @@ databaseChangeLog:
 
               - column:
                   name: expire_data_time
-                  type: TIMESTAMP
+                  type: TIMESTAMP WITH TIME ZONE
                   constraints:
                     nullable: false
 
@@ -97,65 +114,26 @@ databaseChangeLog:
                   type: BOOLEAN
                   defaultValueBoolean: false
 
-        - addForeignKeyConstraint:
-            constraintName: fk_confirmation_user
-            baseTableName: confirmation_codes
-            baseColumnNames: user_id
-            referencedTableName: users
-            referencedColumnNames: user_id
-            onDelete: CASCADE
-            onUpdate: RESTRICT
-
-
-  - changeSet:
-      id: 3
-      author: 050525group
-      comment: "Create admin and manager"
-      changes:
-        - insert:
-            tableName: users
-            columns:
-              - column: { name: username,      value: "admin" }
-              - column: { name: email,         value: "admin@example.com" }
-              - column: { name: phone_number,  value: "+49111111111" }
-              - column: { name: hash_password, value: "$2a$10$WiAt7dmC1vLIxjY9/9n7P.I5RQU1MKKSOI1Dy1pNLPPIts7K5RJR2" }
-              - column: { name: role,          value: "ADMIN" }
-              - column: { name: status,        value: "CONFIRMED" }
-
-        - insert:
-            tableName: users
-            columns:
-              - column: { name: username,      value: "manager" }
-              - column: { name: email,         value: "manager@example.com" }
-              - column: { name: phone_number,  value: "+49222222222" }
-              - column: { name: hash_password, value: "$2a$10$35bmYiB2kQKydbNporsKfeYTff58vhJc0K0mSNXzbxetiXUJWSWFe" }
-              - column: { name: role,          value: "MANAGER" }
-              - column: { name: status,        value: "CONFIRMED" }
-
-        - insert:
-            tableName: users
-            columns:
-              - column: { name: username,      value: "user" }
-              - column: { name: email,         value: "user@example.com" }
-              - column: { name: phone_number,  value: "+49222222222" }
-              - column: { name: hash_password, value: "$2a$10$DBPg96Sl62tayvVs0Svr.u0xLD6MAmI2XAyQIWpDT06YGktnPi9be" }
-              - column: { name: role,          value: "USER" }
-              - column: { name: status,        value: "CONFIRMED" }
-
-
   - changeSet:
       id: 4
       author: 050525group
-      comment: "Create confirmation codes for admin and manager"
+      comment: "Create table cart items"
       changes:
-        - sql: >
-            INSERT INTO confirmation_codes (code, user_id, expire_data_time, is_confirmed)
-            SELECT gen_random_uuid(), u.user_id, NOW(), TRUE
-            FROM users u
-            WHERE u.username IN ('admin', 'manager')
-            AND NOT EXISTS (
-                SELECT 1 FROM confirmation_codes c WHERE c.user_id = u.user_id
-            );
+        - createTable:
+            tableName: cart_items
+            columns:
+              - column:
+                  name: cart_item_id
+                  type: INT
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: quantity
+                  type: INT
+                  constraints:
+                    nullable: false
 
   - changeSet:
       id: 5
@@ -174,16 +152,370 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: category_name
-                  type: VARCHAR(255)
+                  type: VARCHAR(100)
                   constraints:
                     nullable: false
-                    unique: true
               - column:
                   name: image
                   type: VARCHAR(256)
 
+
   - changeSet:
       id: 6
+      author: 050525group
+      comment: "Create table favourites"
+      changes:
+        - createTable:
+            tableName: favourites
+            columns:
+              - column:
+                  name: favourite_id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+  - changeSet:
+      id: 7
+      author: 050525group
+      comment: "Create table orders"
+      changes:
+        - createTable:
+            tableName: orders
+            columns:
+              - column:
+                  name: order_id
+                  type: INT
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+              - column:
+                  name: delivery_address
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: contact_phone
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: delivery_method
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: 8
+      author: 050525group
+      comment: "Create table order items"
+      changes:
+        - createTable:
+            tableName: order_items
+            columns:
+              - column:
+                  name: order_item_id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: quantity
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: price_at_purchase
+                  type: DECIMAL(10,2)
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: 9
+      author: 050525group
+      comment: "Create table products"
+      changes:
+        - createTable:
+            tableName: products
+            columns:
+              - column:
+                  name: id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: name
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: description
+                  type: VARCHAR(255)
+
+              - column:
+                  name: price
+                  type: DECIMAL(10,2)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: image
+                  type: VARCHAR(256)
+
+              - column:
+                  name: discount_price
+                  type: DECIMAL(10,2)
+
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+
+  - changeSet:
+      id: 10
+      author: 050525group
+      comment: "Add missing FK columns"
+      changes:
+        - addColumn:
+            tableName: users
+            columns:
+              - column:
+                  name: cart_id
+                  type: INT
+                  constraints:
+                    nullable: true
+
+        - addColumn:
+            tableName: cart_items
+            columns:
+              - column:
+                  name: cart_id
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: product_id
+                  type: INT
+                  constraints:
+                    nullable: false
+
+        - addColumn:
+            tableName: favourites
+            columns:
+              - column:
+                  name: user_id
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: product_id
+                  type: INT
+                  constraints:
+                    nullable: false
+
+        - addColumn:
+            tableName: products
+            columns:
+              - column:
+                  name: category_id
+                  type: INT
+                  constraints:
+                    nullable: false
+
+        - addColumn:
+            tableName: orders
+            columns:
+              - column:
+                  name: user_id
+                  type: INT
+                  constraints:
+                    nullable: false
+
+        - addColumn:
+            tableName: order_items
+            columns:
+              - column:
+                  name: order_id
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: product_id
+                  type: INT
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: 11
+      author: 050525Group
+      comment: "Add ForeignKey"
+      changes:
+
+        - addForeignKeyConstraint:
+            baseTableName: carts
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: user_id
+            constraintName: fk_carts_user
+            onDelete: CASCADE
+            onUpdate: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: users
+            baseColumnNames: cart_id
+            referencedTableName: carts
+            referencedColumnNames: cart_id
+            constraintName: fk_users_cart
+            onDelete: SET NULL
+            onUpdate: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: cart_items
+            baseColumnNames: cart_id
+            referencedTableName: carts
+            referencedColumnNames: cart_id
+            constraintName: fk_cart_items_cart
+            onDelete: CASCADE
+            onUpdate: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: cart_items
+            baseColumnNames: product_id
+            referencedTableName: products
+            referencedColumnNames: id
+            constraintName: fk_cart_items_product
+            onDelete: CASCADE
+            onUpdate: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: favourites
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: user_id
+            constraintName: fk_favourites_user
+            onDelete: CASCADE
+            onUpdate: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: favourites
+            baseColumnNames: product_id
+            referencedTableName: products
+            referencedColumnNames: id
+            constraintName: fk_favourites_product
+            onDelete: CASCADE
+            onUpdate: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: products
+            baseColumnNames: category_id
+            referencedTableName: category
+            referencedColumnNames: category_id
+            constraintName: fk_products_category
+            onDelete: RESTRICT
+            onUpdate: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: orders
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: user_id
+            constraintName: fk_orders_user
+            onDelete: CASCADE
+            onUpdate: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: order_items
+            baseColumnNames: order_id
+            referencedTableName: orders
+            referencedColumnNames: order_id
+            constraintName: fk_order_items_order
+            onDelete: CASCADE
+            onUpdate: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: order_items
+            baseColumnNames: product_id
+            referencedTableName: products
+            referencedColumnNames: id
+            constraintName: fk_order_items_product
+            onDelete: CASCADE
+            onUpdate: CASCADE
+
+        - addForeignKeyConstraint:
+            constraintName: fk_confirmation_user
+            baseTableName: confirmation_codes
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: user_id
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+
+  - changeSet:
+      id: 12
+      author: 050525group
+      comment: "Create admin and manager"
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column: { name: username,      value: "admin" }
+              - column: { name: email,         value: "admin@example.com" }
+              - column: { name: phone_number,  value: "+49111111111" }
+              - column: { name: hash_password, value: "$2a$10$WiAt7dmC1vLIxjY9/9n7P.I5RQU1MKKSOI1Dy1pNLPPIts7K5RJR2" }
+              - column: { name: role,          value: "ADMIN" }
+              - column: { name: status,        value: "CONFIRMED" }
+
+        - insert:
+            tableName: users
+            columns:
+              - column: { name: username,      value: "manager" }
+              - column: { name: email,         value: "manager@example.com" }
+              - column: { name: phone_number,  value: "+493333333333333" }
+              - column: { name: hash_password, value: "$2a$10$35bmYiB2kQKydbNporsKfeYTff58vhJc0K0mSNXzbxetiXUJWSWFe" }
+              - column: { name: role,          value: "MANAGER" }
+              - column: { name: status,        value: "CONFIRMED" }
+
+        - insert:
+            tableName: users
+            columns:
+              - column: { name: username,      value: "user" }
+              - column: { name: email,         value: "user@example.com" }
+              - column: { name: phone_number,  value: "+49222222222" }
+              - column: { name: hash_password, value: "$2a$10$DBPg96Sl62tayvVs0Svr.u0xLD6MAmI2XAyQIWpDT06YGktnPi9be" }
+              - column: { name: role,          value: "USER" }
+              - column: { name: status,        value: "CONFIRMED" }
+
+  - changeSet:
+      id: 13
       author: 050525group
       comment: "Create default product categories"
       changes:
