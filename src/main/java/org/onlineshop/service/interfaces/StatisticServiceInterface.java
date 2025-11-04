@@ -2,6 +2,7 @@ package org.onlineshop.service.interfaces;
 
 import org.onlineshop.dto.statistic.GroupByPeriod;
 import org.onlineshop.dto.statistic.ProductStatisticResponseDto;
+import org.onlineshop.dto.statistic.ProfitStatisticRequestDto;
 import org.onlineshop.dto.statistic.ProfitStatisticsResponseDto;
 import org.onlineshop.entity.Product;
 
@@ -13,11 +14,7 @@ public interface StatisticServiceInterface {
     List<ProductStatisticResponseDto> getTopTenPurchasedProducts();
     List<ProductStatisticResponseDto> getTenCanceledProducts();
     List<ProductStatisticResponseDto> getProductsInPendingPaymentStatus(Integer days);
-    ProfitStatisticsResponseDto getProfitStatistics(
-            Integer periodCount,
-           String periodUnitStr,
-            String  groupByStr
-    );
+    ProfitStatisticsResponseDto getProfitStatistics(ProfitStatisticRequestDto request);
 
 
 }

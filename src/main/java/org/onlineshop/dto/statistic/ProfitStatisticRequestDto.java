@@ -13,9 +13,11 @@ public class ProfitStatisticRequestDto {
     @NotNull(message = "period count must not be null")
     private Integer periodCount;
 
-    @NotBlank(message = "period Unit must not be blank")
+    @NotBlank
+    @NotNull
     private String periodUnit;
 
-    @NotNull(message = "groupBy must not be null")
+    @NotBlank
+    @NotNull
     private String  groupBy;
 }

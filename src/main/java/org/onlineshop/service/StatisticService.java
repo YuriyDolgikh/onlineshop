@@ -3,6 +3,7 @@ package org.onlineshop.service;
 import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.statistic.GroupByPeriod;
 import org.onlineshop.dto.statistic.ProductStatisticResponseDto;
+import org.onlineshop.dto.statistic.ProfitStatisticRequestDto;
 import org.onlineshop.dto.statistic.ProfitStatisticsResponseDto;
 import org.onlineshop.entity.Order;
 import org.onlineshop.entity.Product;
@@ -16,7 +17,10 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.IsoFields;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @Service
@@ -39,7 +43,7 @@ public class StatisticService implements StatisticServiceInterface {
     public List<ProductStatisticResponseDto> getProductsInPendingPaymentStatus(Integer days) {
         LocalDateTime since = LocalDateTime.now().minusDays(days);
 
-        Map<Product, Integer> productQuantityMap  = new LinkedHashMap<>();
+        Map<Product, Integer> productQuantityMap = new LinkedHashMap<>();
 
         orderRepository.findByStatusAndCreatedAtAfter(Order.Status.PENDING_PAYMENT, since)
                 .forEach(o -> o.getOrderItems()
@@ -51,12 +55,17 @@ public class StatisticService implements StatisticServiceInterface {
     }
 
     @Override
-    public ProfitStatisticsResponseDto getProfitStatistics(Integer periodCount, String periodUnitStr, String  groupByStr) {
+    public ProfitStatisticsResponseDto getProfitStatistics(ProfitStatisticRequestDto request) {
+
+        Integer periodCount = request.getPeriodCount();
+        String periodUnitStr = request.getPeriodUnit();
+        String groupByStr = request.getGroupBy();
+
         ChronoUnit periodUnit;
         try {
             periodUnit = ChronoUnit.valueOf(periodUnitStr.toUpperCase());
-        }catch (IllegalArgumentException e) {
-            throw new BadRequestException("Invalid period unit: " + periodUnitStr);
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException("Invalid period unit: " + periodUnitStr + ". Valid values are: DAYS, WEEKS, MONTHS, YEARS");
         }
         GroupByPeriod groupBy;
         try {
@@ -84,7 +93,7 @@ public class StatisticService implements StatisticServiceInterface {
                     .map(i -> i.getPriceAtPurchase().multiply(BigDecimal.valueOf(i.getQuantity())))
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
             groupedProfit.merge(key, totalPrice, BigDecimal::add);
-            totalProfit  = totalProfit.add(totalPrice);
+            totalProfit = totalProfit.add(totalPrice);
 
         }
         return ProfitStatisticsResponseDto.builder()
