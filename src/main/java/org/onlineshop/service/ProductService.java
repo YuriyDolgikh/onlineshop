@@ -76,12 +76,18 @@ public class ProductService implements ProductServiceInterface {
                             + " already exist in category." );
                 });
         if (productUpdateDto.getProductName() != null && !productUpdateDto.getProductName().isBlank()) {
+            if (productUpdateDto.getProductName().length() < 3 || productUpdateDto.getProductName().length() > 20) {
+                throw new IllegalArgumentException("Product title must be between 3 and 20 characters");
+            }
             productToUpdate.setName(productUpdateDto.getProductName());
         }
         if (productUpdateDto.getProductDescription() != null && !productUpdateDto.getProductDescription().isBlank()) {
             productToUpdate.setDescription(productUpdateDto.getProductDescription());
         }
         if (productUpdateDto.getProductPrice() != null) {
+            if(productUpdateDto.getProductPrice().compareTo(BigDecimal.ZERO) <= 0 ){
+                throw new IllegalArgumentException("Product price must be greater than 0");
+            }
             productToUpdate.setPrice(productUpdateDto.getProductPrice());
         }
         if (productUpdateDto.getProductDiscountPrice() != null) {

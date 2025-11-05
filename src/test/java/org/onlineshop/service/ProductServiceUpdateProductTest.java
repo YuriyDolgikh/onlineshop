@@ -71,7 +71,7 @@ class ProductServiceUpdateProductTest {
     }
 
     @Test
-    void updateProductNameIfOk() {
+    void testUpdateProductNameIfOk() {
         ProductRequestDto requestDto = ProductRequestDto.builder()
                 .productName("TestProduct")
                 .productCategory("testCategoryFirst")
@@ -93,7 +93,7 @@ class ProductServiceUpdateProductTest {
     }
 
     @Test
-    void updateProductCategoryIfOk() {
+    void testUpdateProductCategoryIfOk() {
         ProductRequestDto requestDto = ProductRequestDto.builder()
                 .productName("TestProduct")
                 .productCategory("testCategoryFirst")
@@ -115,7 +115,7 @@ class ProductServiceUpdateProductTest {
     }
 
     @Test
-    void updateProductDescriptionIfOk() {
+    void testUpdateProductDescriptionIfOk() {
         ProductRequestDto requestDto = ProductRequestDto.builder()
                 .productName("TestProduct")
                 .productCategory("testCategoryFirst")
@@ -137,7 +137,7 @@ class ProductServiceUpdateProductTest {
     }
 
     @Test
-    void updateProductPriceIfOk() {
+    void testUpdateProductPriceIfOk() {
         ProductRequestDto requestDto = ProductRequestDto.builder()
                 .productName("TestProduct")
                 .productCategory("testCategoryFirst")
@@ -159,7 +159,7 @@ class ProductServiceUpdateProductTest {
     }
 
     @Test
-    void updateProductDiscountPriceIfOk() {
+    void testUpdateProductDiscountPriceIfOk() {
         ProductRequestDto requestDto = ProductRequestDto.builder()
                 .productName("TestProduct")
                 .productCategory("testCategoryFirst")
@@ -181,7 +181,7 @@ class ProductServiceUpdateProductTest {
     }
 
     @Test
-    void updateProductImageIfOk() {
+    void testUpdateProductImageIfOk() {
         ProductRequestDto requestDto = ProductRequestDto.builder()
                 .productName("TestProduct")
                 .productCategory("testCategoryFirst")
@@ -219,6 +219,7 @@ class ProductServiceUpdateProductTest {
                 .productName("TestProduct")
                 .build();
 
+
         Exception exception = assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(savedProductFirst.getProductId(),productSecond ));
         String messageException = "Product with name: " + productSecond.getProductName() + " already exist in category.";
         assertEquals(messageException, exception.getMessage());
@@ -227,16 +228,6 @@ class ProductServiceUpdateProductTest {
 
     @Test
     void testUpdateProductWhenProductNotFound() {
-        ProductRequestDto productFirst = ProductRequestDto.builder()
-                .productName("TestProduct")
-                .productCategory("testCategoryFirst")
-                .image("https://drive.google.com/test")
-                .productDescription("TestProductText")
-                .productPrice(BigDecimal.valueOf(100))
-                .productDiscountPrice(BigDecimal.valueOf(5))
-                .build();
-
-        ProductResponseDto savedProductFirst = productService.addProduct(productFirst);
 
         ProductUpdateDto productSecond = ProductUpdateDto.builder()
                 .productName("Product")
@@ -271,6 +262,75 @@ class ProductServiceUpdateProductTest {
                 violations.stream().anyMatch(v -> v.getMessage().equals("Invalid image URL")),
                 "Error message should be 'Invalid image URL'"
         );
+
+    }
+
+    @Test
+    void testUpdateProductIfNameIsTooShort() {
+        ProductRequestDto productFirst = ProductRequestDto.builder()
+                .productName("TestProduct")
+                .productCategory("testCategoryFirst")
+                .image("https://drive.google.com/test")
+                .productDescription("TestProductText")
+                .productPrice(BigDecimal.valueOf(100))
+                .productDiscountPrice(BigDecimal.valueOf(5))
+                .build();
+
+        ProductResponseDto savedProductFirst = productService.addProduct(productFirst);
+
+        ProductUpdateDto productSecond = ProductUpdateDto.builder()
+                .productName("Te")
+                .build();
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(savedProductFirst.getProductId(),productSecond ));
+        String messageException = "Product title must be between 3 and 20 characters";
+        assertEquals(messageException, exception.getMessage());
+
+    }
+
+    @Test
+    void testUpdateProductIfNameIsTooLong() {
+        ProductRequestDto productFirst = ProductRequestDto.builder()
+                .productName("TestProduct")
+                .productCategory("testCategoryFirst")
+                .image("https://drive.google.com/test")
+                .productDescription("TestProductText")
+                .productPrice(BigDecimal.valueOf(100))
+                .productDiscountPrice(BigDecimal.valueOf(5))
+                .build();
+
+        ProductResponseDto savedProductFirst = productService.addProduct(productFirst);
+
+        ProductUpdateDto productSecond = ProductUpdateDto.builder()
+                .productName("TestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProduct")
+                .build();
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(savedProductFirst.getProductId(),productSecond ));
+        String messageException = "Product title must be between 3 and 20 characters";
+        assertEquals(messageException, exception.getMessage());
+
+    }
+
+    @Test
+    void testUpdateProductIfPriceIsZero() {
+        ProductRequestDto productFirst = ProductRequestDto.builder()
+                .productName("TestProduct")
+                .productCategory("testCategoryFirst")
+                .image("https://drive.google.com/test")
+                .productDescription("TestProductText")
+                .productPrice(BigDecimal.valueOf(100))
+                .productDiscountPrice(BigDecimal.valueOf(5))
+                .build();
+
+        ProductResponseDto savedProductFirst = productService.addProduct(productFirst);
+
+        ProductUpdateDto productSecond = ProductUpdateDto.builder()
+                .productPrice(BigDecimal.ZERO)
+                .build();
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(savedProductFirst.getProductId(),productSecond ));
+        String messageException = "Product price must be greater than 0";
+        assertEquals(messageException, exception.getMessage());
 
     }
 }
