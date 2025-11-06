@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.onlineshop.dto.product.ProductRequestDto;
 import org.onlineshop.dto.product.ProductResponseDto;
 import org.onlineshop.entity.Category;
+import org.onlineshop.entity.Product;
 import org.onlineshop.repository.CategoryRepository;
 import org.onlineshop.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -41,8 +43,8 @@ class ProductServiceDeleteProductTest {
         categoryRepository.deleteAll();
     }
 
-    @BeforeEach
-    void setUp() {
+    @Test
+    void testDeleteProductIfOk() {
 
         Category categoryFirst = Category.builder()
                 .categoryName("testCategoryFirst")
@@ -52,24 +54,22 @@ class ProductServiceDeleteProductTest {
 
         categoryRepository.save(categoryFirst);
 
-    }
-
-    @Test
-    void testDeleteProductIfOk() {
-        ProductRequestDto productFirst = ProductRequestDto.builder()
-                .productName("TestProduct")
-                .productCategory("testCategoryFirst")
-                .image("https://drive.google.com/test")
-                .productDescription("TestProductText")
-                .productPrice(BigDecimal.valueOf(100))
-                .productDiscountPrice(BigDecimal.valueOf(5))
+        Product productTest = Product.builder()
+                .name("testProduct")
+                .category(categoryFirst)
+                .description("testDescription")
+                .price(BigDecimal.valueOf(100))
+                .discountPrice(BigDecimal.valueOf(10))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .image("https://drive.google.com/file/first")
                 .build();
 
-        ProductResponseDto savedProductFirst = productService.addProduct(productFirst);
+        productRepository.save(productTest);
 
-        productService.deleteProduct(savedProductFirst.getProductId());
+        productService.deleteProduct(productTest.getId());
 
-        assertFalse(productRepository.findById(savedProductFirst.getProductId()).isPresent());
+        assertFalse(productRepository.findById(productTest.getId()).isPresent());
         assertEquals(0, productRepository.findAll().size());
 
     }

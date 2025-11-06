@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.onlineshop.dto.product.ProductRequestDto;
 import org.onlineshop.dto.product.ProductResponseDto;
 import org.onlineshop.entity.Category;
+import org.onlineshop.entity.Product;
 import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.repository.CategoryRepository;
 import org.onlineshop.repository.ProductRepository;
@@ -59,6 +60,19 @@ class ProductServiceAddProductTest {
 
         categoryRepository.save(category);
 
+        Product productTestOne = Product.builder()
+                .name("TestProductSecond")
+                .category(category)
+                .description("testDescription")
+                .price(BigDecimal.valueOf(100))
+                .discountPrice(BigDecimal.valueOf(10))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .image("https://drive.google.com/file/first")
+                .build();
+
+        productRepository.save(productTestOne);
+
     }
 
     @Test
@@ -76,7 +90,7 @@ class ProductServiceAddProductTest {
         ProductResponseDto savedProduct = productService.addProduct(requestDto);
         assertEquals(savedProduct.getProductName(), requestDto.getProductName());
         assertEquals(savedProduct.getProductCategory(), requestDto.getProductCategory());
-        assertEquals(1, productRepository.findAll().size());
+        assertEquals(2, productRepository.findAll().size());
 
     }
 
@@ -99,19 +113,8 @@ class ProductServiceAddProductTest {
 
     @Test
     void testAddProductWhenCategoryAlreadyContainsProductWithSameName() {
-        ProductRequestDto productFirst = ProductRequestDto.builder()
-                .productName("TestProduct")
-                .productCategory("testCategory")
-                .image("https://drive.google.com/test")
-                .productDescription("TestProductText")
-                .productPrice(BigDecimal.valueOf(100))
-                .productDiscountPrice(BigDecimal.valueOf(5))
-                .build();
-
-        productService.addProduct(productFirst);
-
         ProductRequestDto productSecond = ProductRequestDto.builder()
-                .productName("TestProduct")
+                .productName("TestProductSecond")
                 .productCategory("testCategory")
                 .image("https://drive.google.com/Dublicate")
                 .productDescription("TestProductTextForDublicate")
