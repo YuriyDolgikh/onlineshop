@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.onlineshop.dto.product.ProductRequestDto;
 import org.onlineshop.dto.product.ProductResponseDto;
 import org.onlineshop.entity.Category;
+import org.onlineshop.entity.Product;
 import org.onlineshop.repository.CategoryRepository;
 import org.onlineshop.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -42,9 +44,8 @@ class ProductServiceSetDiscountPriceTest {
         categoryRepository.deleteAll();
     }
 
-    @BeforeEach
-    void setUp() {
-
+    @Test
+    void testSetDiscountPriceIfOk() {
         Category categoryFirst = Category.builder()
                 .categoryName("testCategoryFirst")
                 .image("https://drive.google.com/file/first")
@@ -53,23 +54,21 @@ class ProductServiceSetDiscountPriceTest {
 
         categoryRepository.save(categoryFirst);
 
-    }
-
-    @Test
-    void testSetDiscountPriceIfOk() {
-        ProductRequestDto productFirst = ProductRequestDto.builder()
-                .productName("TestProduct")
-                .productCategory("testCategoryFirst")
-                .image("https://drive.google.com/test")
-                .productDescription("TestProductText")
-                .productPrice(BigDecimal.valueOf(100))
-                .productDiscountPrice(BigDecimal.valueOf(5))
+        Product productTestOne = Product.builder()
+                .name("testProductOne")
+                .category(categoryFirst)
+                .description("testDescription")
+                .price(BigDecimal.valueOf(100))
+                .discountPrice(BigDecimal.valueOf(10))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .image("https://drive.google.com/file/first")
                 .build();
 
-        ProductResponseDto savedProductFirst = productService.addProduct(productFirst);
+        productRepository.save(productTestOne);
 
-        ProductResponseDto updateDiscountPriceProduct = productService.setDiscountPrice(savedProductFirst.getProductId(), BigDecimal.valueOf(100));
-        assertEquals(updateDiscountPriceProduct.getProductName(), productFirst.getProductName());
+        ProductResponseDto updateDiscountPriceProduct = productService.setDiscountPrice(productTestOne.getId(), BigDecimal.valueOf(100));
+        assertEquals(updateDiscountPriceProduct.getProductName(), productTestOne.getName());
         assertEquals(updateDiscountPriceProduct.getProductDiscountPrice(), BigDecimal.valueOf(100));
         assertEquals(1, productRepository.findAll().size());
     }
@@ -77,8 +76,8 @@ class ProductServiceSetDiscountPriceTest {
     @Test
     void testSetDiscountPriceIfProductNotFound() {
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> productService.setDiscountPrice(10000,BigDecimal.valueOf(100)));
-        String messageException = "Product with id = 10000 not found";
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> productService.setDiscountPrice(100000,BigDecimal.valueOf(100)));
+        String messageException = "Product with id = 100000 not found";
         assertEquals(messageException, exception.getMessage());
     }
 }

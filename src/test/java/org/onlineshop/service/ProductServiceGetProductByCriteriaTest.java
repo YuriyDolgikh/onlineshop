@@ -7,6 +7,7 @@ import org.junit.jupiter.params.shadow.com.univocity.parsers.annotations.Parsed;
 import org.onlineshop.dto.product.ProductRequestDto;
 import org.onlineshop.dto.product.ProductResponseDto;
 import org.onlineshop.entity.Category;
+import org.onlineshop.entity.Product;
 import org.onlineshop.repository.CategoryRepository;
 import org.onlineshop.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,9 +46,436 @@ class ProductServiceGetProductByCriteriaTest {
         categoryRepository.deleteAll();
     }
 
-    @BeforeEach
-    void setUp() {
+    @Test
+    void testGetProductsByPriceCriteriaAscIfOk() {
+        Category categoryFirst = Category.builder()
+                .categoryName("testCategoryFirst")
+                .image("https://drive.google.com/file/first")
+                .products(new ArrayList<>())
+                .build();
 
+        categoryRepository.save(categoryFirst);
+
+        Product productTestOne = Product.builder()
+                .name("testProductOne")
+                .category(categoryFirst)
+                .description("testDescription")
+                .price(BigDecimal.valueOf(100))
+                .discountPrice(BigDecimal.valueOf(10))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .image("https://drive.google.com/file/first")
+                .build();
+
+        productRepository.save(productTestOne);
+
+        Product productTestTwo = Product.builder()
+                .name("testProductTwo")
+                .category(categoryFirst)
+                .description("testDescription")
+                .price(BigDecimal.valueOf(200))
+                .discountPrice(BigDecimal.valueOf(10))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .image("https://drive.google.com/file/one")
+                .build();
+
+        productRepository.save(productTestTwo);
+
+        Product productTestThree = Product.builder()
+                .name("testProductThree")
+                .category(categoryFirst)
+                .description("testDescription")
+                .price(BigDecimal.valueOf(250))
+                .discountPrice(BigDecimal.valueOf(10))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .image("https://drive.google.com/file/three")
+                .build();
+
+        productRepository.save(productTestThree);
+
+        Product productTestFour = Product.builder()
+                .name("testProductFour")
+                .category(categoryFirst)
+                .description("testDescription")
+                .price(BigDecimal.valueOf(400))
+                .discountPrice(BigDecimal.valueOf(10))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .image("https://drive.google.com/file/four")
+                .build();
+
+        productRepository.save(productTestFour);
+
+
+        List<ProductResponseDto> result = productService.getProductsByCriteria("price","100-300","asc");
+
+        assertEquals(3, result.size());
+        assertTrue(result.get(0).getProductPrice().compareTo(new BigDecimal("100")) == 0);
+        assertTrue(result.get(1).getProductPrice().compareTo(new BigDecimal("200")) == 0);
+        assertTrue(result.get(2).getProductPrice().compareTo(new BigDecimal("250")) == 0);
+
+    }
+
+    @Test
+    void testGetProductsByPriceCriteriaDescIfOk() {
+        Category categoryFirst = Category.builder()
+                .categoryName("testCategoryFirst")
+                .image("https://drive.google.com/file/first")
+                .products(new ArrayList<>())
+                .build();
+
+        categoryRepository.save(categoryFirst);
+
+        Product productTestOne = Product.builder()
+                .name("testProductOne")
+                .category(categoryFirst)
+                .description("testDescription")
+                .price(BigDecimal.valueOf(100))
+                .discountPrice(BigDecimal.valueOf(10))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .image("https://drive.google.com/file/first")
+                .build();
+
+        productRepository.save(productTestOne);
+
+        Product productTestTwo = Product.builder()
+                .name("testProductTwo")
+                .category(categoryFirst)
+                .description("testDescription")
+                .price(BigDecimal.valueOf(200))
+                .discountPrice(BigDecimal.valueOf(10))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .image("https://drive.google.com/file/one")
+                .build();
+
+        productRepository.save(productTestTwo);
+
+        Product productTestThree = Product.builder()
+                .name("testProductThree")
+                .category(categoryFirst)
+                .description("testDescription")
+                .price(BigDecimal.valueOf(250))
+                .discountPrice(BigDecimal.valueOf(10))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .image("https://drive.google.com/file/three")
+                .build();
+
+        productRepository.save(productTestThree);
+
+        Product productTestFour = Product.builder()
+                .name("testProductFour")
+                .category(categoryFirst)
+                .description("testDescription")
+                .price(BigDecimal.valueOf(400))
+                .discountPrice(BigDecimal.valueOf(10))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .image("https://drive.google.com/file/four")
+                .build();
+
+        productRepository.save(productTestFour);
+
+        List<ProductResponseDto> result = productService.getProductsByCriteria("price","100-300","desc");
+
+        assertEquals(3, result.size());
+        assertTrue(result.get(0).getProductPrice().compareTo(new BigDecimal("250")) == 0);
+        assertTrue(result.get(1).getProductPrice().compareTo(new BigDecimal("200")) == 0);
+        assertTrue(result.get(2).getProductPrice().compareTo(new BigDecimal("100")) == 0);
+
+    }
+
+    @Test
+    void testGetProductsByDiscountPriceCriteriaAscIfOk() {
+        Category categoryFirst = Category.builder()
+                .categoryName("testCategoryFirst")
+                .image("https://drive.google.com/file/first")
+                .products(new ArrayList<>())
+                .build();
+
+        categoryRepository.save(categoryFirst);
+
+        Product productTestOne = Product.builder()
+                .name("testProductOne")
+                .category(categoryFirst)
+                .description("testDescription")
+                .price(BigDecimal.valueOf(100))
+                .discountPrice(BigDecimal.valueOf(5))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .image("https://drive.google.com/file/first")
+                .build();
+
+        productRepository.save(productTestOne);
+
+        Product productTestTwo = Product.builder()
+                .name("testProductTwo")
+                .category(categoryFirst)
+                .description("testDescription")
+                .price(BigDecimal.valueOf(200))
+                .discountPrice(BigDecimal.valueOf(10))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .image("https://drive.google.com/file/one")
+                .build();
+
+        productRepository.save(productTestTwo);
+
+        Product productTestThree = Product.builder()
+                .name("testProductThree")
+                .category(categoryFirst)
+                .description("testDescription")
+                .price(BigDecimal.valueOf(250))
+                .discountPrice(BigDecimal.valueOf(15))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .image("https://drive.google.com/file/three")
+                .build();
+
+        productRepository.save(productTestThree);
+
+        Product productTestFour = Product.builder()
+                .name("testProductFour")
+                .category(categoryFirst)
+                .description("testDescription")
+                .price(BigDecimal.valueOf(400))
+                .discountPrice(BigDecimal.valueOf(20))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .image("https://drive.google.com/file/four")
+                .build();
+
+        productRepository.save(productTestFour);
+
+        List<ProductResponseDto> result = productService.getProductsByCriteria("discount"," ","asc");
+
+        assertEquals(4, result.size());
+        assertTrue(result.get(0).getProductDiscountPrice().compareTo(new BigDecimal("5")) == 0);
+        assertTrue(result.get(1).getProductDiscountPrice().compareTo(new BigDecimal("10")) == 0);
+        assertTrue(result.get(2).getProductDiscountPrice().compareTo(new BigDecimal("15")) == 0);
+        assertTrue(result.get(3).getProductDiscountPrice().compareTo(new BigDecimal("20")) == 0);
+    }
+
+    @Test
+    void testGetProductsByDiscountPriceCriteriaDescIfOk() {
+        Category categoryFirst = Category.builder()
+                .categoryName("testCategoryFirst")
+                .image("https://drive.google.com/file/first")
+                .products(new ArrayList<>())
+                .build();
+
+        categoryRepository.save(categoryFirst);
+
+        Product productTestOne = Product.builder()
+                .name("testProductOne")
+                .category(categoryFirst)
+                .description("testDescription")
+                .price(BigDecimal.valueOf(100))
+                .discountPrice(BigDecimal.valueOf(5))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .image("https://drive.google.com/file/first")
+                .build();
+
+        productRepository.save(productTestOne);
+
+        Product productTestTwo = Product.builder()
+                .name("testProductTwo")
+                .category(categoryFirst)
+                .description("testDescription")
+                .price(BigDecimal.valueOf(200))
+                .discountPrice(BigDecimal.valueOf(10))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .image("https://drive.google.com/file/one")
+                .build();
+
+        productRepository.save(productTestTwo);
+
+        Product productTestThree = Product.builder()
+                .name("testProductThree")
+                .category(categoryFirst)
+                .description("testDescription")
+                .price(BigDecimal.valueOf(250))
+                .discountPrice(BigDecimal.valueOf(15))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .image("https://drive.google.com/file/three")
+                .build();
+
+        productRepository.save(productTestThree);
+
+        Product productTestFour = Product.builder()
+                .name("testProductFour")
+                .category(categoryFirst)
+                .description("testDescription")
+                .price(BigDecimal.valueOf(400))
+                .discountPrice(BigDecimal.valueOf(20))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .image("https://drive.google.com/file/four")
+                .build();
+
+        productRepository.save(productTestFour);
+
+
+        List<ProductResponseDto> result = productService.getProductsByCriteria("discount"," ","desc");
+
+        assertEquals(4, result.size());
+        assertTrue(result.get(0).getProductDiscountPrice().compareTo(new BigDecimal("20")) == 0);
+        assertTrue(result.get(1).getProductDiscountPrice().compareTo(new BigDecimal("15")) == 0);
+        assertTrue(result.get(2).getProductDiscountPrice().compareTo(new BigDecimal("10")) == 0);
+        assertTrue(result.get(3).getProductDiscountPrice().compareTo(new BigDecimal("5")) == 0);
+    }
+
+    @Test
+    void testGetProductsByNameCriteriaAscIfOk() {
+        Category categoryFirst = Category.builder()
+                .categoryName("testCategoryFirst")
+                .image("https://drive.google.com/file/first")
+                .products(new ArrayList<>())
+                .build();
+
+        categoryRepository.save(categoryFirst);
+
+        Product productTestOne = Product.builder()
+                .name("testProductOne")
+                .category(categoryFirst)
+                .description("testDescription")
+                .price(BigDecimal.valueOf(100))
+                .discountPrice(BigDecimal.valueOf(10))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .image("https://drive.google.com/file/first")
+                .build();
+
+        productRepository.save(productTestOne);
+
+        Product productTestTwo = Product.builder()
+                .name("testProductTwo")
+                .category(categoryFirst)
+                .description("testDescription")
+                .price(BigDecimal.valueOf(200))
+                .discountPrice(BigDecimal.valueOf(10))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .image("https://drive.google.com/file/one")
+                .build();
+
+        productRepository.save(productTestTwo);
+
+        Product productTestThree = Product.builder()
+                .name("ProductThree")
+                .category(categoryFirst)
+                .description("testDescription")
+                .price(BigDecimal.valueOf(250))
+                .discountPrice(BigDecimal.valueOf(10))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .image("https://drive.google.com/file/three")
+                .build();
+
+        productRepository.save(productTestThree);
+
+        Product productTestFour = Product.builder()
+                .name("ProductFour")
+                .category(categoryFirst)
+                .description("testDescription")
+                .price(BigDecimal.valueOf(400))
+                .discountPrice(BigDecimal.valueOf(10))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .image("https://drive.google.com/file/four")
+                .build();
+
+        productRepository.save(productTestFour);
+
+
+        List<ProductResponseDto> result = productService.getProductsByCriteria("name","te","asc");
+
+        assertEquals(2, result.size());
+        assertEquals(result.get(0).getProductName(),"testProductOne");
+        assertEquals(result.get(1).getProductName(),"testProductTwo");
+
+    }
+
+    @Test
+    void testGetProductsByNameCriteriaDescIfOk() {
+        Category categoryFirst = Category.builder()
+                .categoryName("testCategoryFirst")
+                .image("https://drive.google.com/file/first")
+                .products(new ArrayList<>())
+                .build();
+
+        categoryRepository.save(categoryFirst);
+
+        Product productTestOne = Product.builder()
+                .name("testProductOne")
+                .category(categoryFirst)
+                .description("testDescription")
+                .price(BigDecimal.valueOf(100))
+                .discountPrice(BigDecimal.valueOf(10))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .image("https://drive.google.com/file/first")
+                .build();
+
+        productRepository.save(productTestOne);
+
+        Product productTestTwo = Product.builder()
+                .name("testProductTwo")
+                .category(categoryFirst)
+                .description("testDescription")
+                .price(BigDecimal.valueOf(200))
+                .discountPrice(BigDecimal.valueOf(10))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .image("https://drive.google.com/file/one")
+                .build();
+
+        productRepository.save(productTestTwo);
+
+        Product productTestThree = Product.builder()
+                .name("ProductThree")
+                .category(categoryFirst)
+                .description("testDescription")
+                .price(BigDecimal.valueOf(250))
+                .discountPrice(BigDecimal.valueOf(10))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .image("https://drive.google.com/file/three")
+                .build();
+
+        productRepository.save(productTestThree);
+
+        Product productTestFour = Product.builder()
+                .name("ProductFour")
+                .category(categoryFirst)
+                .description("testDescription")
+                .price(BigDecimal.valueOf(400))
+                .discountPrice(BigDecimal.valueOf(10))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .image("https://drive.google.com/file/four")
+                .build();
+
+        productRepository.save(productTestFour);
+
+
+        List<ProductResponseDto> result = productService.getProductsByCriteria("name","te","desc");
+
+        assertEquals(2, result.size());
+        assertEquals(result.get(0).getProductName(),"testProductTwo");
+        assertEquals(result.get(1).getProductName(),"testProductOne");
+
+    }
+
+    @Test
+    void testGetProductsByCategoryCriteriaIfOk() {
         Category categoryFirst = Category.builder()
                 .categoryName("testCategoryFirst")
                 .image("https://drive.google.com/file/first")
@@ -64,433 +492,110 @@ class ProductServiceGetProductByCriteriaTest {
 
         categoryRepository.save(categorySecond);
 
-    }
-
-    @Test
-    void testGetProductsByPriceCriteriaAscIfOk() {
-        ProductRequestDto productFirst = ProductRequestDto.builder()
-                .productName("TestProductFirst")
-                .productCategory("testCategoryFirst")
-                .image("https://drive.google.com/test")
-                .productDescription("TestProductText")
-                .productPrice(BigDecimal.valueOf(100))
-                .productDiscountPrice(BigDecimal.valueOf(5))
+        Product productTestOne = Product.builder()
+                .name("testProductOne")
+                .category(categoryFirst)
+                .description("testDescription")
+                .price(BigDecimal.valueOf(100))
+                .discountPrice(BigDecimal.valueOf(10))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .image("https://drive.google.com/file/first")
                 .build();
 
-        ProductResponseDto savedProductFirst = productService.addProduct(productFirst);
+        productRepository.save(productTestOne);
 
-        ProductRequestDto productSecond = ProductRequestDto.builder()
-                .productName("TestProductSecond")
-                .productCategory("testCategoryFirst")
-                .image("https://drive.google.com/test")
-                .productDescription("TestProductText")
-                .productPrice(BigDecimal.valueOf(250))
-                .productDiscountPrice(BigDecimal.valueOf(5))
+        Product productTestTwo = Product.builder()
+                .name("testProductTwo")
+                .category(categoryFirst)
+                .description("testDescription")
+                .price(BigDecimal.valueOf(200))
+                .discountPrice(BigDecimal.valueOf(10))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .image("https://drive.google.com/file/one")
                 .build();
 
-        ProductResponseDto savedProductSecond = productService.addProduct(productSecond);
+        productRepository.save(productTestTwo);
 
-        ProductRequestDto productThird = ProductRequestDto.builder()
-                .productName("TestProductThird")
-                .productCategory("testCategoryFirst")
-                .image("https://drive.google.com/test")
-                .productDescription("TestProductText")
-                .productPrice(BigDecimal.valueOf(200))
-                .productDiscountPrice(BigDecimal.valueOf(5))
+        Product productTestThree = Product.builder()
+                .name("ProductThree")
+                .category(categorySecond)
+                .description("testDescription")
+                .price(BigDecimal.valueOf(250))
+                .discountPrice(BigDecimal.valueOf(10))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .image("https://drive.google.com/file/three")
                 .build();
 
-        ProductResponseDto savedProductThird = productService.addProduct(productThird);
+        productRepository.save(productTestThree);
 
-        ProductRequestDto productFourth = ProductRequestDto.builder()
-                .productName("TestProductFourth")
-                .productCategory("testCategoryFirst")
-                .image("https://drive.google.com/test")
-                .productDescription("TestProductText")
-                .productPrice(BigDecimal.valueOf(400))
-                .productDiscountPrice(BigDecimal.valueOf(5))
+        Product productTestFour = Product.builder()
+                .name("ProductFour")
+                .category(categorySecond)
+                .description("testDescription")
+                .price(BigDecimal.valueOf(400))
+                .discountPrice(BigDecimal.valueOf(10))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .image("https://drive.google.com/file/four")
                 .build();
 
-        ProductResponseDto savedProductFourth  = productService.addProduct(productFourth);
-
-
-        List<ProductResponseDto> result = productService.getProductsByCriteria("price","100-300","asc");
-
-        assertEquals(3, result.size());
-        assertTrue(result.get(0).getProductPrice().compareTo(new BigDecimal("100")) == 0);
-        assertTrue(result.get(1).getProductPrice().compareTo(new BigDecimal("200")) == 0);
-        assertTrue(result.get(2).getProductPrice().compareTo(new BigDecimal("250")) == 0);
-
-    }
-
-    @Test
-    void testGetProductsByPriceCriteriaDescIfOk() {
-        ProductRequestDto productFirst = ProductRequestDto.builder()
-                .productName("TestProductFirst")
-                .productCategory("testCategoryFirst")
-                .image("https://drive.google.com/test")
-                .productDescription("TestProductText")
-                .productPrice(BigDecimal.valueOf(100))
-                .productDiscountPrice(BigDecimal.valueOf(5))
-                .build();
-
-        ProductResponseDto savedProductFirst = productService.addProduct(productFirst);
-
-        ProductRequestDto productSecond = ProductRequestDto.builder()
-                .productName("TestProductSecond")
-                .productCategory("testCategoryFirst")
-                .image("https://drive.google.com/test")
-                .productDescription("TestProductText")
-                .productPrice(BigDecimal.valueOf(250))
-                .productDiscountPrice(BigDecimal.valueOf(5))
-                .build();
-
-        ProductResponseDto savedProductSecond = productService.addProduct(productSecond);
-
-        ProductRequestDto productThird = ProductRequestDto.builder()
-                .productName("TestProductThird")
-                .productCategory("testCategoryFirst")
-                .image("https://drive.google.com/test")
-                .productDescription("TestProductText")
-                .productPrice(BigDecimal.valueOf(200))
-                .productDiscountPrice(BigDecimal.valueOf(5))
-                .build();
-
-        ProductResponseDto savedProductThird = productService.addProduct(productThird);
-
-        ProductRequestDto productFourth = ProductRequestDto.builder()
-                .productName("TestProductFourth")
-                .productCategory("testCategoryFirst")
-                .image("https://drive.google.com/test")
-                .productDescription("TestProductText")
-                .productPrice(BigDecimal.valueOf(400))
-                .productDiscountPrice(BigDecimal.valueOf(5))
-                .build();
-
-        ProductResponseDto savedProductFourth  = productService.addProduct(productFourth);
-
-
-        List<ProductResponseDto> result = productService.getProductsByCriteria("price","100-300","desc");
-
-        assertEquals(3, result.size());
-        assertTrue(result.get(0).getProductPrice().compareTo(new BigDecimal("250")) == 0);
-        assertTrue(result.get(1).getProductPrice().compareTo(new BigDecimal("200")) == 0);
-        assertTrue(result.get(2).getProductPrice().compareTo(new BigDecimal("100")) == 0);
-
-    }
-
-    @Test
-    void testGetProductsByDiscountPriceCriteriaAscIfOk() {
-        ProductRequestDto productFirst = ProductRequestDto.builder()
-                .productName("TestProductFirst")
-                .productCategory("testCategoryFirst")
-                .image("https://drive.google.com/test")
-                .productDescription("TestProductText")
-                .productPrice(BigDecimal.valueOf(100))
-                .productDiscountPrice(BigDecimal.valueOf(5))
-                .build();
-
-        ProductResponseDto savedProductFirst = productService.addProduct(productFirst);
-
-        ProductRequestDto productSecond = ProductRequestDto.builder()
-                .productName("TestProductSecond")
-                .productCategory("testCategoryFirst")
-                .image("https://drive.google.com/test")
-                .productDescription("TestProductText")
-                .productPrice(BigDecimal.valueOf(250))
-                .productDiscountPrice(BigDecimal.valueOf(10))
-                .build();
-
-        ProductResponseDto savedProductSecond = productService.addProduct(productSecond);
-
-        ProductRequestDto productThird = ProductRequestDto.builder()
-                .productName("TestProductThird")
-                .productCategory("testCategoryFirst")
-                .image("https://drive.google.com/test")
-                .productDescription("TestProductText")
-                .productPrice(BigDecimal.valueOf(200))
-                .productDiscountPrice(BigDecimal.valueOf(15))
-                .build();
-
-        ProductResponseDto savedProductThird = productService.addProduct(productThird);
-
-        ProductRequestDto productFourth = ProductRequestDto.builder()
-                .productName("TestProductFourth")
-                .productCategory("testCategoryFirst")
-                .image("https://drive.google.com/test")
-                .productDescription("TestProductText")
-                .productPrice(BigDecimal.valueOf(400))
-                .productDiscountPrice(BigDecimal.valueOf(20))
-                .build();
-
-        ProductResponseDto savedProductFourth  = productService.addProduct(productFourth);
-
-
-        List<ProductResponseDto> result = productService.getProductsByCriteria("discount"," ","asc");
-
-        assertEquals(4, result.size());
-        assertTrue(result.get(0).getProductDiscountPrice().compareTo(new BigDecimal("5")) == 0);
-        assertTrue(result.get(1).getProductDiscountPrice().compareTo(new BigDecimal("10")) == 0);
-        assertTrue(result.get(2).getProductDiscountPrice().compareTo(new BigDecimal("15")) == 0);
-        assertTrue(result.get(3).getProductDiscountPrice().compareTo(new BigDecimal("20")) == 0);
-    }
-
-    @Test
-    void testGetProductsByDiscountPriceCriteriaDescIfOk() {
-        ProductRequestDto productFirst = ProductRequestDto.builder()
-                .productName("TestProductFirst")
-                .productCategory("testCategoryFirst")
-                .image("https://drive.google.com/test")
-                .productDescription("TestProductText")
-                .productPrice(BigDecimal.valueOf(100))
-                .productDiscountPrice(BigDecimal.valueOf(5))
-                .build();
-
-        ProductResponseDto savedProductFirst = productService.addProduct(productFirst);
-
-        ProductRequestDto productSecond = ProductRequestDto.builder()
-                .productName("TestProductSecond")
-                .productCategory("testCategoryFirst")
-                .image("https://drive.google.com/test")
-                .productDescription("TestProductText")
-                .productPrice(BigDecimal.valueOf(250))
-                .productDiscountPrice(BigDecimal.valueOf(10))
-                .build();
-
-        ProductResponseDto savedProductSecond = productService.addProduct(productSecond);
-
-        ProductRequestDto productThird = ProductRequestDto.builder()
-                .productName("TestProductThird")
-                .productCategory("testCategoryFirst")
-                .image("https://drive.google.com/test")
-                .productDescription("TestProductText")
-                .productPrice(BigDecimal.valueOf(200))
-                .productDiscountPrice(BigDecimal.valueOf(15))
-                .build();
-
-        ProductResponseDto savedProductThird = productService.addProduct(productThird);
-
-        ProductRequestDto productFourth = ProductRequestDto.builder()
-                .productName("TestProductFourth")
-                .productCategory("testCategoryFirst")
-                .image("https://drive.google.com/test")
-                .productDescription("TestProductText")
-                .productPrice(BigDecimal.valueOf(400))
-                .productDiscountPrice(BigDecimal.valueOf(20))
-                .build();
-
-        ProductResponseDto savedProductFourth  = productService.addProduct(productFourth);
-
-
-        List<ProductResponseDto> result = productService.getProductsByCriteria("discount"," ","desc");
-
-        assertEquals(4, result.size());
-        assertTrue(result.get(0).getProductDiscountPrice().compareTo(new BigDecimal("20")) == 0);
-        assertTrue(result.get(1).getProductDiscountPrice().compareTo(new BigDecimal("15")) == 0);
-        assertTrue(result.get(2).getProductDiscountPrice().compareTo(new BigDecimal("10")) == 0);
-        assertTrue(result.get(3).getProductDiscountPrice().compareTo(new BigDecimal("5")) == 0);
-    }
-
-    @Test
-    void testGetProductsByNameCriteriaAscIfOk() {
-        ProductRequestDto productFirst = ProductRequestDto.builder()
-                .productName("TestProductFirst")
-                .productCategory("testCategoryFirst")
-                .image("https://drive.google.com/test")
-                .productDescription("TestProductText")
-                .productPrice(BigDecimal.valueOf(100))
-                .productDiscountPrice(BigDecimal.valueOf(5))
-                .build();
-
-        ProductResponseDto savedProductFirst = productService.addProduct(productFirst);
-
-        ProductRequestDto productSecond = ProductRequestDto.builder()
-                .productName("TestProductSecond")
-                .productCategory("testCategoryFirst")
-                .image("https://drive.google.com/test")
-                .productDescription("TestProductText")
-                .productPrice(BigDecimal.valueOf(250))
-                .productDiscountPrice(BigDecimal.valueOf(10))
-                .build();
-
-        ProductResponseDto savedProductSecond = productService.addProduct(productSecond);
-
-        ProductRequestDto productThird = ProductRequestDto.builder()
-                .productName("ProductThird")
-                .productCategory("testCategoryFirst")
-                .image("https://drive.google.com/test")
-                .productDescription("TestProductText")
-                .productPrice(BigDecimal.valueOf(200))
-                .productDiscountPrice(BigDecimal.valueOf(15))
-                .build();
-
-        ProductResponseDto savedProductThird = productService.addProduct(productThird);
-
-        ProductRequestDto productFourth = ProductRequestDto.builder()
-                .productName("ProductFourth")
-                .productCategory("testCategoryFirst")
-                .image("https://drive.google.com/test")
-                .productDescription("TestProductText")
-                .productPrice(BigDecimal.valueOf(400))
-                .productDiscountPrice(BigDecimal.valueOf(20))
-                .build();
-
-        ProductResponseDto savedProductFourth  = productService.addProduct(productFourth);
-
-
-        List<ProductResponseDto> result = productService.getProductsByCriteria("name","te","asc");
-
-        assertEquals(2, result.size());
-        assertEquals(result.get(0).getProductName(),"TestProductFirst");
-        assertEquals(result.get(1).getProductName(),"TestProductSecond");
-
-    }
-
-    @Test
-    void testGetProductsByNameCriteriaDescIfOk() {
-        ProductRequestDto productFirst = ProductRequestDto.builder()
-                .productName("TestProductFirst")
-                .productCategory("testCategoryFirst")
-                .image("https://drive.google.com/test")
-                .productDescription("TestProductText")
-                .productPrice(BigDecimal.valueOf(100))
-                .productDiscountPrice(BigDecimal.valueOf(5))
-                .build();
-
-        ProductResponseDto savedProductFirst = productService.addProduct(productFirst);
-
-        ProductRequestDto productSecond = ProductRequestDto.builder()
-                .productName("TestProductSecond")
-                .productCategory("testCategoryFirst")
-                .image("https://drive.google.com/test")
-                .productDescription("TestProductText")
-                .productPrice(BigDecimal.valueOf(250))
-                .productDiscountPrice(BigDecimal.valueOf(10))
-                .build();
-
-        ProductResponseDto savedProductSecond = productService.addProduct(productSecond);
-
-        ProductRequestDto productThird = ProductRequestDto.builder()
-                .productName("ProductThird")
-                .productCategory("testCategoryFirst")
-                .image("https://drive.google.com/test")
-                .productDescription("TestProductText")
-                .productPrice(BigDecimal.valueOf(200))
-                .productDiscountPrice(BigDecimal.valueOf(15))
-                .build();
-
-        ProductResponseDto savedProductThird = productService.addProduct(productThird);
-
-        ProductRequestDto productFourth = ProductRequestDto.builder()
-                .productName("ProductFourth")
-                .productCategory("testCategoryFirst")
-                .image("https://drive.google.com/test")
-                .productDescription("TestProductText")
-                .productPrice(BigDecimal.valueOf(400))
-                .productDiscountPrice(BigDecimal.valueOf(20))
-                .build();
-
-        ProductResponseDto savedProductFourth  = productService.addProduct(productFourth);
-
-
-        List<ProductResponseDto> result = productService.getProductsByCriteria("name","te","desc");
-
-        assertEquals(2, result.size());
-        assertEquals(result.get(0).getProductName(),"TestProductSecond");
-        assertEquals(result.get(1).getProductName(),"TestProductFirst");
-
-    }
-
-    @Test
-    void testGetProductsByCategoryCriteriaIfOk() {
-        ProductRequestDto productFirst = ProductRequestDto.builder()
-                .productName("TestProductFirst")
-                .productCategory("testCategoryFirst")
-                .image("https://drive.google.com/test")
-                .productDescription("TestProductText")
-                .productPrice(BigDecimal.valueOf(100))
-                .productDiscountPrice(BigDecimal.valueOf(5))
-                .build();
-
-        ProductResponseDto savedProductFirst = productService.addProduct(productFirst);
-
-        ProductRequestDto productSecond = ProductRequestDto.builder()
-                .productName("TestProductSecond")
-                .productCategory("testCategoryFirst")
-                .image("https://drive.google.com/test")
-                .productDescription("TestProductText")
-                .productPrice(BigDecimal.valueOf(250))
-                .productDiscountPrice(BigDecimal.valueOf(10))
-                .build();
-
-        ProductResponseDto savedProductSecond = productService.addProduct(productSecond);
-
-        ProductRequestDto productThird = ProductRequestDto.builder()
-                .productName("ProductThird")
-                .productCategory("testCategorySecond")
-                .image("https://drive.google.com/test")
-                .productDescription("TestProductText")
-                .productPrice(BigDecimal.valueOf(200))
-                .productDiscountPrice(BigDecimal.valueOf(15))
-                .build();
-
-        ProductResponseDto savedProductThird = productService.addProduct(productThird);
-
-        ProductRequestDto productFourth = ProductRequestDto.builder()
-                .productName("ProductFourth")
-                .productCategory("testCategorySecond")
-                .image("https://drive.google.com/test")
-                .productDescription("TestProductText")
-                .productPrice(BigDecimal.valueOf(400))
-                .productDiscountPrice(BigDecimal.valueOf(20))
-                .build();
-
-        ProductResponseDto savedProductFourth  = productService.addProduct(productFourth);
+        productRepository.save(productTestFour);
 
 
         List<ProductResponseDto> result = productService.getProductsByCriteria("category","testCategorySecond","asc");
 
         assertEquals(2, result.size());
-        assertEquals(result.get(0).getProductName(),"ProductThird");
-        assertEquals(result.get(1).getProductName(),"ProductFourth");
+        assertEquals(result.get(0).getProductName(),"ProductThree");
+        assertEquals(result.get(1).getProductName(),"ProductFour");
 
     }
 
     @Test
     void testGetProductsByCreateDateCriteriaIfOk() {
-        ProductRequestDto productFirst = ProductRequestDto.builder()
-                .productName("TestProductFirst")
-                .productCategory("testCategoryFirst")
-                .image("https://drive.google.com/test")
-                .productDescription("TestProductText")
-                .productPrice(BigDecimal.valueOf(100))
-                .productDiscountPrice(BigDecimal.valueOf(5))
+        Category categoryFirst = Category.builder()
+                .categoryName("testCategoryFirst")
+                .image("https://drive.google.com/file/first")
+                .products(new ArrayList<>())
                 .build();
 
-        ProductResponseDto savedProductFirst = productService.addProduct(productFirst);
+        categoryRepository.save(categoryFirst);
 
-        ProductRequestDto productSecond = ProductRequestDto.builder()
-                .productName("ProductSecond")
-                .productCategory("testCategorySecond")
-                .image("https://drive.google.com/test")
-                .productDescription("TestProductText")
-                .productPrice(BigDecimal.valueOf(200))
-                .productDiscountPrice(BigDecimal.valueOf(15))
+        Product productTestOne = Product.builder()
+                .name("testProductOne")
+                .category(categoryFirst)
+                .description("testDescription")
+                .price(BigDecimal.valueOf(100))
+                .discountPrice(BigDecimal.valueOf(10))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .image("https://drive.google.com/file/first")
                 .build();
 
-        ProductResponseDto savedProductThird = productService.addProduct(productSecond);
+        productRepository.save(productTestOne);
 
+        Product productTestTwo = Product.builder()
+                .name("testProductTwo")
+                .category(categoryFirst)
+                .description("testDescription")
+                .price(BigDecimal.valueOf(200))
+                .discountPrice(BigDecimal.valueOf(10))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .image("https://drive.google.com/file/one")
+                .build();
 
+        productRepository.save(productTestTwo);
 
         LocalDateTime now = LocalDateTime.now();
         String dateNow = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(now);
-
 
         List<ProductResponseDto> result = productService.getProductsByCriteria("createDate",dateNow,"asc");
 
         assertEquals(2, result.size());
 
-
     }
-
 
 }
