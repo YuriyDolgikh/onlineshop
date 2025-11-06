@@ -13,6 +13,7 @@ import org.onlineshop.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
@@ -76,8 +77,16 @@ class ProductServiceDeleteProductTest {
 
     @Test
     void testDeleteProductIfProductNotFound() {
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> productService.setDiscountPrice(10000,BigDecimal.valueOf(100)));
-        String messageException = "Product with id = 10000 not found";
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> productService.deleteProduct(100000));
+        String messageException = "Product with id = 100000 not found";
+        assertEquals(messageException, exception.getMessage());
+
+    }
+
+    @Test
+    void testDeleteProductIfProductIdNull() {
+        Exception exception = assertThrows(InvalidDataAccessApiUsageException.class, () -> productService.deleteProduct(null));
+        String messageException = "The given id must not be null";
         assertEquals(messageException, exception.getMessage());
 
     }

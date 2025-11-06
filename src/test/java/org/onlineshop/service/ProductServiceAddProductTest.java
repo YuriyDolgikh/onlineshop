@@ -117,7 +117,7 @@ class ProductServiceAddProductTest {
                 .productName("TestProductSecond")
                 .productCategory("testCategory")
                 .image("https://drive.google.com/Dublicate")
-                .productDescription("TestProductTextForDublicate")
+                .productDescription("TestProductTextForUniqueTest")
                 .productPrice(BigDecimal.valueOf(80))
                 .productDiscountPrice(BigDecimal.valueOf(10))
                 .build();
