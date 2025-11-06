@@ -9,6 +9,7 @@ import org.onlineshop.dto.product.ProductResponseForUserDto;
 import org.onlineshop.dto.product.ProductUpdateDto;
 import org.onlineshop.entity.Category;
 import org.onlineshop.entity.Product;
+import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.repository.ProductRepository;
 import org.onlineshop.service.converter.ProductConverter;
 import org.onlineshop.service.interfaces.ProductServiceInterface;
@@ -204,7 +205,11 @@ public class ProductService implements ProductServiceInterface {
     }
 
     public List<ProductResponseForUserDto> getTopFiveDiscountedProductsOfTheDay() {
-        return productConverter.toUserDtos(getProductsByDiscount("desc").stream().limit(5).toList());
+        List<ProductResponseForUserDto> result = productConverter.toUserDtos(getProductsByDiscount("desc").stream().limit(5).toList());
+        if (result.size() == 0) {
+            throw new NotFoundException("No discounted products found");
+        }
+        return result;
     }
 
     private Sort.Direction getSortDirection(String sortDirection) {

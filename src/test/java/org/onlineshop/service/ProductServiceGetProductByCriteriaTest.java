@@ -598,4 +598,72 @@ class ProductServiceGetProductByCriteriaTest {
 
     }
 
+    @Test
+    void testGetProductsByCriteriaGetAllProductAscIfOk() {
+        Category categoryFirst = Category.builder()
+                .categoryName("testCategoryFirst")
+                .image("https://drive.google.com/file/first")
+                .products(new ArrayList<>())
+                .build();
+
+        categoryRepository.save(categoryFirst);
+
+        Product productTestOne = Product.builder()
+                .name("testProductOne")
+                .category(categoryFirst)
+                .description("testDescription")
+                .price(BigDecimal.valueOf(100))
+                .discountPrice(BigDecimal.valueOf(10))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .image("https://drive.google.com/file/first")
+                .build();
+
+        productRepository.save(productTestOne);
+
+        Product productTestTwo = Product.builder()
+                .name("testProductTwo")
+                .category(categoryFirst)
+                .description("testDescription")
+                .price(BigDecimal.valueOf(200))
+                .discountPrice(BigDecimal.valueOf(10))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .image("https://drive.google.com/file/one")
+                .build();
+
+        productRepository.save(productTestTwo);
+
+        Product productTestThree = Product.builder()
+                .name("ProductThree")
+                .category(categoryFirst)
+                .description("testDescription")
+                .price(BigDecimal.valueOf(250))
+                .discountPrice(BigDecimal.valueOf(10))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .image("https://drive.google.com/file/three")
+                .build();
+
+        productRepository.save(productTestThree);
+
+        Product productTestFour = Product.builder()
+                .name("ProductFour")
+                .category(categoryFirst)
+                .description("testDescription")
+                .price(BigDecimal.valueOf(400))
+                .discountPrice(BigDecimal.valueOf(10))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .image("https://drive.google.com/file/four")
+                .build();
+
+        productRepository.save(productTestFour);
+
+
+        List<ProductResponseDto> result = productService.getProductsByCriteria(" "," "," ");
+
+        assertEquals(4, result.size());
+    }
+
 }
