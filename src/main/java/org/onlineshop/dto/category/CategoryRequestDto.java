@@ -7,7 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.validator.constraints.URL;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -20,7 +19,5 @@ public class CategoryRequestDto {
     @Size(min = 3, max = 20, message = "Category name must be between 3 and 20 characters")
     private String categoryName;
 
-    @URL(message = "Invalid image URL")
     private String image;
-
 }
