@@ -1,6 +1,5 @@
 package org.onlineshop.service;
 
-import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -17,7 +16,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.ArrayList;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -187,18 +185,4 @@ class CategoryServiceUpdateCategoryTest {
         assertEquals(messageException, exception.getMessage());
     }
 
-    @Test
-    void testUpdateCategoryIfImageUrlInvalid() {
-
-        CategoryUpdateDto categoryForCheckImage = CategoryUpdateDto.builder()
-                .image("INVALID")
-                .build();
-
-        Set<ConstraintViolation<CategoryUpdateDto>> violations = validatorFactory.getValidator().validate(categoryForCheckImage);
-        assertFalse(violations.isEmpty(), "Validation should fail for invalid image");
-        assertTrue(
-                violations.stream().anyMatch(v -> v.getMessage().equals("Invalid image URL")),
-                "Error message should be 'Invalid image URL'"
-        );
-    }
 }

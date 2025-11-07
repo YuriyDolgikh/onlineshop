@@ -10,6 +10,8 @@ import org.onlineshop.dto.product.ProductResponseDto;
 import org.onlineshop.entity.Category;
 import org.onlineshop.entity.Product;
 import org.onlineshop.exception.BadRequestException;
+import org.onlineshop.exception.UrlValidationError;
+import org.onlineshop.exception.UrlValidationException;
 import org.onlineshop.repository.CategoryRepository;
 import org.onlineshop.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -247,24 +249,29 @@ class ProductServiceAddProductTest {
         );
 
     }
-
     @Test
     void testAddProductIfImageUrlInvalid() {
         ProductRequestDto product = ProductRequestDto.builder()
                 .productName("TestName")
                 .productCategory("testCategory")
-                .image("Invalid image URL")
+                .image("abc")
                 .productDescription("TestProductText")
                 .productPrice(BigDecimal.valueOf(100))
                 .productDiscountPrice(BigDecimal.valueOf(5))
                 .build();
 
-        Set<ConstraintViolation<ProductRequestDto>> violations = validatorFactory.getValidator().validate(product);
-        assertFalse(violations.isEmpty(), "Validation should fail for invalid image");
-        assertTrue(
-                violations.stream().anyMatch(v -> v.getMessage().equals("Invalid image URL")),
-                "Error message should be 'Invalid image URL'"
+        UrlValidationException ex = assertThrows(
+                UrlValidationException.class,
+                () -> productService.addProduct(product),
+                "Service should throw UrlValidationException for invalid image URL"
         );
-
+        UrlValidationError err = ex.getError();
+        assertTrue(
+                err == UrlValidationError.INVALID_DOMAIN
+                        || err == UrlValidationError.INVALID_EXTENSION
+                        || err == UrlValidationError.UNREACHABLE,
+                () -> "Unexpected error type for invalid image URL: " + err
+        );
     }
+
 }

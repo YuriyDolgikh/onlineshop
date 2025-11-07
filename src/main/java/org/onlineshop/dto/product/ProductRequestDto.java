@@ -26,7 +26,7 @@ public class ProductRequestDto {
 
     private BigDecimal productDiscountPrice;
 
-   // @URL(message = "Invalid image URL")
+    @URL(message = "Invalid image URL")
     private String image;
 
 }

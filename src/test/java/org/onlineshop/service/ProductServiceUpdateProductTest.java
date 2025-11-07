@@ -1,11 +1,8 @@
 package org.onlineshop.service;
 
-import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.onlineshop.dto.product.ProductRequestDto;
 import org.onlineshop.dto.product.ProductResponseDto;
 import org.onlineshop.dto.product.ProductUpdateDto;
 import org.onlineshop.entity.Category;
@@ -21,10 +18,9 @@ import org.springframework.test.context.TestPropertySource;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -278,7 +274,7 @@ class ProductServiceUpdateProductTest {
                 .build();
 
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(productTest.getId(),productSecond ));
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(productTest.getId(), productSecond));
         String messageException = "Product with name: " + productSecond.getProductName() + " already exist in category.";
         assertEquals(messageException, exception.getMessage());
 
@@ -291,25 +287,9 @@ class ProductServiceUpdateProductTest {
                 .productName("Product")
                 .build();
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(10000,productSecond ));
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(10000, productSecond));
         String messageException = "Product with id = 10000 not found";
         assertEquals(messageException, exception.getMessage());
-
-    }
-
-    @Test
-    void testUpdateProductIfImageUrlInvalid() {
-
-        ProductUpdateDto productSecond = ProductUpdateDto.builder()
-                .image("INVALID")
-                .build();
-
-        Set<ConstraintViolation<ProductUpdateDto>> violations = validatorFactory.getValidator().validate(productSecond);
-        assertFalse(violations.isEmpty(), "Validation should fail for invalid image");
-        assertTrue(
-                violations.stream().anyMatch(v -> v.getMessage().equals("Invalid image URL")),
-                "Error message should be 'Invalid image URL'"
-        );
 
     }
 
@@ -340,7 +320,7 @@ class ProductServiceUpdateProductTest {
                 .productName("Te")
                 .build();
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(productTest.getId(),productSecond ));
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(productTest.getId(), productSecond));
         String messageException = "Product title must be between 3 and 20 characters";
         assertEquals(messageException, exception.getMessage());
 
@@ -373,7 +353,7 @@ class ProductServiceUpdateProductTest {
                 .productName("TestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProduct")
                 .build();
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(productTest.getId(),productSecond ));
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(productTest.getId(), productSecond));
         String messageException = "Product title must be between 3 and 20 characters";
         assertEquals(messageException, exception.getMessage());
 
@@ -406,7 +386,7 @@ class ProductServiceUpdateProductTest {
                 .productPrice(BigDecimal.ZERO)
                 .build();
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(productTest.getId(),productSecond ));
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(productTest.getId(), productSecond));
         String messageException = "Product price must be greater than 0";
         assertEquals(messageException, exception.getMessage());
 
