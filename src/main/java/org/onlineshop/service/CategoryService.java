@@ -4,7 +4,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.category.CategoryRequestDto;
 import org.onlineshop.dto.category.CategoryResponseDto;
+import org.onlineshop.dto.category.CategoryUpdateDto;
 import org.onlineshop.entity.Category;
+import org.onlineshop.entity.Product;
 import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.repository.CategoryRepository;
 import org.onlineshop.service.converter.CategoryConverter;
@@ -44,27 +46,25 @@ public class CategoryService implements CategoryServiceInterface {
 
     @Transactional
     @Override
-    public CategoryResponseDto updateCategory(Integer categoryId, CategoryRequestDto categoryRequestDto) {
-        if (categoryId == null){
-            throw new IllegalArgumentException("Category id must be provided");
+    public CategoryResponseDto updateCategory(Integer categoryId, CategoryUpdateDto categoryUpdateDto) {
+        Category categoryForUpdate = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new IllegalArgumentException("Category with id = " + categoryId + " not found"));
+
+        if (categoryUpdateDto.getCategoryName() != null && !categoryUpdateDto.getCategoryName().isBlank()) {
+            if (categoryUpdateDto.getCategoryName().length() < 3 || categoryUpdateDto.getCategoryName().length() > 20) {
+                throw new IllegalArgumentException("Category name must be between 3 and 20 characters");
+            }
+            Optional<Category> categoryForCheck = categoryRepository.findByCategoryName(categoryUpdateDto.getCategoryName());
+            if (categoryForCheck.isPresent() && !categoryForCheck.get().getCategoryId().equals(categoryId)){
+                throw new BadRequestException("Category with name: " + categoryUpdateDto.getCategoryName() + " already exist");
+            }
+            categoryForUpdate.setCategoryName(categoryUpdateDto.getCategoryName());
         }
-        if (categoryRequestDto == null){
-            throw new IllegalArgumentException("Category request must be provided");
+
+        if (categoryUpdateDto.getImage() != null && !categoryUpdateDto.getImage().isBlank()) {
+            categoryForUpdate.setImage(categoryUpdateDto.getImage());
         }
-        if (categoryRequestDto.getCategoryName() == null || categoryRequestDto.getCategoryName().isBlank()){
-            throw new IllegalArgumentException("Category name must be provided");
-        }
-        Optional<Category> categoryOptional = categoryRepository.findById(categoryId);
-        if (categoryOptional.isEmpty()){
-            throw new BadRequestException("Category with id: " + categoryId + " not found");
-        }
-        Category categoryToUpdate = categoryOptional.get();
-        categoryToUpdate.setCategoryName(categoryRequestDto.getCategoryName());
-        Optional<Category> categoryForCheck = categoryRepository.findByCategoryName(categoryRequestDto.getCategoryName());
-        if (categoryForCheck.isPresent() && !categoryForCheck.get().getCategoryId().equals(categoryId)){
-            throw new BadRequestException("Category with name: " + categoryRequestDto.getCategoryName() + " already exist");
-        }
-        Category savedCategory = categoryRepository.save(categoryToUpdate);
+        Category savedCategory = categoryRepository.save(categoryForUpdate);
         return categoryConverter.toDto(savedCategory);
     }
 
