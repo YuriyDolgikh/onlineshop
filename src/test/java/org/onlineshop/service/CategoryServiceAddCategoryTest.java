@@ -7,9 +7,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.onlineshop.dto.category.CategoryRequestDto;
 import org.onlineshop.dto.category.CategoryResponseDto;
-import org.onlineshop.dto.category.CategoryUpdateDto;
 import org.onlineshop.entity.Category;
 import org.onlineshop.exception.BadRequestException;
+import org.onlineshop.exception.UrlValidationError;
+import org.onlineshop.exception.UrlValidationException;
 import org.onlineshop.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -146,16 +147,26 @@ class CategoryServiceAddCategoryTest {
 
     @Test
     void testAddCategoryIfImageUrlInvalid() {
-        CategoryRequestDto categoryForCheckImageUrl = CategoryRequestDto.builder()
-                .categoryName("testCategoryForImageTest")
+        String uniqueName = "testCategoryForImage_" + System.nanoTime();
+
+        CategoryRequestDto dto = CategoryRequestDto.builder()
+                .categoryName(uniqueName)
                 .image("INVALID")
                 .build();
 
-        Set<ConstraintViolation<CategoryRequestDto>> violations = validatorFactory.getValidator().validate(categoryForCheckImageUrl);
-        assertFalse(violations.isEmpty(), "Validation should fail for invalid image");
+        UrlValidationException ex = assertThrows(
+                UrlValidationException.class,
+                () -> categoryService.addCategory(dto),
+                "Service should throw UrlValidationException for invalid image URL"
+        );
+
+        UrlValidationError err = ex.getError();
         assertTrue(
-                violations.stream().anyMatch(v -> v.getMessage().equals("Invalid image URL")),
-                "Error message should be 'Invalid image URL'"
+                err == UrlValidationError.INVALID_DOMAIN
+                        || err == UrlValidationError.INVALID_EXTENSION
+                        || err == UrlValidationError.UNREACHABLE,
+                () -> "Unexpected error type for invalid image URL: " + err
         );
     }
+
 }

@@ -63,7 +63,7 @@ public class CategoryService implements CategoryServiceInterface {
             if (categoryForCheck.isPresent() && !categoryForCheck.get().getCategoryId().equals(categoryId)) {
                 throw new BadRequestException("Category with name: " + categoryUpdateDto.getCategoryName() + " already exist");
             }
-            categoryForUpdate.setCategoryName(categoryUpdateDto.getCategoryName());
+            categoryForUpdate.setCategoryName(categoryUpdateDto.getCategoryName().trim());
         }
 
         if (categoryUpdateDto.getImage() != null && !categoryUpdateDto.getImage().isBlank()) {

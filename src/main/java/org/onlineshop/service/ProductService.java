@@ -66,7 +66,7 @@ public class ProductService implements ProductServiceInterface {
                 .orElseThrow(() -> new IllegalArgumentException("Product with id = " + productId + " not found"));
         Category category = productToUpdate.getCategory();
         if (productUpdateDto.getProductCategory() != null && !productUpdateDto.getProductCategory().isBlank()) {
-            Category categoryAfterUpdate = categoryService.getCategoryByName(productUpdateDto.getProductCategory());
+            Category categoryAfterUpdate = categoryService.getCategoryByName(productUpdateDto.getProductCategory().trim());
             category = category.equals(categoryAfterUpdate) ? category : categoryAfterUpdate;
             productToUpdate.setCategory(category);
         }
@@ -82,7 +82,7 @@ public class ProductService implements ProductServiceInterface {
             if (productUpdateDto.getProductName().length() < 3 || productUpdateDto.getProductName().length() > 20) {
                 throw new IllegalArgumentException("Product title must be between 3 and 20 characters");
             }
-            productToUpdate.setName(productUpdateDto.getProductName());
+            productToUpdate.setName(productUpdateDto.getProductName().trim());
         }
         if (productUpdateDto.getProductDescription() != null && !productUpdateDto.getProductDescription().isBlank()) {
             productToUpdate.setDescription(productUpdateDto.getProductDescription());

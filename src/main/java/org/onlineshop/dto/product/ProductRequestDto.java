@@ -1,9 +1,11 @@
 package org.onlineshop.dto.product;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
-import org.hibernate.validator.constraints.URL;
 
 import java.math.BigDecimal;
 
@@ -26,7 +28,5 @@ public class ProductRequestDto {
 
     private BigDecimal productDiscountPrice;
 
-    @URL(message = "Invalid image URL")
     private String image;
-
 }
