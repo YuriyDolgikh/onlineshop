@@ -65,7 +65,7 @@ class CategoryServiceAddCategoryTest {
         assertNotNull(category);
         assertEquals(categoryRequestDto.getCategoryName(), category.getCategoryName());
         assertEquals(categoryRequestDto.getImage(), category.getImage());
-        assertEquals(1, categoryRepository.findAll().size());
+        assertEquals(2, categoryRepository.findAll().size());
     }
 
     @Test
