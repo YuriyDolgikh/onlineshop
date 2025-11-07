@@ -1,7 +1,6 @@
 package org.onlineshop.service;
 
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.product.ProductRequestDto;
 import org.onlineshop.dto.product.ProductResponseDto;
@@ -13,9 +12,9 @@ import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.repository.ProductRepository;
 import org.onlineshop.service.converter.ProductConverter;
 import org.onlineshop.service.interfaces.ProductServiceInterface;
+import org.onlineshop.service.util.ProductServiceHelper;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -29,6 +28,7 @@ public class ProductService implements ProductServiceInterface {
     private final ProductRepository productRepository;
     private final CategoryService categoryService;
     private final ProductConverter productConverter;
+    private final ProductServiceHelper helper;
 
     @Transactional
     @Override
@@ -43,12 +43,14 @@ public class ProductService implements ProductServiceInterface {
                             + " already exist in category: " + category.getCategoryName());
                 });
         LocalDateTime now = LocalDateTime.now();
+
+        final String finalImage = helper.resolveImageUrl(productRequestDto.getImage());
         Product productToSave = Product.builder()
-                .name(productRequestDto.getProductName())
+                .name(productRequestDto.getProductName().trim())
                 .description(productRequestDto.getProductDescription())
                 .price(productRequestDto.getProductPrice())
                 .discountPrice(productRequestDto.getProductDiscountPrice())
-                .image(productRequestDto.getImage())
+                .image(finalImage)
                 .category(category)
                 .createdAt(now)
                 .updatedAt(now)
@@ -59,11 +61,11 @@ public class ProductService implements ProductServiceInterface {
 
     @Transactional
     @Override
-    public ProductResponseDto updateProduct(Integer productId,ProductUpdateDto productUpdateDto) {
+    public ProductResponseDto updateProduct(Integer productId, ProductUpdateDto productUpdateDto) {
         Product productToUpdate = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Product with id = " + productId + " not found"));
         Category category = productToUpdate.getCategory();
-        if (productUpdateDto.getProductCategory() != null && !productUpdateDto.getProductCategory().isBlank() ) {
+        if (productUpdateDto.getProductCategory() != null && !productUpdateDto.getProductCategory().isBlank()) {
             Category categoryAfterUpdate = categoryService.getCategoryByName(productUpdateDto.getProductCategory());
             category = category.equals(categoryAfterUpdate) ? category : categoryAfterUpdate;
             productToUpdate.setCategory(category);
@@ -74,7 +76,7 @@ public class ProductService implements ProductServiceInterface {
                 .findFirst()
                 .ifPresent(productName -> {
                     throw new IllegalArgumentException("Product with name: " + productName
-                            + " already exist in category." );
+                            + " already exist in category.");
                 });
         if (productUpdateDto.getProductName() != null && !productUpdateDto.getProductName().isBlank()) {
             if (productUpdateDto.getProductName().length() < 3 || productUpdateDto.getProductName().length() > 20) {
@@ -86,7 +88,7 @@ public class ProductService implements ProductServiceInterface {
             productToUpdate.setDescription(productUpdateDto.getProductDescription());
         }
         if (productUpdateDto.getProductPrice() != null) {
-            if(productUpdateDto.getProductPrice().compareTo(BigDecimal.ZERO) <= 0 ){
+            if (productUpdateDto.getProductPrice().compareTo(BigDecimal.ZERO) <= 0) {
                 throw new IllegalArgumentException("Product price must be greater than 0");
             }
             productToUpdate.setPrice(productUpdateDto.getProductPrice());
@@ -95,7 +97,8 @@ public class ProductService implements ProductServiceInterface {
             productToUpdate.setDiscountPrice(productUpdateDto.getProductDiscountPrice());
         }
         if (productUpdateDto.getImage() != null && !productUpdateDto.getImage().isBlank()) {
-            productToUpdate.setImage(productUpdateDto.getImage());
+            String newImage = helper.resolveImageUrl(productUpdateDto.getImage());
+            productToUpdate.setImage(newImage);
         }
         LocalDateTime now = LocalDateTime.now();
         productToUpdate.setUpdatedAt(now);

@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
  */
 @Component
 @RequiredArgsConstructor
-public class GoogleDriveLinkNormalizer {
+public class UrlDriveLinkNormalizer {
     private static final String ERROR_MSG_INVALID_CONFIG =
             "Google Drive configuration is incomplete. Both fileIdRegex and viewUrl must be set.";
 
@@ -36,14 +36,14 @@ public class GoogleDriveLinkNormalizer {
     }
 
     private void validateConfiguration() {
-        ImageServiceConfig.GoogleDriveConfig config = imageServiceConfig.getGoogleDrive();
+        ImageServiceConfig.UrlSourceConfig config = imageServiceConfig.getUrlConfig();
         if (config.getFileIdRegex() == null || config.getViewUrl() == null) {
             throw new IllegalStateException(ERROR_MSG_INVALID_CONFIG);
         }
     }
 
     private String extractAndTransformUrl(String url) {
-        ImageServiceConfig.GoogleDriveConfig config = imageServiceConfig.getGoogleDrive();
+        ImageServiceConfig.UrlSourceConfig config = imageServiceConfig.getUrlConfig();
         Matcher urlMatcher = Pattern.compile(config.getFileIdRegex()).matcher(url);
 
         return urlMatcher.find()

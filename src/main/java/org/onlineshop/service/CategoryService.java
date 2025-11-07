@@ -11,6 +11,7 @@ import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.repository.CategoryRepository;
 import org.onlineshop.service.converter.CategoryConverter;
 import org.onlineshop.service.interfaces.CategoryServiceInterface;
+import org.onlineshop.service.util.CategoryServiceHelper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,24 +23,28 @@ public class CategoryService implements CategoryServiceInterface {
 
     private final CategoryRepository categoryRepository;
     private final CategoryConverter categoryConverter;
+    private final CategoryServiceHelper helper;
 
     @Transactional
     @Override
     public CategoryResponseDto addCategory(CategoryRequestDto categoryRequestDto) {
-        if (categoryRequestDto == null){
+        if (categoryRequestDto == null) {
             throw new IllegalArgumentException("Category request must be provided");
         }
-        if (categoryRequestDto.getCategoryName() == null || categoryRequestDto.getCategoryName().isBlank()){
+        if (categoryRequestDto.getCategoryName() == null || categoryRequestDto.getCategoryName().isBlank()) {
             throw new IllegalArgumentException("Category name must be provided");
         }
-        if (categoryRepository.existsByCategoryName(categoryRequestDto.getCategoryName())){
+        if (categoryRepository.existsByCategoryName(categoryRequestDto.getCategoryName())) {
             throw new BadRequestException("Category with name: " + categoryRequestDto.getCategoryName() + " already exist");
         }
+
+        final String finalImage = helper.resolveImageUrl(categoryRequestDto.getImage());
         Category category = Category.builder()
                 .categoryId(null)
-                .categoryName(categoryRequestDto.getCategoryName())
-                .image(categoryRequestDto.getImage())
+                .categoryName(categoryRequestDto.getCategoryName().trim())
+                .image(finalImage)
                 .build();
+
         Category savedCategory = categoryRepository.save(category);
         return categoryConverter.toDto(savedCategory);
     }
@@ -55,7 +60,7 @@ public class CategoryService implements CategoryServiceInterface {
                 throw new IllegalArgumentException("Category name must be between 3 and 20 characters");
             }
             Optional<Category> categoryForCheck = categoryRepository.findByCategoryName(categoryUpdateDto.getCategoryName());
-            if (categoryForCheck.isPresent() && !categoryForCheck.get().getCategoryId().equals(categoryId)){
+            if (categoryForCheck.isPresent() && !categoryForCheck.get().getCategoryId().equals(categoryId)) {
                 throw new BadRequestException("Category with name: " + categoryUpdateDto.getCategoryName() + " already exist");
             }
             categoryForUpdate.setCategoryName(categoryUpdateDto.getCategoryName());
@@ -71,7 +76,7 @@ public class CategoryService implements CategoryServiceInterface {
     @Transactional
     @Override
     public CategoryResponseDto deleteCategory(Integer categoryId) {
-        if (categoryId == null){
+        if (categoryId == null) {
             throw new IllegalArgumentException("Category id must be provided");
         }
         Category categoryToDelete = categoryRepository.findById(categoryId)
@@ -93,8 +98,9 @@ public class CategoryService implements CategoryServiceInterface {
                 .orElseThrow(() -> new BadRequestException("Category with id: " + categoryId + " not found"));
     }
 
-    public Category getCategoryByName(String categoryName){
+    public Category getCategoryByName(String categoryName) {
         return categoryRepository.findByCategoryName(categoryName)
                 .orElseThrow(() -> new BadRequestException("Category with name: " + categoryName + " not found"));
     }
+
 }

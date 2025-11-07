@@ -13,19 +13,21 @@ import java.util.List;
 @Component
 @ConfigurationProperties(prefix = "image.service")
 public class ImageServiceConfig {
-    private static final int DEFAULT_TIMEOUT_MILLIS = 1500;
+    private static final int DEFAULT_TIMEOUT_MILLIS = 3000;
     private static final int DEFAULT_MAX_URL_LENGTH = 256;
     private static final boolean DEFAULT_HEAD_REQUEST_ENABLED = true;
 
     private final List<String> allowedDomains = new ArrayList<>();
     private final List<String> allowedExtensions = new ArrayList<>();
-    private final GoogleDriveConfig googleDrive = new GoogleDriveConfig();
+    private final UrlSourceConfig urlConfig = new UrlSourceConfig();
     private final ValidationConfig validation = new ValidationConfig();
+    private final ProductDefaultConfig productDefault = new ProductDefaultConfig();
+    private final CategoryDefaultConfig categoryDefault = new CategoryDefaultConfig();
     private final UrlConfig url = new UrlConfig();
 
     @Getter
     @Setter
-    public static class GoogleDriveConfig {
+    public static class UrlSourceConfig {
         private String baseUrl;
         private String viewUrl;
         private String fileIdRegex;
@@ -36,6 +38,8 @@ public class ImageServiceConfig {
     public static class ValidationConfig {
         private boolean headRequestEnabled = DEFAULT_HEAD_REQUEST_ENABLED;
         private int timeoutMillis = DEFAULT_TIMEOUT_MILLIS;
+
+        private List<String> skipHeadDomains = new ArrayList<>();
     }
 
     @Getter
@@ -44,4 +48,15 @@ public class ImageServiceConfig {
         private int maxLength = DEFAULT_MAX_URL_LENGTH;
     }
 
+    @Getter
+    @Setter
+    public static class ProductDefaultConfig {
+        private String image;
+    }
+
+    @Getter
+    @Setter
+    public static class CategoryDefaultConfig {
+        private String image;
+    }
 }
