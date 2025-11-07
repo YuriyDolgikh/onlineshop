@@ -33,6 +33,7 @@ class CategoryServiceAddCategoryTest {
 
     @Autowired
     private CategoryService categoryService;
+
     @Autowired
     private ValidatorFactory validatorFactory;
 

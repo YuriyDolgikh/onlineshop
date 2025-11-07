@@ -26,8 +26,6 @@ class CategoryServiceGetCategoryByIdTest {
 
     @Autowired
     private CategoryService categoryService;
-    @Autowired
-    private ValidatorFactory validatorFactory;
 
     @AfterEach
     void dropDatabase() {
