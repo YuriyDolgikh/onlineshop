@@ -180,4 +180,20 @@ public class GlobalExceptionHandler {
                 .body("Internal Server Error: " + ex.getMessage());
     }
 
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<Map<String, Object>> handleImageValidation(ValidationException ex) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("message", "Validation failed");
+        body.put("errors", Map.of("image", ex.getMessage()));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    @ExceptionHandler(UrlValidationException.class)
+    public ResponseEntity<Map<String, Object>> handleUrlValidation(UrlValidationException ex) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("message", "Validation failed");
+        body.put("errors", Map.of("image", ex.getError().getMessage()));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
 }
