@@ -6,6 +6,7 @@ import org.onlineshop.dto.category.CategoryRequestDto;
 import org.onlineshop.dto.category.CategoryResponseDto;
 import org.onlineshop.dto.category.CategoryUpdateDto;
 import org.onlineshop.entity.Category;
+import org.onlineshop.entity.Product;
 import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.repository.CategoryRepository;
 import org.onlineshop.service.converter.CategoryConverter;
@@ -65,12 +66,9 @@ public class CategoryService implements CategoryServiceInterface {
             categoryForUpdate.setCategoryName(categoryUpdateDto.getCategoryName());
         }
 
-
         if (categoryUpdateDto.getImage() != null && !categoryUpdateDto.getImage().isBlank()) {
-            String newImage = helper.resolveImageUrl(categoryUpdateDto.getImage());
-            categoryForUpdate.setImage(newImage);
+            categoryForUpdate.setImage(categoryUpdateDto.getImage());
         }
-
         Category savedCategory = categoryRepository.save(categoryForUpdate);
         return categoryConverter.toDto(savedCategory);
     }
