@@ -15,8 +15,6 @@ import org.onlineshop.service.converter.FavouriteConverter;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -82,9 +80,8 @@ class FavouriteServiceGetFavouritesTest {
 
         verify(userService).getCurrentUser();
         verify(favouriteRepository).findByUser(user);
-        verify(favouriteConverter).toDtos(List.of(favourite));
+        verify(favouriteConverter).toDtos(List.of());
     }
-
 
     @Test
     void getFavouritesReturnsAllItems() {
@@ -102,7 +99,4 @@ class FavouriteServiceGetFavouritesTest {
         assertEquals(favouriteResponseDto, result.get(0));
         assertEquals(dto2, result.get(1));
     }
-
-
-
 }
