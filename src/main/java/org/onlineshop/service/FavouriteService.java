@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -52,7 +51,7 @@ public class FavouriteService implements FavouriteServiceInterface {
     @Override
     public FavouriteResponseDto deleteFavourite(Integer productId) {
         if (productId == null) {
-            throw new NotFoundException("Product not found in favourites");
+            throw new IllegalArgumentException("Product Id cannot be null");
         }
 
         User user = userService.getCurrentUser();
