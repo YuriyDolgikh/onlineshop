@@ -38,15 +38,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class ProductControllerAddNewProductTest {
 
     @Autowired
-    private ProductService productService;
-
-    @Autowired
-    private CategoryService categoryService;
-
-    @Autowired
-    private UserService userService;
-
-    @Autowired
     private UserRepository userRepository;
 
     @Autowired
@@ -54,9 +45,6 @@ class ProductControllerAddNewProductTest {
 
     @Autowired
     private ProductRepository productRepository;
-
-    @Autowired
-    private MockMvc mockMvc;
 
     @Autowired
     private ProductController productController;
