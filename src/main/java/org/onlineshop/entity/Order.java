@@ -62,7 +62,6 @@ public class Order {
     private List<OrderItem> orderItems = new ArrayList<>();
 
     public enum Status {
-        OPEN,
         PENDING_PAYMENT,
         PAID,
         IN_TRANSIT,

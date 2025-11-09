@@ -67,7 +67,8 @@ public class CategoryService implements CategoryServiceInterface {
         }
 
         if (categoryUpdateDto.getImage() != null && !categoryUpdateDto.getImage().isBlank()) {
-            categoryForUpdate.setImage(categoryUpdateDto.getImage());
+            String newImage = helper.resolveImageUrl(categoryUpdateDto.getImage());
+            categoryForUpdate.setImage(newImage);
         }
         Category savedCategory = categoryRepository.save(categoryForUpdate);
         return categoryConverter.toDto(savedCategory);
@@ -82,7 +83,8 @@ public class CategoryService implements CategoryServiceInterface {
         Category categoryToDelete = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new BadRequestException("Category with id: " + categoryId + " not found"));
         categoryToDelete.getProducts()
-                .forEach(product -> product.setCategory(null));      //TODO: null must be changed to OTHER category
+                .forEach(product -> product.setCategory(categoryRepository.findByCategoryName("Other")
+                        .orElseThrow(() -> new BadRequestException("Other category not found"))));
         categoryRepository.delete(categoryToDelete);
         return categoryConverter.toDto(categoryToDelete);
     }

@@ -38,33 +38,29 @@ public class OrderService implements OrderServiceInterface {
         if (dto == null) {
             throw new BadRequestException("OrderRequestDto cannot be null");
         }
+        // Throws: IllegalArgumentException – if this enum type has no constant with the specified name
+        Order.DeliveryMethod method = Order.DeliveryMethod.valueOf(dto.getDeliveryMethod().toUpperCase());
         User currentUser = userService.getCurrentUser();
         Order order = Order.builder()
                 .user(currentUser)
                 .deliveryAddress(dto.getDeliveryAddress())
                 .contactPhone(dto.getContactPhone())
-                .deliveryMethod(Order.DeliveryMethod.valueOf(dto.getDeliveryMethod().toUpperCase()))
-                .status(Order.Status.OPEN)
+                .deliveryMethod(method)
+                .status(Order.Status.PENDING_PAYMENT) // TODO - Зачем, ести тут же меняется на "Ожидает оплаты"?
                 .build();
-
-        orderRepository.save(order);
-
         if (dto.getItems() != null) {
             for (OrderItemRequestDto item : dto.getItems()) {
                 orderItemService.addItemToOrder(item);
             }
         }
-
-        order.setStatus(Order.Status.PENDING_PAYMENT);
         orderRepository.save(order);
-
         return orderConverter.toDto(order);
     }
 
     @Transactional
     @Override
     public OrderResponseDto getOrderById(Integer orderId) {
-        if (!isAllowedAccess(orderId)) {
+        if (!isAccessToOrderAllowed(orderId)) {
             throw new AccessDeniedException("Access denied");
         }
         Order order = orderRepository.findById(orderId)
@@ -76,35 +72,29 @@ public class OrderService implements OrderServiceInterface {
     @Override
     public List<OrderResponseDto> getOrdersByUser(Integer userId) {
         if (userId == null) {
-            throw new BadRequestException("UserId cannot be null");
+            throw new IllegalArgumentException("UserId cannot be null");
         }
         User currentUser = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found with ID: " + userId));
-
+        if (currentUser.getRole() == User.Role.USER && !currentUser.getUserId().equals(userId)) {
+            throw new AccessDeniedException("Access denied");
+        }
         List<Order> orders = orderRepository.findByUser(currentUser);
-
         return orderConverter.toDtos(orders);
     }
 
     @Transactional
     @Override
     public OrderResponseDto updateOrderStatus(Integer orderId, String newStatus) {
-        if (!isAllowedAccess(orderId)) {
+        if (!isAccessToOrderAllowed(orderId)) {
             throw new AccessDeniedException("Access denied");
         }
         if (newStatus == null || newStatus.isBlank()) {
-            throw new BadRequestException("newStatus cannot be null or blank");
+            throw new BadRequestException("New Status cannot be null or blank");
         }
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Order not found with ID: " + orderId));
-
-        Order.Status updatedStatus;
-        try {
-            updatedStatus = Order.Status.valueOf(newStatus.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new BadRequestException("Invalid order status: " + newStatus);
-        }
-
+        Order.Status updatedStatus = Order.Status.valueOf(newStatus.toUpperCase());
         order.setStatus(updatedStatus);
         orderRepository.save(order);
         return orderConverter.toDto(order);
@@ -113,7 +103,7 @@ public class OrderService implements OrderServiceInterface {
     @Transactional
     @Override
     public void cancelOrder(Integer orderId) {
-        if (!isAllowedAccess(orderId)) {
+        if (!isAccessToOrderAllowed(orderId)) {
             throw new AccessDeniedException("Access denied");
         }
         Order order = orderRepository.findById(orderId)
@@ -126,12 +116,12 @@ public class OrderService implements OrderServiceInterface {
     @Transactional
     @Override
     public OrderResponseDto confirmPayment(Integer orderId, String paymentMethod) {
-        if (!isAllowedAccess(orderId)) {
-            throw new AccessDeniedException("Access denied");
-        }
+        User currentUser = userService.getCurrentUser();
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Order not found with ID: " + orderId));
-
+        if (!order.getUser().getUserId().equals(currentUser.getUserId())) {
+            throw new AccessDeniedException("Access denied");
+        }
         order.setStatus(Order.Status.PAID);
         orderRepository.save(order);
 
@@ -148,18 +138,18 @@ public class OrderService implements OrderServiceInterface {
     @Transactional
     @Override
     public OrderResponseDto updateOrderDelivery(Integer orderId, OrderRequestDto dto) {
-       if (!isAllowedAccess(orderId)) {
-           throw new AccessDeniedException("Access denied");
-       }
+        if (!isAccessToOrderAllowed(orderId)) {
+            throw new AccessDeniedException("Access denied");
+        }
         if (dto == null) {
             throw new IllegalArgumentException("OrderRequestDto cannot be null");
         }
         if (dto.getDeliveryAddress() == null || dto.getDeliveryAddress().isBlank()) {
-            throw new IllegalArgumentException("Delivery address cannot be empty");
+            throw new IllegalArgumentException("Delivery address cannot be null or empty");
         }
 
         if (dto.getContactPhone() == null || dto.getContactPhone().isBlank()) {
-            throw new IllegalArgumentException("Contact phone cannot be empty");
+            throw new IllegalArgumentException("Contact phone cannot be null empty");
         }
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
@@ -169,10 +159,8 @@ public class OrderService implements OrderServiceInterface {
         } catch (IllegalArgumentException e) {
             throw new RuntimeException("Invalid delivery method: " + dto.getDeliveryMethod());
         }
-
         order.setDeliveryAddress(dto.getDeliveryAddress());
         order.setContactPhone(dto.getContactPhone());
-
         orderRepository.save(order);
         return orderConverter.toDto(order);
     }
@@ -180,17 +168,15 @@ public class OrderService implements OrderServiceInterface {
     @Transactional
     @Override
     public OrderStatusResponseDto getOrderStatusDto(Integer orderId) {
-       if (!isAllowedAccess(orderId)) {
-           throw new AccessDeniedException("Access denied");
-       }
-
+        if (!isAccessToOrderAllowed(orderId)) {
+            throw new AccessDeniedException("Access denied");
+        }
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Order not found with ID: " + orderId));
-
         return new OrderStatusResponseDto(order.getStatus().name(), order.getUpdatedAt());
     }
 
-    public boolean isAllowedAccess(Integer orderId) {
+    public boolean isAccessToOrderAllowed(Integer orderId) {
         if (orderId == null) {
             throw new BadRequestException("OrderId cannot be null");
         }
@@ -200,7 +186,6 @@ public class OrderService implements OrderServiceInterface {
         if (currentUser.getRole() == User.Role.ADMIN || currentUser.getRole() == User.Role.MANAGER) {
             return true;
         }
-
         // обычный пользователь — только свои заказы
         return orderRepository.findById(orderId)
                 .map(o -> o.getUser() != null && o.getUser().getUserId().equals(currentUser.getUserId()))

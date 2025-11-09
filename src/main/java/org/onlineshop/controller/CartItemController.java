@@ -10,7 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequiredArgsConstructor
@@ -41,7 +41,7 @@ public class CartItemController {
     }
 
     @GetMapping("/{productId}")
-    public ResponseEntity<List<CartItemResponseDto>> getCartItem(@Valid @PathVariable Integer productId) {
+    public ResponseEntity<Set<CartItemResponseDto>> getCartItem(@Valid @PathVariable Integer productId) {
         return ResponseEntity
                 .status(HttpStatus.FOUND)
                 .body(cartItemService.getCartItems());
