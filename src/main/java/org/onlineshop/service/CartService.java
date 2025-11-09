@@ -54,7 +54,7 @@ public class CartService implements CartServiceInterface {
         LocalDateTime now = LocalDateTime.now();
         newOrder.setOrderItems(orderItems);
         newOrder.setUser(user);
-        newOrder.setStatus(Order.Status.OPEN);
+        newOrder.setStatus(Order.Status.PENDING_PAYMENT);
         newOrder.setCreatedAt(now);
         newOrder.setUpdatedAt(now);
         Order savedOrder = orderRepository.save(newOrder);
