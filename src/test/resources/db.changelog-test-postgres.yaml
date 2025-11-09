@@ -267,7 +267,7 @@ databaseChangeLog:
 
               - column:
                   name: name
-                  type: VARCHAR(500)
+                  type: VARCHAR(100)
                   constraints:
                     nullable: false
 

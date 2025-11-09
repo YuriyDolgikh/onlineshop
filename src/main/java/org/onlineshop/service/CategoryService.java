@@ -56,7 +56,7 @@ public class CategoryService implements CategoryServiceInterface {
                 .orElseThrow(() -> new IllegalArgumentException("Category with id = " + categoryId + " not found"));
 
         if (categoryUpdateDto.getCategoryName() != null && !categoryUpdateDto.getCategoryName().isBlank()) {
-            if (categoryUpdateDto.getCategoryName().length() < 3 || categoryUpdateDto.getCategoryName().length() > 100) {
+            if (categoryUpdateDto.getCategoryName().length() < 3 || categoryUpdateDto.getCategoryName().length() > 20) {
                 throw new IllegalArgumentException("Category name must be between 3 and 100 characters");
             }
             Optional<Category> categoryForCheck = categoryRepository.findByCategoryName(categoryUpdateDto.getCategoryName());
