@@ -91,12 +91,12 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handles  thrown when the request body
+     * Handles thrown when the request body
      * cannot be parsed or converted to the target Java type (invalid JSON,
      * wrong enum constant, or incorrect date format).
      *
-     * @param ex the thrown  HttpMessageNotReadableException
-     * @return a  ResponseEntity containing a descriptive error message
+     * @param ex the thrown HttpMessageNotReadableException
+     * @return a ResponseEntity containing a descriptive error message
      * and HTTP 400 (Bad Request) status
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
@@ -195,5 +195,4 @@ public class GlobalExceptionHandler {
         body.put("errors", Map.of("image", ex.getError().getMessage()));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
-
 }
