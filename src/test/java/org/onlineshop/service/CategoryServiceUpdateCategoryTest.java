@@ -150,11 +150,11 @@ class CategoryServiceUpdateCategoryTest {
         categoryRepository.save(categoryTwo);
 
         CategoryUpdateDto categoryUpdateDto = CategoryUpdateDto.builder()
-                .categoryName("testCategorySecondTestCategorySecondTestCategorySecondTestCategorySecondTestCategorySecondTestCategorySecond")
+                .categoryName("testCategorySecondTestCategorySecondTestCategorySecondTestCategorySecondTestCategorySecondTestCategorySecondTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProduct")
                 .build();
 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> categoryService.updateCategory(categoryOne.getCategoryId(), categoryUpdateDto));
-        String messageException = "Category name must be between 3 and 20 characters";
+        String messageException = "Category name must be between 3 and 100 characters";
         assertEquals(messageException, exception.getMessage());
     }
 
@@ -181,7 +181,7 @@ class CategoryServiceUpdateCategoryTest {
                 .build();
 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> categoryService.updateCategory(categoryOne.getCategoryId(), categoryUpdateDto));
-        String messageException = "Category name must be between 3 and 20 characters";
+        String messageException = "Category name must be between 3 and 100 characters";
         assertEquals(messageException, exception.getMessage());
     }
 

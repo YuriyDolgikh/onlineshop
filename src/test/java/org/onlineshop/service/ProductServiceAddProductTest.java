@@ -204,8 +204,8 @@ class ProductServiceAddProductTest {
         Set<ConstraintViolation<ProductRequestDto>> violations = validatorFactory.getValidator().validate(product);
         assertFalse(violations.isEmpty(), "Validation should fail for too short name");
         assertTrue(
-                violations.stream().anyMatch(v -> v.getMessage().equals("Product title must be between 3 and 20 characters")),
-                "Error message should be 'Product title must be between 3 and 20 characters'"
+                violations.stream().anyMatch(v -> v.getMessage().equals("Product title must be between 3 and 100 characters")),
+                "Error message should be 'Product title must be between 3 and 100 characters'"
         );
 
     }
@@ -213,7 +213,7 @@ class ProductServiceAddProductTest {
     @Test
     void testAddProductIfNameIsTooLong() {
         ProductRequestDto product = ProductRequestDto.builder()
-                .productName("TestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestName")
+                .productName("TestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestName")
                 .productCategory("testCategory")
                 .image("https://drive.google.com/test")
                 .productDescription("TestProductText")
@@ -224,8 +224,8 @@ class ProductServiceAddProductTest {
         Set<ConstraintViolation<ProductRequestDto>> violations = validatorFactory.getValidator().validate(product);
         assertFalse(violations.isEmpty(), "Validation should fail for too long name");
         assertTrue(
-                violations.stream().anyMatch(v -> v.getMessage().equals("Product title must be between 3 and 20 characters")),
-                "Error message should be 'Product title must be between 3 and 20 characters'"
+                violations.stream().anyMatch(v -> v.getMessage().equals("Product title must be between 3 and 100 characters")),
+                "Error message should be 'Product title must be between 3 and 100 characters'"
         );
 
     }

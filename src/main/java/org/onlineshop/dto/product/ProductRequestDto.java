@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 public class ProductRequestDto {
 
     @NotBlank(message = "Product title is required and must be not blank")
-    @Size(min = 3, max = 20, message = "Product title must be between 3 and 20 characters")
+    @Size(min = 3, max = 100, message = "Product title must be between 3 and 100 characters")
     private String productName;
 
     private String productDescription;

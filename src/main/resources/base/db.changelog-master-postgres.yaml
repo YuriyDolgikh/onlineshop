@@ -551,12 +551,66 @@ databaseChangeLog:
               - column: { name: category_name, value: "Other" }
               - column: { name: image, value: "https://drive.google.com/file/other" }
 
-
-
-
-
-
-
+  - changeSet:
+      id: 14
+      author: 050525group
+      comment: "Create default products for category Fertilizer"
+      changes:
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Bone Meal Powder Fertilizer" }
+              - column: { name: description,      value: "Universal fertilizer for indoor plants" }
+              - column: { name: price,            valueNumeric: 50.99 }
+              - column: { name: discount_price,   valueNumeric: 10.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1XxMACbxBJkYUhpjhanbBA3gLxHGmlFYs/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Fertilizer')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Brunnings All Purpose NPK Fertiliser Pestrol Australia" }
+              - column: { name: description,      value: "Universal fertilizer" }
+              - column: { name: price,            valueNumeric: 60.50 }
+              - column: { name: discount_price,   valueNumeric: 15.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1p3VmhulZ878JghEWMAAJtvmgCs8hm9MZ/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Protective products and septic tanks')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Lawnifi_Spring" }
+              - column: { name: description,      value: "Compact tool for repotting" }
+              - column: { name: price,            valueNumeric: 5.50 }
+              - column: { name: discount_price,   valueNumeric: 0.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1ApqNPMTmbBzLQ9FunSZDl9SXvjBul3je/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Tools and equipment')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Lawnifi_Spring" }
+              - column: { name: description,      value: "Compact tool for repotting" }
+              - column: { name: price,            valueNumeric: 5.50 }
+              - column: { name: discount_price,   valueNumeric: 0.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1ApqNPMTmbBzLQ9FunSZDl9SXvjBul3je/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Tools and equipment')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Lawnifi_Spring" }
+              - column: { name: description,      value: "Compact tool for repotting" }
+              - column: { name: price,            valueNumeric: 5.50 }
+              - column: { name: discount_price,   valueNumeric: 0.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1ApqNPMTmbBzLQ9FunSZDl9SXvjBul3je/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Tools and equipment')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
 
 
 

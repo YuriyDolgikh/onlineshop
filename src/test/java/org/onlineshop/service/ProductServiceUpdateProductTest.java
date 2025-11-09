@@ -321,7 +321,7 @@ class ProductServiceUpdateProductTest {
                 .build();
 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(productTest.getId(), productSecond));
-        String messageException = "Product title must be between 3 and 20 characters";
+        String messageException = "Product title must be between 3 and 100 characters";
         assertEquals(messageException, exception.getMessage());
 
     }
@@ -350,11 +350,11 @@ class ProductServiceUpdateProductTest {
         productRepository.save(productTest);
 
         ProductUpdateDto productSecond = ProductUpdateDto.builder()
-                .productName("TestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProduct")
+                .productName("TestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProduct")
                 .build();
 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(productTest.getId(), productSecond));
-        String messageException = "Product title must be between 3 and 20 characters";
+        String messageException = "Product title must be between 3 and 100 characters";
         assertEquals(messageException, exception.getMessage());
 
     }

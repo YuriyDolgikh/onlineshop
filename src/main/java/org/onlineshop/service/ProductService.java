@@ -79,8 +79,8 @@ public class ProductService implements ProductServiceInterface {
                             + " already exist in category.");
                 });
         if (productUpdateDto.getProductName() != null && !productUpdateDto.getProductName().isBlank()) {
-            if (productUpdateDto.getProductName().length() < 3 || productUpdateDto.getProductName().length() > 20) {
-                throw new IllegalArgumentException("Product title must be between 3 and 20 characters");
+            if (productUpdateDto.getProductName().length() < 3 || productUpdateDto.getProductName().length() > 100) {
+                throw new IllegalArgumentException("Product title must be between 3 and 100 characters");
             }
             productToUpdate.setName(productUpdateDto.getProductName().trim());
         }

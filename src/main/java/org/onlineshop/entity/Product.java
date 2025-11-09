@@ -30,7 +30,7 @@ public class Product {
 
     @Column(nullable = false, length = 50)
     @NotBlank(message = "product title is required and must be not blank)")
-    @Size(min = 3, max = 20)
+    @Size(min = 3, max = 100)
     private String name;
 
     @Column(columnDefinition = "TEXT")
