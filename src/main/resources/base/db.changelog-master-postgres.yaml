@@ -549,7 +549,330 @@ databaseChangeLog:
             tableName: category
             columns:
               - column: { name: category_name, value: "Other" }
-              - column: { name: image, value: "https://drive.google.com/file/other" }
+              - column: { name: image, value: "https://drive.google.com/file/d/1TfZgAbNYbS_eMd8zIxeGCtC-XVYid3sx/view?usp=drive_link" }
+
+  - changeSet:
+      id: 14
+      author: 050525group
+      comment: "Create default products for category Fertilizer"
+      changes:
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Bone Meal Powder Fertilizer" }
+              - column: { name: description,      value: "Universal Fertilizer for indoor plants" }
+              - column: { name: price,            valueNumeric: 50.00 }
+              - column: { name: discount_price,   valueNumeric: 10.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1XxMACbxBJkYUhpjhanbBA3gLxHGmlFYs/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Fertilizer')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Brunnings All PurposeNPK" }
+              - column: { name: description,      value: "Pest protection for houseplants" }
+              - column: { name: price,            valueNumeric: 20.50 }
+              - column: { name: discount_price,   valueNumeric: 10.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1p3VmhulZ878JghEWMAAJtvmgCs8hm9MZ/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Fertilizer')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Lawnifi_Spring" }
+              - column: { name: description,      value: "Compact tool for repotting" }
+              - column: { name: price,            valueNumeric: 5.50 }
+              - column: { name: discount_price,   valueNumeric: 0.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1ApqNPMTmbBzLQ9FunSZDl9SXvjBul3je/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Fertilizer')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "NPK" }
+              - column: { name: description,      value: " New npk" }
+              - column: { name: price,            valueNumeric: 5.50 }
+              - column: { name: discount_price,   valueNumeric: 0.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1rBAQ3b3KBDJ9e541hyprQHCaPBKw3CWm/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Fertilizer')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Organic fruit veggie fertilizer" }
+              - column: { name: description,      value: "Organic" }
+              - column: { name: price,            valueNumeric: 5.50 }
+              - column: { name: discount_price,   valueNumeric: 0.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1R74-jb34ez_ppBBYHWkNXKK-ehdPLSYO/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Fertilizer')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+
+  - changeSet:
+      id: 15
+      author: 050525group
+      comment: "Create default products for category Building materials"
+      changes:
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Acer griseum" }
+              - column: { name: description,      value: "Acer griseum" }
+              - column: { name: price,            valueNumeric: 50.00 }
+              - column: { name: discount_price,   valueNumeric: 10.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1xhDCYeLBmsi0M4yntkJAkqav7zlsIFCQ/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Building materials')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Butter fly garden" }
+              - column: { name: description,      value: "Butter fly garden" }
+              - column: { name: price,            valueNumeric: 20.50 }
+              - column: { name: discount_price,   valueNumeric: 10.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1K4W78PYhqOcl9a67kEg4wo6pvlk0wFV0/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Building materials')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Corten Planter" }
+              - column: { name: description,      value: "Corten Planter" }
+              - column: { name: price,            valueNumeric: 5.50 }
+              - column: { name: discount_price,   valueNumeric: 0.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/12GDDnwPWT6hmcmxHnEy62ch2bCG6yzAi/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Building materials')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Leucadendron ChoLeuc" }
+              - column: { name: description,      value: "Leucadendron_ChoLeuc" }
+              - column: { name: price,            valueNumeric: 5.50 }
+              - column: { name: discount_price,   valueNumeric: 0.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1Ve9ZDqw8wtYabzZIwjsxHFwfReWBjS9b/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Building materials')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "mullai" }
+              - column: { name: description,      value: "mullai" }
+              - column: { name: price,            valueNumeric: 5.50 }
+              - column: { name: discount_price,   valueNumeric: 0.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1cnV0o_bsvEe0s3Y689a4mEBjilzd0rQv/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Building materials')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+
+  - changeSet:
+      id: 16
+      author: 050525group
+      comment: "Create default products for category Pots and planters"
+      changes:
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Arttrees pots and planters" }
+              - column: { name: description,      value: "Arttrees pots and planters" }
+              - column: { name: price,            valueNumeric: 50.00 }
+              - column: { name: discount_price,   valueNumeric: 10.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1DsU7xOPiBRztPemFkDdWKJE3LlM3o30z/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Pots and planters')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Blue and White Ceramic Planter Large" }
+              - column: { name: description,      value: "Blue and White Ceramic Planter Large" }
+              - column: { name: price,            valueNumeric: 20.50 }
+              - column: { name: discount_price,   valueNumeric: 10.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1EOS7di97oBfWIhHx1NO2Q0ShojhA3QDd/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Pots and planters')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Chalk interiors " }
+              - column: { name: description,      value: "Compact tool for repotting" }
+              - column: { name: price,            valueNumeric: 5.50 }
+              - column: { name: discount_price,   valueNumeric: 0.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1ApqNPMTmbBzLQ9FunSZDl9SXvjBul3je/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Pots and planters')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Gardening" }
+              - column: { name: description,      value: "Gardening" }
+              - column: { name: price,            valueNumeric: 5.50 }
+              - column: { name: discount_price,   valueNumeric: 0.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1MTROh_tvS7GaqITUxQ_Cmd5quy31rxXz/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Pots and planters')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Star Outdoor Planter Green" }
+              - column: { name: description,      value: "Star Outdoor Planter Green" }
+              - column: { name: price,            valueNumeric: 5.50 }
+              - column: { name: discount_price,   valueNumeric: 0.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/14EmDFmNCahSKDN54Cqw404394MTyRtYa/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Pots and planters')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+
+  - changeSet:
+      id: 17
+      author: 050525group
+      comment: "Create default products for category Protective products and septic tanks"
+      changes:
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "All Ultra Free Clear Odor Relief" }
+              - column: { name: description,      value: "All Ultra Free Clear Odor Relief" }
+              - column: { name: price,            valueNumeric: 50.00 }
+              - column: { name: discount_price,   valueNumeric: 10.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1qEAUKPi1x7N2xe5bDHka7NlAVfgnYFGL/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Protective products and septic tanks')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "DRAIN MATE INSTANT CLEANING ACTION PowaFix" }
+              - column: { name: description,      value: "DRAIN MATE - INSTANT CLEANING ACTION - PowaFix" }
+              - column: { name: price,            valueNumeric: 20.50 }
+              - column: { name: discount_price,   valueNumeric: 10.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1YaeZbsQJAhZBO06vHcdN-FR7-YOQ0rm_/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Protective products and septic tanks')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Products Domestic Wastewater Treatment Hutchinson" }
+              - column: { name: description,      value: "Products Domestic Wastewater Treatment Hutchinson" }
+              - column: { name: price,            valueNumeric: 5.50 }
+              - column: { name: discount_price,   valueNumeric: 0.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1aN-ba3HqYlogM6zHK7qahZVh4Ve9V4de/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Protective products and septic tanks')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Rainwater tanks" }
+              - column: { name: description,      value: "Rainwater tanks" }
+              - column: { name: price,            valueNumeric: 5.50 }
+              - column: { name: discount_price,   valueNumeric: 0.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/153JIrlUHQT_gs7XxadT0HiZzyU27vAFk/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Protective products and septic tanks')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Septic Tanks Tanks  RotoTank" }
+              - column: { name: description,      value: "Septic Tanks Tanks  RotoTank" }
+              - column: { name: price,            valueNumeric: 5.50 }
+              - column: { name: discount_price,   valueNumeric: 0.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1O6ev8IdBsIcBkTpO9TSVI6pgHqKKy8Cp/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Protective products and septic tanks')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+
+  - changeSet:
+      id: 18
+      author: 050525group
+      comment: "Create default products for category Tools and equipment"
+      changes:
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Garden Rake" }
+              - column: { name: description,      value: "Garden Rake" }
+              - column: { name: price,            valueNumeric: 50.00 }
+              - column: { name: discount_price,   valueNumeric: 10.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1BrTTo4IBsWiK2nh8943yFtYxEOUrAN2o/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Tools and equipment')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Garden Trowel" }
+              - column: { name: description,      value: "Garden Trowel" }
+              - column: { name: price,            valueNumeric: 20.50 }
+              - column: { name: discount_price,   valueNumeric: 10.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1M8tA1HuVq2CekfUSvxtUwvvnIja5jBvP/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Tools and equipment')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Hand Fork" }
+              - column: { name: description,      value: "Hand Fork" }
+              - column: { name: price,            valueNumeric: 5.50 }
+              - column: { name: discount_price,   valueNumeric: 0.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1rYsPD2bZrnBFvU4cKuLfHw5RUo3gwKgY/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Tools and equipment')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Pruning Shears" }
+              - column: { name: description,      value: "Pruning Shears" }
+              - column: { name: price,            valueNumeric: 5.50 }
+              - column: { name: discount_price,   valueNumeric: 0.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1t5N1wVq0uhXV0hCz46URW2LGpcz4s8pf/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Tools and equipment')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Watering Can" }
+              - column: { name: description,      value: "Watering Can" }
+              - column: { name: price,            valueNumeric: 5.50 }
+              - column: { name: discount_price,   valueNumeric: 0.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1zbsiB0aC1494tMLZIXfYlTaRnho8ucOw/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Tools and equipment')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+
+  - changeSet:
+      id: 19
+      author: 050525group
+      comment: "Create default products for category Other"
+      changes:
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Other Product" }
+              - column: { name: description,      value: "other" }
+              - column: { name: price,            valueNumeric: 50.00 }
+              - column: { name: discount_price,   valueNumeric: 10.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1bpjJftEvSPBys8ESSX2AJu0fkBi57__d/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Other')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+
 
 
 
