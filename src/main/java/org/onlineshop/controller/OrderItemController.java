@@ -1,11 +1,8 @@
 package org.onlineshop.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.onlineshop.dto.orderItem.OrderItemRequestDto;
 import org.onlineshop.dto.orderItem.OrderItemResponseDto;
 import org.onlineshop.dto.orderItem.OrderItemUpdateDto;
-import org.onlineshop.entity.Order;
-import org.onlineshop.entity.OrderItem;
 import org.onlineshop.service.OrderItemService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,13 +15,13 @@ public class OrderItemController {
 
     private final OrderItemService orderItemService;
 
-    @PostMapping
-    public ResponseEntity<OrderItemResponseDto> addItemToOrder(@RequestBody OrderItemRequestDto requestDto) {
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(orderItemService.addItemToOrder(requestDto));
-
-    }
+//    @PostMapping
+//    public ResponseEntity<OrderItemResponseDto> addItemToOrder(@RequestBody OrderItemRequestDto requestDto) {
+//        return ResponseEntity
+//                .status(HttpStatus.CREATED)
+//                .body(orderItemService.addItemToOrder(requestDto));
+//
+//    }
 
     @DeleteMapping("{orderItemId}")
     public ResponseEntity<OrderItemResponseDto> deleteItemFromOrder(@PathVariable Integer orderItemId) {

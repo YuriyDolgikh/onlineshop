@@ -4,7 +4,7 @@ import org.onlineshop.dto.cartItem.CartItemRequestDto;
 import org.onlineshop.dto.cartItem.CartItemResponseDto;
 import org.onlineshop.dto.cartItem.CartItemUpdateDto;
 
-import java.util.List;
+import java.util.Set;
 
 public interface CartItemServiceInterface {
     CartItemResponseDto addItemToCart(CartItemRequestDto cartItemRequestDto);
@@ -13,5 +13,5 @@ public interface CartItemServiceInterface {
 
     CartItemResponseDto updateItemInCart(CartItemUpdateDto cartItemUpdateDto);
 
-    List<CartItemResponseDto> getCartItems();
+    Set<CartItemResponseDto> getCartItems();
 }

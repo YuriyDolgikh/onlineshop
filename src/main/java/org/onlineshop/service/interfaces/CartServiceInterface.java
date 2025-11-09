@@ -4,6 +4,6 @@ import org.onlineshop.dto.cart.CartResponseDto;
 
 public interface CartServiceInterface {
     void clearCart();
-    void transferToOrder();
+    void transferCartToOrder();
     CartResponseDto getCartFullData();
 }

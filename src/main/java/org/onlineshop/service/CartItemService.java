@@ -4,30 +4,29 @@ import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.cartItem.CartItemRequestDto;
 import org.onlineshop.dto.cartItem.CartItemResponseDto;
 import org.onlineshop.dto.cartItem.CartItemUpdateDto;
-import org.onlineshop.entity.Order;
-import org.onlineshop.entity.OrderItem;
+import org.onlineshop.entity.Cart;
+import org.onlineshop.entity.CartItem;
 import org.onlineshop.entity.Product;
 import org.onlineshop.entity.User;
-import org.onlineshop.repository.OrderItemRepository;
-import org.onlineshop.repository.OrderRepository;
-import org.onlineshop.repository.ProductRepository;
+import org.onlineshop.exception.BadRequestException;
+import org.onlineshop.repository.*;
 import org.onlineshop.service.converter.CartItemConverter;
 import org.onlineshop.service.interfaces.CartItemServiceInterface;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class CartItemService implements CartItemServiceInterface {
 
-    private final ProductRepository productRepository;
-    private final OrderRepository orderRepository;
-    private final OrderItemRepository orderItemRepository;
+    private final CartItemRepository cartItemRepository;
     private final UserService userService;
     private final CartItemConverter cartItemConverter;
+    private final CartService cartService;
+    private final ProductService productService;
 
     @Transactional
     @Override
@@ -35,28 +34,34 @@ public class CartItemService implements CartItemServiceInterface {
         if (cartItemRequestDto.getProductId() == null) {
             throw new IllegalArgumentException("Product Id cannot be null");
         }
-        if (cartItemRequestDto.getQuantity() == null || cartItemRequestDto.getQuantity() < 1) {
-            throw new IllegalArgumentException("Quantity must be at least 1");
+        if (cartItemRequestDto.getQuantity() == null) {
+            throw new IllegalArgumentException("Quantity cannot be null");
+        }
+        if (cartItemRequestDto.getQuantity() < 1) {
+            throw new BadRequestException("Quantity must be at least 1");
+        }
+        if (productService.getProductById(cartItemRequestDto.getProductId()).isEmpty()) {
+            throw new BadRequestException("Product with ID: " + cartItemRequestDto.getProductId() + " not found");
         }
         User user = userService.getCurrentUser();
-        OrderItem orderItem;
-        try {
-            orderItem = getOrderItemFromCart(user, cartItemRequestDto.getProductId());
-            orderItem.setQuantity(orderItem.getQuantity() + cartItemRequestDto.getQuantity());
-        } catch (IllegalArgumentException e) {
-            Product product = productRepository.findById(cartItemRequestDto.getProductId())
-                    .orElseThrow(() -> new IllegalArgumentException("Product not found with ID: " + cartItemRequestDto.getProductId()));
-
-            Order openOrder = getCurrentCart(user);
-
-            orderItem = new OrderItem();
-            orderItem.setOrder(openOrder);
-            orderItem.setProduct(product);
-            orderItem.setQuantity(cartItemRequestDto.getQuantity());
+        Cart cart = user.getCart();
+        Set<CartItem> cartItems = cart.getCartItems();
+        Optional<CartItem> cartItem = getCartItemFromCart(cartItemRequestDto.getProductId());
+        CartItem savedCartItem = new CartItem();
+        if (cartItem.isPresent()) {
+            cartItem.get().setQuantity(cartItem.get().getQuantity() + cartItemRequestDto.getQuantity());
+        } else {
+            Product product = productService.getProductById(cartItemRequestDto.getProductId()).get();
+            CartItem newCartItem = CartItem.builder()
+                    .product(product)
+                    .quantity(cartItemRequestDto.getQuantity())
+                    .build();
+            savedCartItem = cartItemRepository.save(newCartItem);
+            cartItems.add(savedCartItem);
+            cart.setCartItems(cartItems);
         }
-
-        OrderItem savedItem = orderItemRepository.save(orderItem);
-        return cartItemConverter.toDto(savedItem);
+        cartService.saveCart(cart);
+        return cartItemConverter.toDto(savedCartItem);
     }
 
     @Transactional
@@ -65,11 +70,14 @@ public class CartItemService implements CartItemServiceInterface {
         if (productId == null) {
             throw new IllegalArgumentException("Product Id cannot be null");
         }
-        User user = userService.getCurrentUser();
-        OrderItem orderItem = getOrderItemFromCart(user, productId);
-
-        orderItemRepository.delete(orderItem);
-        return cartItemConverter.toDto(orderItem);
+        Cart cart = cartService.getCurrentCart();
+        CartItem cartItemToRemove = cart.getCartItems().stream()
+                .filter(cartItem -> cartItem.getProduct().getId().equals(productId))
+                .findFirst().orElseThrow(() -> new IllegalArgumentException("Product with ID: " + productId + " not found in cart"));
+        cart.getCartItems().remove(cartItemToRemove);
+        cartItemRepository.delete(cartItemToRemove);
+        cartService.saveCart(cart);
+        return cartItemConverter.toDto(cartItemToRemove);
     }
 
     @Transactional
@@ -78,46 +86,36 @@ public class CartItemService implements CartItemServiceInterface {
         if (cartItemUpdateDto.getProductId() == null) {
             throw new IllegalArgumentException("Product Id cannot be null");
         }
-        if (cartItemUpdateDto.getQuantity() == null || cartItemUpdateDto.getQuantity() < 1) {
+        if (cartItemUpdateDto.getQuantity() == null) {
+            throw new IllegalArgumentException("Quantity cannot be null");
+        }
+        if (cartItemUpdateDto.getQuantity() < 1) {
             throw new IllegalArgumentException("Quantity must be at least 1");
         }
-        User user = userService.getCurrentUser();
-        OrderItem orderItem = getOrderItemFromCart(user, cartItemUpdateDto.getProductId());
-
-        orderItem.setQuantity(cartItemUpdateDto.getQuantity());
-        OrderItem savedItem = orderItemRepository.save(orderItem);
-
-        return cartItemConverter.toDto(savedItem);
+        if (productService.getProductById(cartItemUpdateDto.getProductId()).isEmpty()) {
+            throw new BadRequestException("Product with ID: " + cartItemUpdateDto.getProductId() + " not found");
+        }
+        CartItem cartItemToUpdate = getCartItemFromCart(cartItemUpdateDto.getProductId()).orElseThrow(() ->
+                new IllegalArgumentException("Product with ID: " + cartItemUpdateDto.getProductId() + " not found in users cart"));
+        cartItemToUpdate.setQuantity(cartItemUpdateDto.getQuantity());
+        CartItem savedCartItem = cartItemRepository.save(cartItemToUpdate);
+        return cartItemConverter.toDto(savedCartItem);
     }
 
     @Transactional
     @Override
-    public List<CartItemResponseDto> getCartItems() {
+    public Set<CartItemResponseDto> getCartItems() {
+        Cart cart = cartService.getCurrentCart();
+        return cartItemConverter.toDtos(cart.getCartItems());
+    }
+
+    //возвращает конкретный товар из корзины текущего пользователя
+    private Optional<CartItem> getCartItemFromCart(Integer productId) {
         User user = userService.getCurrentUser();
-        Order openOrder = getCurrentCart(user);
-        return cartItemConverter.toDtos(orderItemRepository.findByOrder(openOrder));
-    }
-
-    //возвращает корзину пользователя.
-    private Order getCurrentCart(User user) {
-        return orderRepository.findByUser(user).stream()
-                .filter(order -> order.getStatus() == Order.Status.OPEN)
-                .findFirst()
-                .orElseGet(() -> {
-                    Order newOrder = new Order();
-                    newOrder.setUser(user);
-                    newOrder.setStatus(Order.Status.OPEN);
-                    return orderRepository.save(newOrder);
-                });
-    }
-
-    //возвращает конкретный товар из корзины.
-    private OrderItem getOrderItemFromCart(User user, Integer productId) {
-        Order openOrder = getCurrentCart(user);
-
-        return orderItemRepository.findByOrder(openOrder).stream()
+        Cart userCart = user.getCart();
+        Set<CartItem> cartItems = userCart.getCartItems();
+        return cartItems.stream()
                 .filter(item -> item.getProduct().getId().equals(productId))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Product not found in cart"));
+                .findFirst();
     }
 }

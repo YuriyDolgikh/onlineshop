@@ -3,85 +3,109 @@ package org.onlineshop.service;
 import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.cart.CartResponseDto;
 import org.onlineshop.dto.cartItem.CartItemResponseDto;
-import org.onlineshop.entity.Order;
-import org.onlineshop.entity.OrderItem;
-import org.onlineshop.entity.User;
-import org.onlineshop.repository.OrderItemRepository;
+import org.onlineshop.entity.*;
+import org.onlineshop.exception.BadRequestException;
+import org.onlineshop.repository.CartRepository;
 import org.onlineshop.repository.OrderRepository;
+import org.onlineshop.repository.UserRepository;
 import org.onlineshop.service.converter.CartItemConverter;
 import org.onlineshop.service.interfaces.CartServiceInterface;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class CartService implements CartServiceInterface {
     private final OrderRepository orderRepository;
     private final UserService userService;
-    private final OrderItemRepository orderItemRepository;
     private final CartItemConverter cartItemConverter;
+    private final CartRepository cartRepository;
+    private final UserRepository userRepository;
 
     @Transactional
     @Override
     public void clearCart() {
         User user = userService.getCurrentUser();
-        Order openOrder = getCurrentCart(user);
-
-        List<OrderItem> items = orderItemRepository.findByOrder(openOrder);
-        orderItemRepository.deleteAll(items);
+        user.getCart().getCartItems().clear();
+        userRepository.save(user);
     }
 
     @Transactional
     @Override
-    public void transferToOrder() {
-        User user = userService.getCurrentUser();
-        Order openOrder = getCurrentCart(user);
-        List<OrderItem> items = orderItemRepository.findByOrder(openOrder);
-        if (items.isEmpty()) {
-            throw new IllegalStateException("Cart is empty, cannot transfer to order");
-        }
+    public void transferCartToOrder() {
 
-        openOrder.setStatus(Order.Status.PENDING_PAYMENT);
-        orderRepository.save(openOrder);
+        Cart cart = getCurrentCart();
+        User user = userService.getCurrentUser();
+        Set<CartItem> cartItems = cart.getCartItems();
+
+        List<OrderItem> orderItems = new ArrayList<>();
+
+        for (CartItem cartItem : cartItems) {
+            OrderItem orderItem = cartItemConverter.cartItemToOrderItem(cartItem);
+            orderItems.add(orderItem);
+        }
+        Order newOrder = new Order();
+        LocalDateTime now = LocalDateTime.now();
+        newOrder.setOrderItems(orderItems);
+        newOrder.setUser(user);
+        newOrder.setStatus(Order.Status.OPEN);
+        newOrder.setCreatedAt(now);
+        newOrder.setUpdatedAt(now);
+        Order savedOrder = orderRepository.save(newOrder);
+        user.getOrders().add(savedOrder);
+        userRepository.save(user);
+        clearCart();
     }
 
     @Transactional
     @Override
     public CartResponseDto getCartFullData() {
         User user = userService.getCurrentUser();
-        Order openOrder = getCurrentCart(user);
-
-        List<OrderItem> items = orderItemRepository.findByOrder(openOrder);
-
-        List<CartItemResponseDto> cartItems = items.stream()
+        Cart cart = getCurrentCart();
+        Set<CartItem> items = cart.getCartItems();
+        List<CartItemResponseDto> cartItemDtos = items.stream()
                 .map(cartItemConverter::toDto)
-                .collect(Collectors.toList());
-
+                .toList();
         BigDecimal totalPrice = BigDecimal.ZERO;
-        for (CartItemResponseDto item : cartItems) {
-            BigDecimal itemTotal = item.getProduct().getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
-            totalPrice = totalPrice.add(itemTotal);
+        for (CartItemResponseDto item : cartItemDtos) {
+            Product product = item.getProduct();
+            BigDecimal itemTotal = product.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
+            BigDecimal itemTotalWithDiscount = itemTotal
+                    .subtract(product.getPrice()
+                            .multiply(product.getDiscountPrice())
+                            .divide(BigDecimal.valueOf(100)));
+            totalPrice = totalPrice.add(itemTotalWithDiscount);
         }
         return CartResponseDto.builder()
                 .userId(user.getUserId())
-                .cartItems(cartItems)
+                .cartItems(cartItemDtos)
                 .totalPrice(totalPrice)
                 .build();
     }
 
-    private Order getCurrentCart(User user) {
-        return orderRepository.findByUser(user).stream()
-                .filter(o -> o.getStatus() == Order.Status.OPEN)
-                .findFirst()
-                .orElseGet(() -> {
-                    Order newOrder = new Order();
-                    newOrder.setUser(user);
-                    newOrder.setStatus(Order.Status.OPEN);
-                    return orderRepository.save(newOrder);
-                });
+    @Transactional
+    public Cart getCurrentCart() {
+        User user = userService.getCurrentUser();
+        return cartRepository.findByUser(user).orElseThrow(() -> new BadRequestException("Cart is empty"));
+    }
+
+    @Transactional
+    public void saveCart(Cart cart) {
+        if (cart == null) {
+            throw new IllegalArgumentException("Cart can't be null");
+        }
+        if (cart.getUser() == null) {
+            throw new IllegalArgumentException("User can't be null");
+        }
+        if (cart.getCartItems() == null){
+            throw new IllegalArgumentException("Cart items can't be null");
+        }
+        cartRepository.save(cart);
     }
 }

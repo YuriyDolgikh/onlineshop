@@ -26,7 +26,7 @@ public class CartController {
     @GetMapping("/toOrder")
     public ResponseEntity<Void> transferToOrder() {
 
-        cartService.transferToOrder();
+        cartService.transferCartToOrder();
 
         return ResponseEntity.ok().build();
     }
