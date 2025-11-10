@@ -28,6 +28,9 @@ public class CartService implements CartServiceInterface {
     private final CartRepository cartRepository;
     private final UserRepository userRepository;
 
+    /**
+     * Clears the current user's shopping cart.
+     */
     @Transactional
     @Override
     public void clearCart() {
@@ -36,6 +39,9 @@ public class CartService implements CartServiceInterface {
         userRepository.save(user);
     }
 
+    /**
+     * Transfers the current user's shopping cart to an order.
+     */
     @Transactional
     @Override
     public void transferCartToOrder() {
@@ -63,6 +69,13 @@ public class CartService implements CartServiceInterface {
         clearCart();
     }
 
+    /**
+     * Retrieves the full data of the current user's shopping cart, including cart items
+     * and the total price with applied discounts.
+     *
+     * @return a {@link CartResponseDto} containing the user ID, a list of cart item details,
+     * and the total price of the items in the cart with discounts applied.
+     */
     @Transactional
     @Override
     public CartResponseDto getCartFullData() {
@@ -89,12 +102,26 @@ public class CartService implements CartServiceInterface {
                 .build();
     }
 
+    /**
+     * Retrieves the current user's shopping cart.
+     * If the cart is empty, an exception is thrown.
+     *
+     * @return the current user's shopping cart object, or an exception if the cart is empty
+     */
     @Transactional
     public Cart getCurrentCart() {
         User user = userService.getCurrentUser();
         return cartRepository.findByUser(user).orElseThrow(() -> new BadRequestException("Cart is empty"));
     }
 
+    /**
+     * Saves the specified cart entity into the repository after validating its contents.
+     * The cart must have a valid user and cart items present; otherwise, an exception is thrown.
+     *
+     * @param cart the cart object to be saved
+     *             must not be null, must have a non-null user, and non-null cart items
+     * @throws IllegalArgumentException if the cart is null, the cart's user is null, or the cart's items are null
+     */
     @Transactional
     public void saveCart(Cart cart) {
         if (cart == null) {
@@ -103,7 +130,7 @@ public class CartService implements CartServiceInterface {
         if (cart.getUser() == null) {
             throw new IllegalArgumentException("User can't be null");
         }
-        if (cart.getCartItems() == null){
+        if (cart.getCartItems() == null) {
             throw new IllegalArgumentException("Cart items can't be null");
         }
         cartRepository.save(cart);

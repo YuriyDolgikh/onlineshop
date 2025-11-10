@@ -9,7 +9,8 @@ import org.onlineshop.entity.CartItem;
 import org.onlineshop.entity.Product;
 import org.onlineshop.entity.User;
 import org.onlineshop.exception.BadRequestException;
-import org.onlineshop.repository.*;
+import org.onlineshop.exception.NotFoundException;
+import org.onlineshop.repository.CartItemRepository;
 import org.onlineshop.service.converter.CartItemConverter;
 import org.onlineshop.service.interfaces.CartItemServiceInterface;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * Service class responsible for managing cart items for specific users.
+ * Provides functionality to add, remove, update, and retrieve cart items
+ * within a user's shopping cart. This class handles business logic
+ * related to cart item persistence and integration with upstream services
+ * such as ProductService, UserService, and CartService.
+ */
 @Service
 @RequiredArgsConstructor
 public class CartItemService implements CartItemServiceInterface {
@@ -28,6 +36,15 @@ public class CartItemService implements CartItemServiceInterface {
     private final CartService cartService;
     private final ProductService productService;
 
+    /**
+     * Adds an item to the user's cart. If the item already exists in the cart, its quantity is updated.
+     * If the item is not present in the cart, it is added as a new entry.
+     *
+     * @param cartItemRequestDto the DTO containing information about the product to add to the cart, such as product ID and quantity.
+     * @return a DTO representing the added or updated cart item, including product details and quantity.
+     * @throws IllegalArgumentException if the product ID or quantity is null.
+     * @throws BadRequestException      if the quantity is less than 1, or if the product cannot be found.
+     */
     @Transactional
     @Override
     public CartItemResponseDto addItemToCart(CartItemRequestDto cartItemRequestDto) {
@@ -64,6 +81,16 @@ public class CartItemService implements CartItemServiceInterface {
         return cartItemConverter.toDto(savedCartItem);
     }
 
+    /**
+     * Removes an item from the user's cart based on the provided product ID.
+     * If the product is not found in the cart, an exception is thrown.
+     * The cart is then updated and persisted.
+     *
+     * @param productId the ID of the product to be removed from the cart
+     * @return a DTO representing the cart item that was removed, including product details and quantity
+     * @throws IllegalArgumentException if the product ID is null
+     * @throws NotFoundException        if the product with the specified ID cannot be found in the cart
+     */
     @Transactional
     @Override
     public CartItemResponseDto removeItemFromCart(Integer productId) {
@@ -73,13 +100,23 @@ public class CartItemService implements CartItemServiceInterface {
         Cart cart = cartService.getCurrentCart();
         CartItem cartItemToRemove = cart.getCartItems().stream()
                 .filter(cartItem -> cartItem.getProduct().getId().equals(productId))
-                .findFirst().orElseThrow(() -> new IllegalArgumentException("Product with ID: " + productId + " not found in cart"));
+                .findFirst().orElseThrow(() -> new NotFoundException("Product with ID: " + productId + " not found in cart"));
         cart.getCartItems().remove(cartItemToRemove);
         cartItemRepository.delete(cartItemToRemove);
         cartService.saveCart(cart);
         return cartItemConverter.toDto(cartItemToRemove);
     }
 
+    /**
+     * Updates an existing item in the cart with new details provided in the input.
+     * Validates the input and ensures that the product exists and is present in the user's cart.
+     * If the product is not found in the cart or does not exist, appropriate exceptions are thrown.
+     *
+     * @param cartItemUpdateDto the DTO containing the product ID and the new quantity to update in the cart
+     * @return a data transfer object representing the updated cart item
+     * @throws IllegalArgumentException if the product ID or quantity is null, or if the quantity is less than 1
+     * @throws NotFoundException        if the product does not exist in the system or is not found in the user's cart
+     */
     @Transactional
     @Override
     public CartItemResponseDto updateItemInCart(CartItemUpdateDto cartItemUpdateDto) {
@@ -93,15 +130,21 @@ public class CartItemService implements CartItemServiceInterface {
             throw new IllegalArgumentException("Quantity must be at least 1");
         }
         if (productService.getProductById(cartItemUpdateDto.getProductId()).isEmpty()) {
-            throw new BadRequestException("Product with ID: " + cartItemUpdateDto.getProductId() + " not found");
+            throw new NotFoundException("Product with ID: " + cartItemUpdateDto.getProductId() + " not found");
         }
         CartItem cartItemToUpdate = getCartItemFromCart(cartItemUpdateDto.getProductId()).orElseThrow(() ->
-                new IllegalArgumentException("Product with ID: " + cartItemUpdateDto.getProductId() + " not found in users cart"));
+                new NotFoundException("Product with ID: " + cartItemUpdateDto.getProductId() + " not found in users cart"));
         cartItemToUpdate.setQuantity(cartItemUpdateDto.getQuantity());
         CartItem savedCartItem = cartItemRepository.save(cartItemToUpdate);
         return cartItemConverter.toDto(savedCartItem);
     }
 
+    /**
+     * Retrieves the items in the current user's shopping cart.
+     * Converts the cart items to a set of CartItemResponseDto.
+     *
+     * @return a set of CartItemResponseDto representing the items in the cart
+     */
     @Transactional
     @Override
     public Set<CartItemResponseDto> getCartItems() {
@@ -109,7 +152,12 @@ public class CartItemService implements CartItemServiceInterface {
         return cartItemConverter.toDtos(cart.getCartItems());
     }
 
-    //возвращает конкретный товар из корзины текущего пользователя
+    /**
+     * Retrieves a specific CartItem from the current user's cart based on the provided product ID.
+     *
+     * @param productId the ID of the product to search for within the user's cart
+     * @return an Optional containing the CartItem if found; otherwise, an empty Optional
+     */
     private Optional<CartItem> getCartItemFromCart(Integer productId) {
         User user = userService.getCurrentUser();
         Cart userCart = user.getCart();

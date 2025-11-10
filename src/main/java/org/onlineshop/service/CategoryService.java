@@ -6,7 +6,6 @@ import org.onlineshop.dto.category.CategoryRequestDto;
 import org.onlineshop.dto.category.CategoryResponseDto;
 import org.onlineshop.dto.category.CategoryUpdateDto;
 import org.onlineshop.entity.Category;
-import org.onlineshop.entity.Product;
 import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.repository.CategoryRepository;
 import org.onlineshop.service.converter.CategoryConverter;
@@ -25,6 +24,15 @@ public class CategoryService implements CategoryServiceInterface {
     private final CategoryConverter categoryConverter;
     private final CategoryServiceHelper helper;
 
+    /**
+     * Adds a new category based on the provided category request data.
+     *
+     * @param categoryRequestDto the data transfer object containing the details of the category to be added
+     * @return a CategoryResponseDto containing the details of the newly added category
+     * @throws IllegalArgumentException if the provided categoryRequestDto is null,
+     *                                  or if the category name is null or blank
+     * @throws BadRequestException      if a category with the same name already exists
+     */
     @Transactional
     @Override
     public CategoryResponseDto addCategory(CategoryRequestDto categoryRequestDto) {
@@ -49,6 +57,17 @@ public class CategoryService implements CategoryServiceInterface {
         return categoryConverter.toDto(savedCategory);
     }
 
+    /**
+     * Updates an existing category based on the provided category ID and update data.
+     * The method validates and updates fields like category name and image if provided.
+     *
+     * @param categoryId        the ID of the category to be updated
+     * @param categoryUpdateDto the data transfer object containing the updated details of the category
+     * @return a CategoryResponseDto containing the details of the updated category
+     * @throws IllegalArgumentException if the provided category ID is not found in the database,
+     *                                  or if the updated category name is invalid
+     * @throws BadRequestException      if a category with the updated name already exists with a different ID
+     */
     @Transactional
     @Override
     public CategoryResponseDto updateCategory(Integer categoryId, CategoryUpdateDto categoryUpdateDto) {
@@ -74,6 +93,14 @@ public class CategoryService implements CategoryServiceInterface {
         return categoryConverter.toDto(savedCategory);
     }
 
+    /**
+     * Deletes an existing category based on the provided category ID.
+     *
+     * @param categoryId the ID of the category to be deleted from the database
+     * @return a CategoryResponseDto containing the details of the deleted category
+     * @throws IllegalArgumentException if the provided category ID is null
+     * @throws BadRequestException      if the category cannot be deleted because it is associated with one or more products
+     */
     @Transactional
     @Override
     public CategoryResponseDto deleteCategory(Integer categoryId) {
@@ -89,20 +116,38 @@ public class CategoryService implements CategoryServiceInterface {
         return categoryConverter.toDto(categoryToDelete);
     }
 
+    /**
+     * Retrieves all categories from the database.
+     *
+     * @return a list of CategoryResponseDto objects containing the details of all categories in the database
+     */
     @Override
     public List<CategoryResponseDto> getAllCategories() {
         return categoryConverter.toDtos(categoryRepository.findAll());
     }
 
+    /**
+     * Retrieves a specific category based on the provided category ID.
+     *
+     * @param categoryId the ID of the category to be retrieved from the database
+     * @return a CategoryResponseDto containing the details of the retrieved category
+     * @throws BadRequestException if the provided category ID is not found in the database
+     */
     @Override
     public Category getCategoryById(Integer categoryId) {
         return categoryRepository.findByCategoryId(categoryId)
                 .orElseThrow(() -> new BadRequestException("Category with id: " + categoryId + " not found"));
     }
 
+    /**
+     * Retrieves a specific category based on the provided category name.
+     *
+     * @param categoryName the name of the category to be retrieved from the database
+     * @return a CategoryResponseDto containing the details of the retrieved category
+     * @throws BadRequestException if the provided category name is not found in the database
+     */
     public Category getCategoryByName(String categoryName) {
         return categoryRepository.findByCategoryName(categoryName)
                 .orElseThrow(() -> new BadRequestException("Category with name: " + categoryName + " not found"));
     }
-
 }
