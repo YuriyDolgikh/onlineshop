@@ -302,15 +302,15 @@ public class ProductController {
     )
     @ApiResponses({
             @ApiResponse(
-                    responseCode = "302",
-                    description = "Products found and retrieved",
+                    responseCode = "200",
+                    description = "Products retrieved successfully",
                     content = @Content(schema = @Schema(implementation = ProductResponseForUserDto.class))
             )
     })
     @GetMapping("/getAllProductForUser")
     public ResponseEntity<List<ProductResponseForUserDto>> getAllProductForUser() {
         return ResponseEntity
-                .status(HttpStatus.FOUND)
+                .status(HttpStatus.OK)
                 .body(productService.getAllProductsForUser());
     }
 
@@ -328,8 +328,8 @@ public class ProductController {
     )
     @ApiResponses({
             @ApiResponse(
-                    responseCode = "302",
-                    description = "Top discounted products found",
+                    responseCode = "200",
+                    description = "Products retrieved successfully",
                     content = @Content(schema = @Schema(implementation = ProductResponseForUserDto.class))
             ),
             @ApiResponse(
@@ -340,7 +340,7 @@ public class ProductController {
     @GetMapping("/getTopFiveProducts")
     public ResponseEntity<List<ProductResponseForUserDto>> getTopFiveDiscountedProductsOfTheDay() {
         return ResponseEntity
-                .status(HttpStatus.FOUND)
+                .status(HttpStatus.OK)
                 .body(productService.getTopFiveDiscountedProductsOfTheDay());
     }
 }
