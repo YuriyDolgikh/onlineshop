@@ -29,6 +29,7 @@ public class CategoryController {
 
     /**
      * Adds a new category to the system based on the details provided in the request.
+     *
      * @param categoryRequestDto the category details encapsulated in a {@code CategoryRequestDto}
      * @return a {@code ResponseEntity} containing a {@code CategoryResponseDto} with details of the newly created category
      */
@@ -50,7 +51,7 @@ public class CategoryController {
     @PostMapping
     public ResponseEntity<CategoryResponseDto> addCategory(
             @Parameter(description = "Category creation data", required = true)
-            @RequestBody CategoryRequestDto categoryRequestDto){
+            @RequestBody CategoryRequestDto categoryRequestDto) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(categoryService.addCategory(categoryRequestDto));
@@ -58,7 +59,8 @@ public class CategoryController {
 
     /**
      * Updates an existing category with the specified ID based on the details provided in the update request.
-     * @param categoryId the ID of the category to be updated
+     *
+     * @param categoryId        the ID of the category to be updated
      * @param categoryUpdateDto the category update details encapsulated in a {@code CategoryUpdateDto}
      * @return a {@code ResponseEntity} containing a {@code CategoryResponseDto} with the updated category details
      */
@@ -86,12 +88,13 @@ public class CategoryController {
             @Parameter(description = "ID of the category to update", required = true)
             @PathVariable Integer categoryId,
             @Parameter(description = "Updated category data", required = true)
-            @RequestBody CategoryUpdateDto categoryUpdateDto){
+            @RequestBody CategoryUpdateDto categoryUpdateDto) {
         return ResponseEntity.ok(categoryService.updateCategory(categoryId, categoryUpdateDto));
     }
 
     /**
      * Deletes an existing category with the specified ID.
+     *
      * @param categoryId the ID of the category to be deleted
      * @return a {@code ResponseEntity} containing a {@code CategoryResponseDto} with the deleted category details
      */
@@ -117,12 +120,13 @@ public class CategoryController {
     @DeleteMapping("/{categoryId}")
     public ResponseEntity<CategoryResponseDto> deleteCategory(
             @Parameter(description = "ID of the category to delete", required = true)
-            @PathVariable Integer categoryId){
+            @PathVariable Integer categoryId) {
         return ResponseEntity.ok(categoryService.deleteCategory(categoryId));
     }
 
     /**
      * Retrieves all categories from the system.
+     *
      * @return a {@code ResponseEntity} containing a {@code List<CategoryResponseDto>}
      * containing all categories available in the system
      */
@@ -138,7 +142,7 @@ public class CategoryController {
             )
     })
     @GetMapping
-    public ResponseEntity<List<CategoryResponseDto>> getAllCategories(){
+    public ResponseEntity<List<CategoryResponseDto>> getAllCategories() {
         return ResponseEntity.ok(categoryService.getAllCategories());
     }
 }
