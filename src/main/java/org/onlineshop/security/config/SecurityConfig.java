@@ -38,7 +38,6 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/**").permitAll()
                         .requestMatchers("/v1/users/**").permitAll()
                         .requestMatchers("/v1/products/**").hasAnyRole("ADMIN", "MANAGER", "USER")
                         .requestMatchers("/v1/carts/**").hasAnyRole("ADMIN", "MANAGER", "USER")
@@ -48,7 +47,6 @@ public class SecurityConfig {
                         .requestMatchers("/v1/categories/**").hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers("/swagger-ui/**").permitAll()
-                        .requestMatchers("/api/user/**").hasAnyRole("ADMIN", "USER")
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(new RestAuthEntryPoint())
