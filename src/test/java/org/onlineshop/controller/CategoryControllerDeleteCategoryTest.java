@@ -3,8 +3,6 @@ package org.onlineshop.controller;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.onlineshop.dto.category.CategoryRequestDto;
-import org.onlineshop.dto.category.CategoryResponseDto;
 import org.onlineshop.entity.Category;
 import org.onlineshop.entity.User;
 import org.onlineshop.exception.BadRequestException;
@@ -15,8 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
@@ -25,7 +21,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -33,7 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @TestPropertySource(locations = "classpath:application-test.yml")
-class CategoryControllerAddNewCategoryTest {
+class CategoryControllerDeleteCategoryTest {
     @Autowired
     private UserRepository userRepository;
 
@@ -66,7 +63,12 @@ class CategoryControllerAddNewCategoryTest {
                 .build();
 
         userRepository.save(newTestUser);
+    }
 
+    @Test
+    @WithMockUser(username = "testUser@email.com",
+            roles = {"ADMIN", "MANAGER"})
+    void testDeleteCategoryIfRoleAdminAndManagerAndIfOk() {
         Category category = Category.builder()
                 .categoryName("testCategoryForOtherTest")
                 .image("https://drive.google.com/file/d/1y03Ct0ABP1X8O6NFvK6FdqiMacYpLeTs/view?usp=drive_link")
@@ -75,71 +77,50 @@ class CategoryControllerAddNewCategoryTest {
 
         categoryRepository.save(category);
 
+        categoryController.deleteCategory(category.getCategoryId());
+
+        assertEquals(0, categoryRepository.findAll().size());
     }
 
     @Test
     @WithMockUser(username = "testUser@email.com",
             roles = {"ADMIN", "MANAGER"})
-    void testAddCategoryIfRoleAdminAndManagerAndIfOk() {
-        CategoryRequestDto categoryRequestDto = CategoryRequestDto.builder()
-                .categoryName("TestCategory")
-                .image("https://drive.google.com/file/two")
-                .build();
+    void testDeleteCategoryIfRoleAdminAndManagerAndIdCategoryNotFound() {
+        assertThrows(BadRequestException.class, () -> categoryController.deleteCategory(100000));
+    }
 
-        ResponseEntity<CategoryResponseDto> category = categoryController.addCategory(categoryRequestDto);
-        assertNotNull(category);
-        assertEquals(categoryRequestDto.getCategoryName(), category.getBody().getCategoryName());
-        assertEquals(categoryRequestDto.getImage(), category.getBody().getImage());
-        assertEquals(2, categoryRepository.findAll().size());
+    @Test
+    @WithMockUser(username = "testUser@email.com",
+            roles = {"ADMIN", "MANAGER"})
+    void testDeleteCategoryIfRoleAdminAndManagerAndIfIdCategoryNull() {
+        assertThrows(IllegalArgumentException.class, () -> categoryController.deleteCategory(null));
     }
 
     @Test
     @WithMockUser(username = "testUser@email.com", roles = "USER")
-    void testAddCategoryIfRoleUser() throws Exception {
-        mockMvc.perform(post("/v1/categories")).andExpect(status().isForbidden());
-    }
-
-    @Test
-    void testAddCategoryIfUserNotRegistered() throws Exception {
-        mockMvc.perform(post("/v1/categories")).andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    @WithMockUser(username = "testUser@email.com",
-            roles = {"ADMIN", "MANAGER"})
-    void testAddCategoryIfRoleAdminAndManagerAndNameTooLong() {
-        CategoryRequestDto categoryRequestDto = CategoryRequestDto.builder()
-                .categoryName("TestCategoryTestCategoryTestCategoryTestCategoryTestCategoryTestCategoryTestCategoryTestCategoryTestCategory")
-                .image("https://drive.google.com/file/two")
-                .build();
-
-        assertThrows(DataIntegrityViolationException.class, () -> categoryController.addCategory(categoryRequestDto));
-        assertEquals(1, categoryRepository.findAll().size());
-    }
-
-    @Test
-    @WithMockUser(username = "testUser@email.com",
-            roles = {"ADMIN", "MANAGER"})
-    void testAddCategoryIfRoleAdminAndManagerAndNameTooShort() throws Exception {
-        CategoryRequestDto categoryRequestDto = CategoryRequestDto.builder()
-                .categoryName("Te")
-                .image("https://drive.google.com/file/two")
-                .build();
-
-        mockMvc.perform(post("/v1/categories")).andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @WithMockUser(username = "testUser@email.com",
-            roles = {"ADMIN", "MANAGER"})
-    void testAddCategoryIfRoleAdminAndManagerAndNameCategoryIsAlreadyExist() {
-        CategoryRequestDto categoryRequestDto = CategoryRequestDto.builder()
+    void testDeleteCategoryIfRoleUser() throws Exception {
+        Category category = Category.builder()
                 .categoryName("testCategoryForOtherTest")
-                .image("https://drive.google.com/file/two")
+                .image("https://drive.google.com/file/d/1y03Ct0ABP1X8O6NFvK6FdqiMacYpLeTs/view?usp=drive_link")
+                .products(new ArrayList<>())
                 .build();
 
-        assertThrows(BadRequestException.class, () -> categoryController.addCategory(categoryRequestDto));
-        assertEquals(1, categoryRepository.findAll().size());
+        categoryRepository.save(category);
 
+        mockMvc.perform(delete("/v1/categories/" + category.getCategoryId())).andExpect(status().isForbidden());
     }
+
+    @Test
+    void testDeleteCategoryIfUserNotRegistered() throws Exception {
+        Category category = Category.builder()
+                .categoryName("testCategoryForOtherTest")
+                .image("https://drive.google.com/file/d/1y03Ct0ABP1X8O6NFvK6FdqiMacYpLeTs/view?usp=drive_link")
+                .products(new ArrayList<>())
+                .build();
+
+        categoryRepository.save(category);
+
+        mockMvc.perform(delete("/v1/categories/" + category.getCategoryId())).andExpect(status().isUnauthorized());
+    }
+
 }
