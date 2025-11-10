@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -100,6 +101,13 @@ class ProductControllerDeleteProductTest {
             roles = {"ADMIN", "MANAGER"})
     void deleteProductIfRoleAdminAndManagerAndIfIdNotFound() {
         assertThrows(IllegalArgumentException.class, () -> productController.deleteProduct(100000));
+    }
+
+    @Test
+    @WithMockUser(username = "testUser@email.com",
+            roles = {"ADMIN", "MANAGER"})
+    void deleteProductIfRoleAdminAndManagerAndIfIdNull() {
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> productController.deleteProduct(null));
     }
 
     @Test
