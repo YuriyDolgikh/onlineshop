@@ -28,6 +28,13 @@ public class MailUtil {
 
     // http://localhost:8080/api/public/confirmation?code=f9fcc1ec-6d34-4fbe-9367-69378ae89d70
 
+    /**
+     * Sends a confirmation email to the specified user with the provided confirmation link.
+     *
+     * @param user the recipient of the confirmation email
+     * @param linkToSend the confirmation link to be included in the email
+     * @throws MailSendingException if an error occurs during the email sending process
+     */
     public void sendConfirmationEmail(User user, String linkToSend) {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, "UTF-8");
@@ -41,6 +48,15 @@ public class MailUtil {
         mailSender.send(message);
     }
 
+    /**
+     * Generates the content for a confirmation email using a predefined template.
+     *
+     * @param user the user who will receive the confirmation email
+     * @param linkToSend the confirmation link to be included in the email content
+     * @return the generated email content as a string
+     * @throws IOException if an I/O error occurs while loading the email template
+     * @throws TemplateException if an error occurs while processing the email template
+     */
     public String createConfirmationEmail(User user, String linkToSend) throws IOException, TemplateException {
         Template template = freemakerConfiguration.getTemplate("confirm_registration_mail.ftlh");
         Map<Object, Object> model = new HashMap<>();
@@ -49,6 +65,15 @@ public class MailUtil {
         return FreeMarkerTemplateUtils.processTemplateIntoString(template, model);
     }
 
+    /**
+     * Sends an order paid confirmation email to the specified user with the provided order details
+     * and attaches the corresponding PDF receipt.
+     *
+     * @param user the recipient of the confirmation email
+     * @param order the order for which the confirmation email is being sent
+     * @param pdfBytes the PDF file content to be attached to the email as bytes
+     * @throws MailSendingException if an error occurs during the email sending process
+     */
     public void sendOrderPaidEmail(User user, Order order, byte[] pdfBytes) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
@@ -77,15 +102,10 @@ public class MailUtil {
                     order.getDeliveryMethod(),
                     order.getDeliveryAddress()
             );
-
             helper.setText(text, false);
-
-
             helper.addAttachment("order_" + order.getOrderId() + ".pdf",
                     new ByteArrayResource(pdfBytes));
-
             mailSender.send(message);
-
         } catch (Exception e) {
             throw new MailSendingException("Error sending order payment email: " + e.getMessage());
         }

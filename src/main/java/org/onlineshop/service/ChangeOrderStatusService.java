@@ -16,6 +16,24 @@ public class ChangeOrderStatusService {
 
     private final OrderRepository orderRepository;
 
+    /**
+     * Periodically processes the statuses of orders based on predefined criteria.
+     * This method is scheduled to execute every 30 seconds.
+     *
+     * The method retrieves orders in specific statuses (e.g., PAID, IN_TRANSIT)
+     * that are eligible for status updates. If no eligible orders are found,
+     * it logs a message indicating no active orders are found.
+     *
+     * For each eligible order, the status is updated to the next logical status:
+     * - PAID -> IN_TRANSIT
+     * - IN_TRANSIT -> DELIVERED
+     *
+     * Updates to the status are saved to the database, and a log message is output
+     * indicating the newly updated status for each order.
+     *
+     * This method is transactional to ensure consistency in the database
+     * during the status update process.
+     */
     @Scheduled(cron = "*/30 * * * * *")
     @Transactional
     public void processOrderStatus() {
@@ -30,6 +48,12 @@ public class ChangeOrderStatusService {
         }
     }
 
+    /**
+     * Retrieves a list of orders eligible for a status change based on their current status.
+     * Orders with the status PAID or IN_TRANSIT are included in the result.
+     *
+     * @return a list of orders that have a status of PAID or IN_TRANSIT
+     */
     private List<Order> getOrdersForChangeStatus() {
         return orderRepository.findAll()
                 .stream()
@@ -38,6 +62,19 @@ public class ChangeOrderStatusService {
                 .toList();
     }
 
+    /**
+     * Updates the status of the given order to the next logical status based on its current status.
+     *
+     * This method performs the following transitions for the provided order:
+     * - If the current status is PAID, the status is updated to IN_TRANSIT.
+     * - If the current status is IN_TRANSIT, the status is updated to DELIVERED.
+     *
+     * No action is performed if the order's status is already DELIVERED or CANCELLED.
+     * The method also updates the order's last updated timestamp and saves the changes
+     * to the order repository.
+     *
+     * @param order the order whose status is to be updated
+     */
     private void setNextOrderStatus(Order order) {
         Order.Status orderStatus = order.getStatus();
         if (orderStatus == Order.Status.DELIVERED || orderStatus == Order.Status.CANCELLED) {

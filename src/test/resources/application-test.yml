@@ -2,7 +2,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/test
     username: postgres
-    password: 789456
+    password: 1111
 
   liquibase:
     change-log: db.changelog-test-postgres.yaml

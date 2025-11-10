@@ -32,6 +32,17 @@ public class OrderService implements OrderServiceInterface {
     private final OrderItemService orderItemService;
     private final MailUtil mailUtil;
 
+    /**
+     * Saves an order based on the provided order request data.
+     *
+     * @param dto the {@link OrderRequestDto} containing order request information such as
+     *            delivery address, contact phone, delivery method, and order items.
+     *            Must not be null.
+     * @return an {@link OrderResponseDto} containing details of the saved order.
+     * @throws BadRequestException      if the provided {@code dto} is null.
+     * @throws IllegalArgumentException if the specified delivery method in {@code dto}
+     *                                  does not match any {@code Order.DeliveryMethod} constants.
+     */
     @Transactional
     @Override
     public OrderResponseDto saveOrder(OrderRequestDto dto) {
@@ -57,6 +68,12 @@ public class OrderService implements OrderServiceInterface {
         return orderConverter.toDto(order);
     }
 
+    /**
+     * Retrieves an order by its ID.
+     *
+     * @param orderId the ID of the order to be retrieved - must not be null
+     * @return an {@link OrderResponseDto} containing details of the retrieved order
+     */
     @Transactional
     @Override
     public OrderResponseDto getOrderById(Integer orderId) {
@@ -68,6 +85,15 @@ public class OrderService implements OrderServiceInterface {
         return orderConverter.toDto(order);
     }
 
+    /**
+     * Retrieves all orders for the specified user.
+     *
+     * @param userId the ID of the user whose orders are to be retrieved - must not be null
+     * @return a list of {@link OrderResponseDto} objects representing the user's orders
+     * @throws NotFoundException        if the user with the specified ID is not found
+     * @throws AccessDeniedException    if the current user is not authorized to view the orders of another user
+     * @throws IllegalArgumentException if the specified user ID is null
+     */
     @Transactional
     @Override
     public List<OrderResponseDto> getOrdersByUser(Integer userId) {
@@ -83,6 +109,16 @@ public class OrderService implements OrderServiceInterface {
         return orderConverter.toDtos(orders);
     }
 
+    /**
+     * Updates the status of an order.
+     *
+     * @param orderId   the ID of the order to be updated - must not be null
+     * @param newStatus the new status to be set for the order - must not be null or blank
+     * @return an {@link OrderResponseDto} containing the updated order details
+     * @throws NotFoundException        if the order with the specified ID is not found
+     * @throws AccessDeniedException    if the current user is not authorized to update the order
+     * @throws IllegalArgumentException if the specified order ID or new status is null or blank
+     */
     @Transactional
     @Override
     public OrderResponseDto updateOrderStatus(Integer orderId, String newStatus) {
@@ -100,6 +136,13 @@ public class OrderService implements OrderServiceInterface {
         return orderConverter.toDto(order);
     }
 
+    /**
+     * Cancel an order.
+     *
+     * @param orderId the ID of the order to be cancelled - must not be null
+     * @throws NotFoundException     if the order with the specified ID is not found
+     * @throws AccessDeniedException if the current user is not authorized to cancel the order
+     */
     @Transactional
     @Override
     public void cancelOrder(Integer orderId) {
@@ -113,6 +156,16 @@ public class OrderService implements OrderServiceInterface {
         orderRepository.save(order);
     }
 
+    /**
+     * Confirms payment for an order and sends an email notification.
+     *
+     * @param orderId       the ID of the order to be confirmed - must not be null
+     * @param paymentMethod the payment method used to pay for the order - must not be null or blank
+     * @return an {@link OrderResponseDto} containing the updated order details
+     * @throws NotFoundException     if the order with the specified ID is not found
+     * @throws AccessDeniedException if the current user is not authorized to confirm payment for the order
+     * @throws MailSendingException  if an error occurs while attempting to send an email notification
+     */
     @Transactional
     @Override
     public OrderResponseDto confirmPayment(Integer orderId, String paymentMethod) {
@@ -126,7 +179,6 @@ public class OrderService implements OrderServiceInterface {
         orderRepository.save(order);
 
         byte[] pdfBytes = PdfOrderGenerator.generatePdfOrder(order);
-
         try {
             mailUtil.sendOrderPaidEmail(order.getUser(), order, pdfBytes);
         } catch (Exception e) {
@@ -135,36 +187,58 @@ public class OrderService implements OrderServiceInterface {
         return orderConverter.toDto(order);
     }
 
+    /**
+     * Updates the delivery details of an existing order.
+     *
+     * @param orderId         the unique identifier of the order to be updated
+     * @param orderRequestDto an object containing the new delivery details, including delivery address,
+     *                        contact phone, and delivery method
+     * @return an OrderResponseDto containing the updated order information
+     * @throws AccessDeniedException    if the user is not authorized to access or update the order
+     * @throws IllegalArgumentException if the dto object or any required fields (delivery address or contact phone)
+     *                                  are null or invalid
+     * @throws RuntimeException         if the order is not found or the specified delivery method is invalid
+     */
     @Transactional
     @Override
-    public OrderResponseDto updateOrderDelivery(Integer orderId, OrderRequestDto dto) {
+    public OrderResponseDto updateOrderDelivery(Integer orderId, OrderRequestDto orderRequestDto) {
         if (!isAccessToOrderAllowed(orderId)) {
             throw new AccessDeniedException("Access denied");
         }
-        if (dto == null) {
+        if (orderRequestDto == null) {
             throw new IllegalArgumentException("OrderRequestDto cannot be null");
         }
-        if (dto.getDeliveryAddress() == null || dto.getDeliveryAddress().isBlank()) {
+        if (orderRequestDto.getDeliveryAddress() == null || orderRequestDto.getDeliveryAddress().isBlank()) {
             throw new IllegalArgumentException("Delivery address cannot be null or empty");
         }
 
-        if (dto.getContactPhone() == null || dto.getContactPhone().isBlank()) {
+        if (orderRequestDto.getContactPhone() == null || orderRequestDto.getContactPhone().isBlank()) {
             throw new IllegalArgumentException("Contact phone cannot be null empty");
         }
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
         try {
-            order.setDeliveryMethod(Order.DeliveryMethod.valueOf(dto.getDeliveryMethod().toUpperCase()));
+            order.setDeliveryMethod(Order.DeliveryMethod.valueOf(orderRequestDto.getDeliveryMethod().toUpperCase()));
         } catch (IllegalArgumentException e) {
-            throw new RuntimeException("Invalid delivery method: " + dto.getDeliveryMethod());
+            throw new RuntimeException("Invalid delivery method: " + orderRequestDto.getDeliveryMethod());
         }
-        order.setDeliveryAddress(dto.getDeliveryAddress());
-        order.setContactPhone(dto.getContactPhone());
+        order.setDeliveryAddress(orderRequestDto.getDeliveryAddress());
+        order.setContactPhone(orderRequestDto.getContactPhone());
         orderRepository.save(order);
         return orderConverter.toDto(order);
     }
 
+    /**
+     * Retrieves the order status DTO for a given order ID. This method ensures that the
+     * current user has appropriate access to the requested order and retrieves the
+     * order details if it exists.
+     *
+     * @param orderId the ID of the order for which the status is to be retrieved
+     * @return an OrderStatusResponseDto containing the status and last updated timestamp of the order
+     * @throws AccessDeniedException if the user does not have access to the specified order
+     * @throws NotFoundException     if the order with the given ID is not found
+     */
     @Transactional
     @Override
     public OrderStatusResponseDto getOrderStatusDto(Integer orderId) {
@@ -176,6 +250,14 @@ public class OrderService implements OrderServiceInterface {
         return new OrderStatusResponseDto(order.getStatus().name(), order.getUpdatedAt());
     }
 
+    /**
+     * Checks if the current user has access to the specified order.
+     *
+     * @param orderId the ID of the order to be checked for access rights
+     * @return true if the current user has access to the order, false otherwise
+     * @throws NotFoundException if the order with the given ID is not found
+     * @throws BadRequestException if the specified order ID is null
+     */
     public boolean isAccessToOrderAllowed(Integer orderId) {
         if (orderId == null) {
             throw new BadRequestException("OrderId cannot be null");
@@ -186,7 +268,7 @@ public class OrderService implements OrderServiceInterface {
         if (currentUser.getRole() == User.Role.ADMIN || currentUser.getRole() == User.Role.MANAGER) {
             return true;
         }
-        // обычный пользователь — только свои заказы
+        // USER has the right to access only their orders
         return orderRepository.findById(orderId)
                 .map(o -> o.getUser() != null && o.getUser().getUserId().equals(currentUser.getUserId()))
                 .orElseThrow(() -> new NotFoundException("Order not found with ID: " + orderId));
