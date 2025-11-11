@@ -1,0 +1,52 @@
+Описание сервиса StatisticService
+
+Сервис StatisticService отвечает за получение статистики по товарам и прибыли.
+Он реализует интерфейс StatisticServiceInterface и выполняет операции
+по подсчёту наиболее продаваемых, отменённых товаров, товаров в ожидании оплаты,
+а также расчёта прибыли за выбранный период.
+
+Основные зависимости:
+
+   * OrderRepository — для получения заказов с различными статусами и датами создания.
+ 
+   * ProductConverter — для преобразования данных о продуктах в DTO.
+
+Основные методы:
+
+1. getTopTenPurchasedProducts()
+   Получает список из 10 самых покупаемых продуктов со статусом PAID.
+   * Вызывает приватный метод getTopTenProducts(Order.Status.PAID).
+   * Возвращает список ProductStatisticResponseDto.
+
+2. getTenCanceledProducts()
+   Получает список из 10 продуктов, по которым были отменённые заказы.
+   * Вызывает приватный метод getTopTenProducts(Order.Status.CANCELLED).
+   * Возвращает список ProductStatisticResponseDto.
+
+3. getProductsInPendingPaymentStatus(Integer days)
+   Получает продукты с заказами в статусе PENDING_PAYMENT за последние N дней
+   * Вычисляет дату начала периода.
+   * Создаёт карту productQuantityMap для подсчёта количества каждого продукта.
+   * Получает заказы с статусом PENDING_PAYMENT, созданные после startDate.
+   * Считает количество каждого продукта в заказах.
+   * Преобразует карту в список ProductStatisticResponseDto через ProductConverter.
+
+4. getProfitStatistics(ProfitStatisticRequestDto request)
+   Получает статистику прибыли за период с группировкой по часу, дню, неделе или месяцу.
+   * Валидирует единицу периода (DAYS, WEEKS, MONTHS, YEARS) и groupBy (HOUR, DAY, WEEK, MONTH).
+   * Определяет startDate и endDate.
+   * Получает заказы со статусом PAID после startDate.
+   * Группирует прибыль по ключу в зависимости от groupBy.
+   * Вычисляет totalProfit.
+   * Возвращает ProfitStatisticsResponseDto с данными о прибыли.
+
+Приватные методы:
+
+5. getTopTenProducts(Order.Status orderStatus)
+   Получает топ-10 продуктов по количеству продаж для указанного статуса заказа.
+  * Создаёт карту productTopTenProducts для подсчёта количества каждого продукта.
+  * Получает все заказы с указанным статусом.
+  * Суммирует количество продуктов по заказам.
+  * Сортирует по убыванию и оставляет первые 10.
+  * Преобразует в список ProductStatisticResponseDto через ProductConverter.
+
