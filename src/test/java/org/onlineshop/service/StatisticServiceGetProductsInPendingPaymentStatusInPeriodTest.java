@@ -13,6 +13,10 @@ import org.onlineshop.entity.OrderItem;
 import org.onlineshop.entity.Product;
 import org.onlineshop.repository.OrderRepository;
 import org.onlineshop.service.converter.ProductConverter;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -25,7 +29,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
-
+@SpringBootTest
+@ActiveProfiles("test")
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@TestPropertySource(locations = "classpath:application-test.yml")
 @ExtendWith(MockitoExtension.class)
 class StatisticServiceGetProductsInPendingPaymentStatusInPeriodTest {
     @Mock
