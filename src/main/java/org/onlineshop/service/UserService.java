@@ -137,8 +137,8 @@ public class UserService implements UserServiceInterface {
             userToUpdate.setHashPassword(passwordEncoder.encode(updateRequest.getHashPassword()));
         }
         // Save the updated user
-        userRepository.save(currentUser);
-        return userConverter.toDto(currentUser);
+        userRepository.save(userToUpdate);
+        return userConverter.toDto(userToUpdate);
     }
 
     /**
