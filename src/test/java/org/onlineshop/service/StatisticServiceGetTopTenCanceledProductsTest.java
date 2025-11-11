@@ -26,7 +26,7 @@ import static org.mockito.Mockito.when;
 
 
 @ExtendWith(MockitoExtension.class)
-class StatisticServiceGetTopTenPurchasedProductsTest {
+class StatisticServiceGetTopTenCanceledProductsTest {
 
     @Mock
     private OrderRepository orderRepository;
@@ -38,7 +38,7 @@ class StatisticServiceGetTopTenPurchasedProductsTest {
     private StatisticService statisticService;
 
     @Test
-    void getTopTenPurchasedProductsTest() {
+    void getTenCanceledProductsTest() {
         Category category = Category.builder()
                 .categoryId(1)
                 .categoryName("Category1")
@@ -51,10 +51,9 @@ class StatisticServiceGetTopTenPurchasedProductsTest {
                     .name("Product " + i)
                     .price(new BigDecimal(100 + i * 10))
                     .discountPrice(new BigDecimal(80 + i * 5))
-                    .category(category)
-                    .build());
-        }
+                    .category(category).build());
 
+        }
         List<Order> orders = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
             Order order = new Order();
@@ -73,7 +72,7 @@ class StatisticServiceGetTopTenPurchasedProductsTest {
             orders.add(order);
         }
 
-        when(orderRepository.findByStatus(Order.Status.PAID)).thenReturn(orders);
+        when(orderRepository.findByStatus(Order.Status.CANCELLED)).thenReturn(orders);
 
         when(productConverter.fromMapToList(Mockito.anyMap()))
                 .thenAnswer(invocation -> {
@@ -112,7 +111,7 @@ class StatisticServiceGetTopTenPurchasedProductsTest {
                         .build())
                 .toList();
 
-        List<ProductStatisticResponseDto> actualList = statisticService.getTopTenPurchasedProducts();
+        List<ProductStatisticResponseDto> actualList = statisticService.getTenCanceledProducts();
 
         assertEquals(expectedList.size(), actualList.size());
 
