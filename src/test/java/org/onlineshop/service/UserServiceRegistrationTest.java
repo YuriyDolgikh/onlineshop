@@ -38,6 +38,12 @@ class UserServiceRegistrationTest {
     @Autowired
     private UserService userService;
 
+    @AfterEach
+    void dropDatabase() {
+        confirmationCodeRepository.deleteAll();
+        userRepository.deleteAll();
+    }
+
     @BeforeEach
     void setUp() {
         User newTestUser = User.builder()
@@ -58,12 +64,6 @@ class UserServiceRegistrationTest {
                 .build();
 
         confirmationCodeRepository.save(confirmationCode);
-    }
-
-    @AfterEach
-    void dropDatabase() {
-        confirmationCodeRepository.deleteAll();
-        userRepository.deleteAll();
     }
 
     @Test
