@@ -45,6 +45,7 @@ class CategoryControllerAddNewCategoryTest {
 
     @Autowired
     private CategoryController categoryController;
+
     @Autowired
     private MockMvc mockMvc;
 
