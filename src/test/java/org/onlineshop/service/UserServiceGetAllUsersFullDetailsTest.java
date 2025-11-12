@@ -1,40 +1,36 @@
 package org.onlineshop.service;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.onlineshop.dto.user.UserResponseDto;
 import org.onlineshop.entity.ConfirmationCode;
 import org.onlineshop.entity.User;
-import org.onlineshop.exception.BadRequestException;
-import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.repository.ConfirmationCodeRepository;
 import org.onlineshop.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @TestPropertySource(locations = "classpath:application-test.yml")
-class UserServiceDeleteTest {
+class UserServiceGetAllUsersFullDetailsTest {
+
     @Autowired
     private UserRepository userRepository;
 
     @Autowired
-    private ConfirmationCodeRepository confirmationCodeRepository;
+    private UserService userService;
 
     @Autowired
-    private UserService userService;
+    private ConfirmationCodeRepository confirmationCodeRepository;
 
     @AfterEach
     void dropDatabase() {
@@ -42,12 +38,8 @@ class UserServiceDeleteTest {
         userRepository.deleteAll();
     }
 
-    private Integer userId;
-
-    private Integer adminId;
-
-    @BeforeEach
-    void setUp() {
+    @Test
+    void testGetAllUsersFullDetailsWhenUsersExist() {
         User newTestUser = User.builder()
                 .username("newTestUser")
                 .email("testUser@email.com")
@@ -58,8 +50,6 @@ class UserServiceDeleteTest {
                 .build();
 
         User savedUser = userRepository.save(newTestUser);
-
-        userId = newTestUser.getUserId();
 
         ConfirmationCode confirmationCode = ConfirmationCode.builder()
                 .code("someConfirmationCode")
@@ -74,13 +64,11 @@ class UserServiceDeleteTest {
                 .email("admin@email.com")
                 .hashPassword("$2a$10$WiAt7dmC1vLIxjY9/9n7P.I5RQU1MKKSOI1Dy1pNLPPIts7K5RJR2")
                 .phoneNumber("+4912121212")
-                .status(User.Status.CONFIRMED)
+                .status(User.Status.NOT_CONFIRMED)
                 .role(User.Role.ADMIN)
                 .build();
 
         User savedAdmin = userRepository.save(admin);
-
-        adminId = admin.getUserId();
 
         ConfirmationCode confirmationCodeAdmin = ConfirmationCode.builder()
                 .code("ConfirmationCode")
@@ -89,45 +77,62 @@ class UserServiceDeleteTest {
                 .build();
 
         confirmationCodeRepository.save(confirmationCodeAdmin);
+
+        List<User> result = userService.getAllUsersFullDetails();
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+
+        User savedUser1 = result.get(0);
+        User savedUser2 = result.get(1);
+
+        assertTrue(result.stream().anyMatch(u -> u.getEmail().equals("testUser@email.com")));
+        assertTrue(result.stream().anyMatch(u -> u.getEmail().equals("admin@email.com")));
+
+        assertEquals("USER", savedUser1.getRole().name());
+        assertEquals("ADMIN", savedUser2.getRole().name());
+
+        assertEquals("CONFIRMED", savedUser1.getStatus().name());
+        assertEquals("NOT_CONFIRMED", savedUser2.getStatus().name());
     }
 
     @Test
-    @WithMockUser(username = "testUser@email.com", roles = "USER")
-    void testDeleteUser() {
-        UserResponseDto deleteUser = userService.deleteUser(userId);
+    void testGetAllUsersFullDetailsWhenUsersNotExists() {
+        List<User> result = userService.getAllUsersFullDetails();
 
-        assertEquals(deleteUser.getStatus(), "DELETED");
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 
     @Test
-    @WithMockUser(username = "testUser@email.com", roles = "USER")
-    void testDeleteUserIfIdNotFound() {
-        assertThrows(NotFoundException.class, () -> userService.deleteUser(100000));
-    }
-
-    @Test
-    @WithMockUser(username = "testUser@email.com", roles = "USER")
-    void testDeleteUserIfAnotherUser() {
-        User newUser = User.builder()
-                .username("newUser")
-                .email("newUser@email.com")
+    void testGetAllUsersFullDetailsWithCorrectData() {
+        User newTestUser = User.builder()
+                .username("newTestUser")
+                .email("testUser@email.com")
                 .hashPassword("$2a$10$WiAt7dmC1vLIxjY9/9n7P.I5RQU1MKKSOI1Dy1pNLPPIts7K5RJR2")
-                .phoneNumber("+4912451212")
+                .phoneNumber("+494949494949")
                 .status(User.Status.CONFIRMED)
                 .role(User.Role.USER)
                 .build();
 
-        userRepository.save(newUser);
+        User savedUser = userRepository.save(newTestUser);
 
-        Exception exception = assertThrows(BadRequestException.class, () -> userService.deleteUser(newUser.getUserId()));
-        assertEquals("You can't delete another user", exception.getMessage());
+        ConfirmationCode confirmationCode = ConfirmationCode.builder()
+                .code("someConfirmationCode")
+                .user(savedUser)
+                .expireDataTime(LocalDateTime.now().plusDays(1))
+                .build();
+
+        confirmationCodeRepository.save(confirmationCode);
+
+        List<User> result = userService.getAllUsersFullDetails();
+
+        User userFromResult = result.get(0);
+        assertEquals("newTestUser", userFromResult.getUsername());
+        assertEquals("testUser@email.com", userFromResult.getEmail());
+        assertEquals("$2a$10$WiAt7dmC1vLIxjY9/9n7P.I5RQU1MKKSOI1Dy1pNLPPIts7K5RJR2", userFromResult.getHashPassword());
+        assertEquals(User.Role.USER, userFromResult.getRole());
+        assertEquals(User.Status.CONFIRMED, userFromResult.getStatus());
     }
-
-    @Test
-    @WithMockUser(username = "admin@email.com", roles = "ADMIN")
-    void testDeleteUserIfRoleAdmin() {
-        assertThrows(BadRequestException.class, () -> userService.deleteUser(adminId));
-    }
-
 
 }
