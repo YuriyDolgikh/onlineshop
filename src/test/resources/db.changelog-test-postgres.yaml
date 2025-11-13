@@ -187,6 +187,7 @@ databaseChangeLog:
               - column:
                   name: order_id
                   type: INT
+                  autoIncrement: true
                   constraints:
                     primaryKey: true
                     nullable: false

@@ -138,31 +138,31 @@
     <build>
         <plugins>
 
-<!--            <plugin>-->
-<!--                <groupId>org.jacoco</groupId>-->
-<!--                <artifactId>jacoco-maven-plugin</artifactId>-->
-<!--                <version>0.8.10</version>-->
-<!--                <executions>-->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.10</version>
+                <executions>
 
-<!--                    &lt;!&ndash; Подключает агент JaCoCo во время тестов &ndash;&gt;-->
-<!--                    <execution>-->
-<!--                        <id>prepare-agent</id>-->
-<!--                        <goals>-->
-<!--                            <goal>prepare-agent</goal>-->
-<!--                        </goals>-->
-<!--                    </execution>-->
+                    <!-- Подключает агент JaCoCo во время тестов -->
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
 
-<!--                    &lt;!&ndash; Генерирует HTML-отчёт после тестов &ndash;&gt;-->
-<!--                    <execution>-->
-<!--                        <id>report</id>-->
-<!--                        <phase>verify</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>report</goal>-->
-<!--                        </goals>-->
-<!--                    </execution>-->
+                    <!-- Генерирует HTML-отчёт после тестов -->
+                    <execution>
+                        <id>report</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
 
-<!--                </executions>-->
-<!--            </plugin>-->
+                </executions>
+            </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

@@ -85,7 +85,7 @@ class StatisticServiceGetProductsInPendingPaymentStatusInPeriodTest {
             orders.add(order);
         }
 
-        when(orderRepository.findByStatusAndCreatedAtAfter(Mockito.eq(Order.Status.PENDING_PAYMENT), Mockito.any())).thenReturn(orders);
+        when(orderRepository.findByStatusAndCreatedAtAfter(Mockito.eq(List.of(Order.Status.PENDING_PAYMENT)), Mockito.any())).thenReturn(orders);
 
         when(productConverter.fromMapToList(Mockito.anyMap())).thenAnswer(invocation -> {
             Map<Product, Integer> map = invocation.getArgument(0);
