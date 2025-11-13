@@ -70,7 +70,7 @@ public class StatisticService implements StatisticServiceInterface {
     public List<ProductStatisticResponseDto> getProductsInPendingPaymentStatus(Integer days) {
         LocalDateTime since = LocalDateTime.now().minusDays(days);
         Map<Product, Integer> productQuantityMap = new LinkedHashMap<>();
-        orderRepository.findByStatusAndCreatedAtAfter(Order.Status.PENDING_PAYMENT, since)
+        orderRepository.findByStatusAndCreatedAtAfter(List.of(Order.Status.PENDING_PAYMENT), since)
                 .forEach(o -> o.getOrderItems()
                         .forEach(oi -> {
                             productQuantityMap.merge(oi.getProduct(), oi.getQuantity(), Integer::sum);
@@ -97,6 +97,7 @@ public class StatisticService implements StatisticServiceInterface {
      *         - the total profit for the analysis period
      * @throws BadRequestException if the provided periodUnit or groupBy values are invalid
      */
+    @Transactional
     @Override
     public ProfitStatisticsResponseDto getProfitStatistics(ProfitStatisticRequestDto request) {
 
@@ -121,7 +122,12 @@ public class StatisticService implements StatisticServiceInterface {
 
         LocalDateTime endDate = LocalDateTime.now();
         LocalDateTime startDate = endDate.minus(periodCount, periodUnit);
-        List<Order> orders = orderRepository.findByStatusAndCreatedAtAfter(Order.Status.PAID, startDate);
+        List<Order.Status> statuses = List.of(
+                Order.Status.PAID,
+                Order.Status.IN_TRANSIT,
+                Order.Status.DELIVERED
+        );
+        List<Order> orders = orderRepository.findByStatusAndCreatedAtAfter(statuses, startDate);
         Map<String, BigDecimal> groupedProfit = new LinkedHashMap<>();
         BigDecimal totalProfit = BigDecimal.ZERO;
         for (Order o : orders) {
