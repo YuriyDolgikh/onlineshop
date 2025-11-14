@@ -123,7 +123,7 @@ public class CartService implements CartServiceInterface {
      * @throws IllegalArgumentException if the cart is null, the cart's user is null, or the cart's items are null
      */
     @Transactional
-    public void saveCart(Cart cart) {
+    public Cart saveCart(Cart cart) {
         if (cart == null) {
             throw new IllegalArgumentException("Cart can't be null");
         }
@@ -133,6 +133,8 @@ public class CartService implements CartServiceInterface {
         if (cart.getCartItems() == null) {
             throw new IllegalArgumentException("Cart items can't be null");
         }
-        cartRepository.save(cart);
+         Cart newCart = cartRepository.save(cart);
+
+        return  newCart;
     }
 }
