@@ -1,0 +1,112 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <h2>🛒 Детальное описание корзины</h2>
+        <button onclick="closeModal()" class="modal-close-btn">&times;</button>
+    </div>
+
+    <div class="modal-body">
+        <!-- Общее описание -->
+        <div class="description-section">
+            <h3>Общее описание</h3>
+            <p>
+                Модуль корзины отвечает за управление товарами, которые пользователь планирует приобрести.
+                Включает функции добавления, удаления, изменения количества товаров, а также преобразования
+                корзины в заказ.
+            </p>
+        </div>
+
+        <!-- Основные методы сервиса -->
+        <div class="methods-section">
+            <h3>Основные сервисные методы</h3>
+
+            <div class="method-card">
+                <h4>clearCart()</h4>
+                <p>Очищает корзину текущего пользователя.</p>
+                <div class="method-steps">
+                    <div>• Получает текущего пользователя через UserService</div>
+                    <div>• Удаляет все элементы корзины (cartItems)</div>
+                    <div>• Сохраняет изменения пользователя через UserRepository</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>transferCartToOrder()</h4>
+                <p>Переносит содержимое корзины в новый заказ.</p>
+                <div class="method-steps">
+                    <div>• Получает текущую корзину и пользователя</div>
+                    <div>• Преобразует CartItem в OrderItem</div>
+                    <div>• Создаёт новый объект Order со статусом PENDING_PAYMENT</div>
+                    <div>• Сохраняет заказ через OrderRepository</div>
+                    <div>• Очищает корзину после успешного переноса</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>getCartFullData()</h4>
+                <p>Возвращает полную информацию о корзине в виде CartResponseDto.</p>
+                <div class="method-steps">
+                    <div>• Получает текущего пользователя и корзину</div>
+                    <div>• Преобразует элементы корзины в DTO</div>
+                    <div>• Рассчитывает общую стоимость с учётом скидок</div>
+                    <div>• Возвращает DTO с идентификатором, списком товаров и суммой</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>getCurrentCart()</h4>
+                <p>Возвращает корзину текущего пользователя.</p>
+                <div class="method-steps">
+                    <div>• Получает пользователя через UserService</div>
+                    <div>• Ищет корзину через CartRepository</div>
+                    <div>• Если корзина отсутствует - BadRequestException("Cart is empty")</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>saveCart(Cart cart)</h4>
+                <p>Сохраняет корзину пользователя в базе данных.</p>
+                <div class="method-steps">
+                    <div>• Проверяет, что объект корзины не равен null</div>
+                    <div>• Проверяет наличие пользователя и элементов корзины</div>
+                    <div>• Сохраняет корзину через CartRepository</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Endpoints -->
+        <div class="endpoints-section">
+            <h3>REST Endpoints</h3>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/carts</span>
+                    <span class="role-badge role-user">USER</span>
+                </div>
+                <p>Получение полной информации о корзине текущего пользователя</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method delete">DELETE</span>
+                    <span class="endpoint-path">/v1/carts</span>
+                    <span class="role-badge role-user">USER</span>
+                </div>
+                <p>Очистка всей корзины текущего пользователя</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/carts/toOrder</span>
+                    <span class="role-badge role-user">USER</span>
+                </div>
+                <p>Преобразование корзины в заказ с последующей очисткой корзины</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button onclick="closeModal()" class="btn btn-primary">Закрыть</button>
+    </div>
+</div>

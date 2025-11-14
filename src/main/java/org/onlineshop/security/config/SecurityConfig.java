@@ -48,6 +48,8 @@ public class SecurityConfig {
                         .requestMatchers("/v1/carts/**").hasAnyRole("ADMIN", "MANAGER", "USER")
                         .requestMatchers("/v1/cartItems/**").hasAnyRole("ADMIN", "MANAGER", "USER")
                         .requestMatchers("/v1/favorites/**").hasAnyRole("ADMIN", "MANAGER", "USER")
+                        .requestMatchers("/v1/orders/**").hasAnyRole("ADMIN", "MANAGER", "USER")
+                        .requestMatchers("/v1/orderItems/**").hasAnyRole("ADMIN", "MANAGER", "USER")
                         .requestMatchers("/v1/statistics/**").hasRole("ADMIN")
                         .requestMatchers("/v1/categories/**").hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers("/v3/api-docs/**").permitAll()
