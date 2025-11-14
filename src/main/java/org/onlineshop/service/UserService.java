@@ -5,14 +5,12 @@ import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.user.UserRequestDto;
 import org.onlineshop.dto.user.UserResponseDto;
 import org.onlineshop.dto.user.UserUpdateRequestDto;
-import org.onlineshop.entity.Cart;
 import org.onlineshop.entity.User;
 import org.onlineshop.exception.AlreadyExistException;
 import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.repository.UserRepository;
 import org.onlineshop.service.converter.UserConverter;
-import org.onlineshop.service.interfaces.CartServiceInterface;
 import org.onlineshop.service.interfaces.UserServiceInterface;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,7 +26,6 @@ public class UserService implements UserServiceInterface {
     private final UserConverter userConverter;
     private final ConfirmationCodeService confirmationCodeService;
     private final PasswordEncoder passwordEncoder;
-    private final CartServiceInterface cartService;
 
     /**
      * Registers a new user in the system. Validates input data and handles duplicate email checks.
@@ -58,7 +55,6 @@ public class UserService implements UserServiceInterface {
         newUser.setStatus(User.Status.NOT_CONFIRMED);
         newUser.setOrders(new ArrayList<>());
         newUser.setFavourites(new HashSet<>());
-        newUser.setCart(cartService.saveCart(new Cart()));
 
         userRepository.save(newUser);
         confirmationCodeService.confirmationCodeManager(newUser);
@@ -267,10 +263,9 @@ public class UserService implements UserServiceInterface {
     }
 
     /**
-     * Saves the provided user to the data store and returns the saved user.
+     * Persists the given user entity into the repository.
      *
-     * @param user the user object to be saved
-     * @return the saved user object
+     * @param user the User object to be saved. Must not be null.
      */
     public User saveUser(User user) {
         userRepository.save(user);
