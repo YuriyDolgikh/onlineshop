@@ -41,7 +41,14 @@ public class SecurityConfig {
 
                         .requestMatchers("/").permitAll()
                         .requestMatchers("/index.html").permitAll()
-                        .requestMatchers("/home").permitAll()
+                        .requestMatchers("/css/**").permitAll()
+                        .requestMatchers("/js/**").permitAll()
+                        .requestMatchers("/images/**").permitAll()
+                        .requestMatchers("/static/**").permitAll()
+                        .requestMatchers("/resources/**").permitAll()
+
+                        .requestMatchers("/modal/**").permitAll()
+                        .requestMatchers("/*.html").permitAll()
 
                         .requestMatchers("/v1/users/**").permitAll()
                         .requestMatchers("/v1/products/**").hasAnyRole("ADMIN", "MANAGER", "USER")
