@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.onlineshop.dto.statistic.ProfitStatisticRequestDto;
 import org.onlineshop.dto.statistic.ProfitStatisticsResponseDto;
+import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.service.StatisticService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -90,6 +91,68 @@ class StatisticControllerGetProfitStatisticsTest {
                 .andExpect(jsonPath("$.profitsByPeriod['2025-11-02']").value(120.0))
                 .andExpect(jsonPath("$.profitsByPeriod['2025-11-03']").value(130.0))
                 .andExpect(jsonPath("$.totalProfit").value(350));
+    }
+
+
+    @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
+    void getProfitStatisticsInvalidPeriodUnit() throws Exception {
+
+        ProfitStatisticRequestDto requestDto = ProfitStatisticRequestDto.builder()
+                .periodCount(10)
+                .periodUnit("Da")
+                .groupBy("DAY")
+                .build();
+
+        when(statisticService.getProfitStatistics(requestDto)).thenThrow(new BadRequestException("Invalid period unit: day. Valid values are: DAYS, WEEKS, MONTHS, YEARS"));
+        mockMvc.perform(post("/v1/statistics/profit")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message")
+                        .value("Invalid period unit: day. Valid values are: DAYS, WEEKS, MONTHS, YEARS"));
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
+    void getProfitStatisticsInvalidGroupBy() throws Exception {
+
+        ProfitStatisticRequestDto requestDto = ProfitStatisticRequestDto.builder()
+                .periodCount(10)
+                .periodUnit("DAYS")
+                .groupBy("Da")
+                .build();
+
+        when(statisticService.getProfitStatistics(requestDto)).thenThrow(new BadRequestException("Invalid groupBy value: Da. Valid values are: HOUR, DAY, WEEK, MONTH"
+        ));
+        mockMvc.perform(post("/v1/statistics/profit")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message")
+                        .value("Invalid groupBy value: Da. Valid values are: HOUR, DAY, WEEK, MONTH"));
+    }
+    @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
+    void getProfitStatisticsInvalidPeriodCount() throws Exception {
+
+        ProfitStatisticRequestDto requestDto = ProfitStatisticRequestDto.builder()
+                .periodCount(-5)
+                .periodUnit("DAYS")
+                .groupBy("DAY")
+                .build();
+
+        when(statisticService.getProfitStatistics(requestDto))
+                .thenThrow(new BadRequestException(
+                        "Invalid periodCount: -5. periodCount must be greater than 0"
+                ));
+
+        mockMvc.perform(post("/v1/statistics/profit")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message")
+                        .value("Invalid periodCount: -5. periodCount must be greater than 0"));
     }
 
 }

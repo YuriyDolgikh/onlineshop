@@ -105,6 +105,12 @@ public class StatisticService implements StatisticServiceInterface {
         String periodUnitStr = request.getPeriodUnit();
         String groupByStr = request.getGroupBy();
 
+        if (periodCount == null || periodCount <= 0) {
+            throw new BadRequestException(
+                    "Invalid periodCount: " + periodCount + ". periodCount must be greater than 0"
+            );
+        }
+
         ChronoUnit periodUnit;
         try {
             periodUnit = ChronoUnit.valueOf(periodUnitStr.toUpperCase());

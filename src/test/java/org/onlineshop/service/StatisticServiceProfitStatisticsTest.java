@@ -113,6 +113,16 @@ class StatisticServiceProfitStatisticsTest {
     }
 
     @Test
+    void getProfitStatisticsInvalidPeriodCountZeroOrNegative() {
+        ProfitStatisticRequestDto request = new ProfitStatisticRequestDto();
+        request.setPeriodCount(0);
+        request.setPeriodUnit("DAYS");
+        request.setGroupBy("DAY");
+
+        assertThrows(BadRequestException.class, () -> statisticService.getProfitStatistics(request));
+    }
+
+    @Test
     void getProfitStatisticsInvalidGroupByAndPeriodUnitAndThrowBadRequest() {
         ProfitStatisticRequestDto request = new ProfitStatisticRequestDto();
         request.setPeriodCount(5);
