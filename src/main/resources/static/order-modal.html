@@ -1,0 +1,163 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <h2>📋 Детальное описание управления заказами</h2>
+        <button onclick="closeModal()" class="modal-close-btn">&times;</button>
+    </div>
+
+    <div class="modal-body">
+        <!-- Общее описание -->
+        <div class="description-section">
+            <h3>Общее описание</h3>
+            <p>
+                Сервис OrderService отвечает за управление заказами пользователя.
+                Выполняет операции сохранения, получения, обновления статуса, отмены и подтверждения оплаты заказов.
+                Обеспечивает полный жизненный цикл заказа от создания до завершения.
+            </p>
+        </div>
+
+        <!-- Основные методы сервиса -->
+        <div class="methods-section">
+            <h3>Основные сервисные методы</h3>
+
+            <div class="method-card">
+                <h4>saveOrder(OrderRequestDto dto)</h4>
+                <p>Сохраняет новый заказ для текущего пользователя.</p>
+                <div class="method-steps">
+                    <div>• Проверяет, что dto не null, иначе выбрасывает BadRequestException</div>
+                    <div>• Преобразует метод доставки в enum Order.DeliveryMethod</div>
+                    <div>• Получает текущего пользователя</div>
+                    <div>• Создаёт объект Order с данными из dto и статусом PENDING_PAYMENT</div>
+                    <div>• Если указаны элементы заказа, добавляет их через OrderItemService</div>
+                    <div>• Сохраняет заказ через OrderRepository</div>
+                    <div>• Возвращает OrderResponseDto через OrderConverter</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>getOrderById(Integer orderId)</h4>
+                <p>Получает заказ по ID.</p>
+                <div class="method-steps">
+                    <div>• Проверяет доступ к заказу через isAccessToOrderAllowed()</div>
+                    <div>• Находит заказ по ID, если не найден — выбрасывает NotFoundException</div>
+                    <div>• Возвращает OrderResponseDto через OrderConverter</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>getOrdersByUser(Integer userId)</h4>
+                <p>Получает список заказов пользователя.</p>
+                <div class="method-steps">
+                    <div>• Проверяет, что userId не null</div>
+                    <div>• Находит пользователя по ID, если не найден — выбрасывает NotFoundException</div>
+                    <div>• Проверяет, что обычный пользователь запрашивает только свои заказы, иначе AccessDeniedException</div>
+                    <div>• Получает список заказов через OrderRepository</div>
+                    <div>• Возвращает список OrderResponseDto через OrderConverter</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>cancelOrder(Integer orderId)</h4>
+                <p>Отменяет заказ.</p>
+                <div class="method-steps">
+                    <div>• Проверяет доступ к заказу</div>
+                    <div>• Находит заказ по ID, если не найден — выбрасывает NotFoundException</div>
+                    <div>• Устанавливает статус CANCELLED и сохраняет</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>confirmPayment(Integer orderId, String paymentMethod)</h4>
+                <p>Подтверждает оплату заказа и отправляет подтверждение по email.</p>
+                <div class="method-steps">
+                    <div>• Получает текущего пользователя</div>
+                    <div>• Находит заказ по ID, проверяет, что он принадлежит пользователю</div>
+                    <div>• Устанавливает статус PAID и сохраняет</div>
+                    <div>• Генерирует PDF заказа и отправляет email через MailUtil</div>
+                    <div>• Возвращает OrderResponseDto</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Endpoints -->
+        <div class="endpoints-section">
+            <h3>REST Endpoints</h3>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method post">POST</span>
+                    <span class="endpoint-path">/v1/orders</span>
+                    <span class="role-badge role-user">USER</span>
+                </div>
+                <p>Создание нового заказа для текущего пользователя</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/orders/{orderId}</span>
+                    <span class="role-badge role-user">USER</span>
+                </div>
+                <p>Получение заказа по ID (пользователи видят только свои заказы)</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/orders/ordersHistory/{userId}</span>
+                    <span class="role-badge role-user">USER</span>
+                </div>
+                <p>Получение истории заказов пользователя</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/orders/cancel/{orderId}</span>
+                    <span class="role-badge role-user">USER</span>
+                </div>
+                <p>Отмена заказа</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/orders/confirm/{orderId}/{payMethod}</span>
+                    <span class="role-badge role-user">USER</span>
+                </div>
+                <p>Подтверждение оплаты заказа с отправкой email-подтверждения</p>
+            </div>
+        </div>
+
+        <!-- Особенности реализации -->
+        <div class="features-section">
+            <h3>🔧 Особенности реализации</h3>
+            <div class="method-card">
+                <div class="method-steps">
+                    <div>• <strong>Безопасность доступа:</strong> Пользователи видят только свои заказы, ADMIN/MANAGER имеют доступ ко всем</div>
+                    <div>• <strong>Жизненный цикл заказа:</strong> Поддержка статусов PENDING_PAYMENT, PAID, CANCELLED, DELIVERED</div>
+                    <div>• <strong>Email уведомления:</strong> Автоматическая отправка подтверждений оплаты с PDF-счетом</div>
+                    <div>• <strong>Валидация данных:</strong> Проверка корректности данных доставки и методов оплаты</div>
+                    <div>• <strong>Обработка ошибок:</strong> Детальные исключения для различных сценариев ошибок</div>
+                    <div>• <strong>Интеграция с платежами:</strong> Поддержка различных методов оплаты (CREDIT_CARD, PAYPAL, BANK_TRANSFER)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Бизнес-логика -->
+        <div class="business-logic-section">
+            <h3>💼 Бизнес-логика</h3>
+            <div class="method-card">
+                <div class="method-steps">
+                    <div>• <strong>Статусы заказов:</strong> Чёткий workflow смены статусов от создания до завершения</div>
+                    <div>• <strong>Фиксированные цены:</strong> Цены товаров фиксируются на момент создания заказа</div>
+                    <div>• <strong>Автоматизация:</strong> PDF генерация счетов и email рассылка при подтверждении оплаты</div>
+                    <div>• <strong>Аудит:</strong> Сохранение дат создания и обновления заказов для отслеживания истории</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button onclick="closeModal()" class="btn btn-primary">Закрыть</button>
+    </div>
+</div>
