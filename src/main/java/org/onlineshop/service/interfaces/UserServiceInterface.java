@@ -3,6 +3,7 @@ package org.onlineshop.service.interfaces;
 import org.onlineshop.dto.user.UserRequestDto;
 import org.onlineshop.dto.user.UserResponseDto;
 import org.onlineshop.dto.user.UserUpdateRequestDto;
+import org.onlineshop.entity.User;
 
 import java.util.List;
 
@@ -22,4 +23,7 @@ public interface UserServiceInterface {
 
     UserResponseDto renewUser(String email);
 
+    User getCurrentUser();
+
+    User saveUser(User user);
 }

@@ -7,9 +7,9 @@ import org.onlineshop.entity.*;
 import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.repository.CartRepository;
 import org.onlineshop.repository.OrderRepository;
-import org.onlineshop.repository.UserRepository;
 import org.onlineshop.service.converter.CartItemConverter;
 import org.onlineshop.service.interfaces.CartServiceInterface;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,10 +23,15 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class CartService implements CartServiceInterface {
     private final OrderRepository orderRepository;
-    private final UserService userService;
     private final CartItemConverter cartItemConverter;
     private final CartRepository cartRepository;
-    private final UserRepository userRepository;
+
+    private UserService userService;
+
+    @Autowired
+    public void setUserService(UserService userService) {
+        this.userService = userService;
+    }
 
     /**
      * Clears the current user's shopping cart.
@@ -34,9 +39,9 @@ public class CartService implements CartServiceInterface {
     @Transactional
     @Override
     public void clearCart() {
-        User user = userService.getCurrentUser();
+        User user = this.userService.getCurrentUser();
         user.getCart().getCartItems().clear();
-        userRepository.save(user);
+        this.userService.saveUser(user);
     }
 
     /**
@@ -47,7 +52,7 @@ public class CartService implements CartServiceInterface {
     public void transferCartToOrder() {
 
         Cart cart = getCurrentCart();
-        User user = userService.getCurrentUser();
+        User user = this.userService.getCurrentUser();
         Set<CartItem> cartItems = cart.getCartItems();
 
         List<OrderItem> orderItems = new ArrayList<>();
@@ -65,7 +70,7 @@ public class CartService implements CartServiceInterface {
         newOrder.setUpdatedAt(now);
         Order savedOrder = orderRepository.save(newOrder);
         user.getOrders().add(savedOrder);
-        userRepository.save(user);
+        this.userService.saveUser(user);
         clearCart();
     }
 
@@ -79,7 +84,7 @@ public class CartService implements CartServiceInterface {
     @Transactional
     @Override
     public CartResponseDto getCartFullData() {
-        User user = userService.getCurrentUser();
+        User user = this.userService.getCurrentUser();
         Cart cart = getCurrentCart();
         Set<CartItem> items = cart.getCartItems();
         List<CartItemResponseDto> cartItemDtos = items.stream()
@@ -110,7 +115,7 @@ public class CartService implements CartServiceInterface {
      */
     @Transactional
     public Cart getCurrentCart() {
-        User user = userService.getCurrentUser();
+        User user = this.userService.getCurrentUser();
         return cartRepository.findByUser(user).orElseThrow(() -> new BadRequestException("Cart is empty"));
     }
 
@@ -120,6 +125,7 @@ public class CartService implements CartServiceInterface {
      *
      * @param cart the cart object to be saved
      *             must not be null, must have a non-null user, and non-null cart items
+     * @return the saved cart object, or an exception if the cart is invalid
      * @throws IllegalArgumentException if the cart is null, the cart's user is null, or the cart's items are null
      */
     @Transactional
@@ -133,8 +139,7 @@ public class CartService implements CartServiceInterface {
         if (cart.getCartItems() == null) {
             throw new IllegalArgumentException("Cart items can't be null");
         }
-         Cart newCart = cartRepository.save(cart);
 
-        return  newCart;
+        return cartRepository.save(cart);
     }
 }
