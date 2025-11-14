@@ -94,18 +94,21 @@ public class OrderService implements OrderServiceInterface {
      * @throws AccessDeniedException    if the current user is not authorized to view the orders of another user
      * @throws IllegalArgumentException if the specified user ID is null
      */
+
     @Transactional
     @Override
     public List<OrderResponseDto> getOrdersByUser(Integer userId) {
         if (userId == null) {
             throw new IllegalArgumentException("UserId cannot be null");
         }
-        User currentUser = userRepository.findById(userId)
+        User requestedUser = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found with ID: " + userId));
+
+        User currentUser = userService.getCurrentUser();
         if (currentUser.getRole() == User.Role.USER && !currentUser.getUserId().equals(userId)) {
             throw new AccessDeniedException("Access denied");
         }
-        List<Order> orders = orderRepository.findByUser(currentUser);
+        List<Order> orders = orderRepository.findByUser(requestedUser);
         return orderConverter.toDtos(orders);
     }
 
@@ -255,7 +258,7 @@ public class OrderService implements OrderServiceInterface {
      *
      * @param orderId the ID of the order to be checked for access rights
      * @return true if the current user has access to the order, false otherwise
-     * @throws NotFoundException if the order with the given ID is not found
+     * @throws NotFoundException   if the order with the given ID is not found
      * @throws BadRequestException if the specified order ID is null
      */
     public boolean isAccessToOrderAllowed(Integer orderId) {
