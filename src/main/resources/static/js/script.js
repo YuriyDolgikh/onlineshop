@@ -28,7 +28,14 @@ async function checkApiStatus() {
 // Загрузка модального окна
 async function loadModal(modalFile) {
     try {
-        const response = await fetch(modalFile);
+        // Обновленный путь для Heroku + Spring Boot
+        const modalPath = `/modal/${modalFile}`;
+        const response = await fetch(modalPath);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const modalContent = await response.text();
 
         const modalContainer = document.getElementById('modalContainer');
@@ -47,6 +54,27 @@ async function loadModal(modalFile) {
 
     } catch (error) {
         console.error('Error loading modal:', error);
+        // Fallback: попробовать загрузить из корневой директории
+        try {
+            const fallbackResponse = await fetch(modalFile);
+            if (fallbackResponse.ok) {
+                const fallbackContent = await fallbackResponse.text();
+                const modalContainer = document.getElementById('modalContainer');
+                modalContainer.innerHTML = `
+                    <div class="modal" id="dynamicModal">
+                        ${fallbackContent}
+                    </div>
+                `;
+
+                const modal = document.getElementById('dynamicModal');
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+                setupModalEvents();
+            }
+        } catch (fallbackError) {
+            console.error('Fallback modal loading also failed:', fallbackError);
+            alert('Ошибка загрузки информации. Пожалуйста, попробуйте позже.');
+        }
     }
 }
 
@@ -80,5 +108,37 @@ function setupModalEvents() {
     });
 }
 
+// Проверка доступности ресурсов
+async function checkResources() {
+    try {
+        // Проверка CSS
+        const cssResponse = await fetch('/css/styles.css');
+        if (!cssResponse.ok) console.warn('CSS not loaded from expected path');
+
+        // Проверка JS
+        const jsResponse = await fetch('/js/script.js');
+        if (!jsResponse.ok) console.warn('JS not loaded from expected path');
+
+        console.log('Resource check completed');
+    } catch (error) {
+        console.warn('Resource loading warning:', error);
+    }
+}
+
 // Проверяем статус при загрузке страницы
-document.addEventListener('DOMContentLoaded', checkApiStatus);
+document.addEventListener('DOMContentLoaded', function() {
+    checkApiStatus();
+    checkResources();
+});
+
+// Добавляем глобальную функцию для обработки ошибок
+window.addEventListener('error', function(event) {
+    console.error('Global error:', event.error);
+});
+
+document.querySelectorAll('.section-card[data-modal]').forEach(card => {
+    card.addEventListener('click', function() {
+        const modalFile = this.getAttribute('data-modal');
+        loadModal(modalFile);
+    });
+});

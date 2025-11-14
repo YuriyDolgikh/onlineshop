@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OnlineShop API - Главная страница</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
 <div class="container">
@@ -37,7 +37,8 @@
                 <h3>Управление пользователями</h3>
                 <p>Регистрация, аутентификация, управление профилями и ролями пользователей</p>
                 <div class="endpoints">
-                    <div class="endpoint">POST /v1/users/register <span class="role-badge role-public">PUBLIC</span></div>
+                    <div class="endpoint">POST /v1/users/register <span class="role-badge role-public">PUBLIC</span>
+                    </div>
                     <div class="endpoint">POST /v1/users/login <span class="role-badge role-public">PUBLIC</span></div>
                     <div class="endpoint">GET /v1/users/profile <span class="role-badge role-user">USER</span></div>
                 </div>
@@ -51,7 +52,8 @@
                 <div class="endpoints">
                     <div class="endpoint">GET /v1/products <span class="role-badge role-user">USER</span></div>
                     <div class="endpoint">POST /v1/products <span class="role-badge role-admin">ADMIN</span></div>
-                    <div class="endpoint">PUT /v1/products/{id} <span class="role-badge role-manager">MANAGER</span></div>
+                    <div class="endpoint">PUT /v1/products/{id} <span class="role-badge role-manager">MANAGER</span>
+                    </div>
                 </div>
             </div>
 
@@ -63,7 +65,8 @@
                 <div class="endpoints">
                     <div class="endpoint">GET /v1/carts <span class="role-badge role-user">USER</span></div>
                     <div class="endpoint">POST /v1/carts/items <span class="role-badge role-user">USER</span></div>
-                    <div class="endpoint">DELETE /v1/carts/items/{id} <span class="role-badge role-user">USER</span></div>
+                    <div class="endpoint">DELETE /v1/carts/items/{id} <span class="role-badge role-user">USER</span>
+                    </div>
                 </div>
             </div>
 
@@ -74,7 +77,8 @@
                 <p>Детальное управление позициями в корзине и их количеством</p>
                 <div class="endpoints">
                     <div class="endpoint">PUT /v1/cartItems/{id} <span class="role-badge role-user">USER</span></div>
-                    <div class="endpoint">GET /v1/cartItems/cart/{cartId} <span class="role-badge role-user">USER</span></div>
+                    <div class="endpoint">GET /v1/cartItems/cart/{cartId} <span class="role-badge role-user">USER</span>
+                    </div>
                 </div>
             </div>
 
@@ -98,7 +102,8 @@
                 <div class="endpoints">
                     <div class="endpoint">GET /v1/categories <span class="role-badge role-user">USER</span></div>
                     <div class="endpoint">POST /v1/categories <span class="role-badge role-admin">ADMIN</span></div>
-                    <div class="endpoint">PUT /v1/categories/{id} <span class="role-badge role-manager">MANAGER</span></div>
+                    <div class="endpoint">PUT /v1/categories/{id} <span class="role-badge role-manager">MANAGER</span>
+                    </div>
                 </div>
             </div>
 
@@ -110,7 +115,8 @@
                 <div class="endpoints">
                     <div class="endpoint">POST /v1/orders <span class="role-badge role-user">USER</span></div>
                     <div class="endpoint">GET /v1/orders/{id} <span class="role-badge role-user">USER</span></div>
-                    <div class="endpoint">GET /v1/orders/cancel/{id} <span class="role-badge role-user">USER</span></div>
+                    <div class="endpoint">GET /v1/orders/cancel/{id} <span class="role-badge role-user">USER</span>
+                    </div>
                 </div>
             </div>
 
@@ -121,7 +127,8 @@
                 <p>Управление товарами в заказах: обновление количества, удаление</p>
                 <div class="endpoints">
                     <div class="endpoint">PUT /v1/orderItems <span class="role-badge role-user">USER</span></div>
-                    <div class="endpoint">DELETE /v1/orderItems/{id} <span class="role-badge role-user">USER</span></div>
+                    <div class="endpoint">DELETE /v1/orderItems/{id} <span class="role-badge role-user">USER</span>
+                    </div>
                 </div>
             </div>
 
@@ -131,9 +138,12 @@
                 <h3>Статистика и аналитика</h3>
                 <p>Получение статистических данных и аналитических отчетов по магазину</p>
                 <div class="endpoints">
-                    <div class="endpoint">GET /v1/statistics/sales <span class="role-badge role-admin">ADMIN</span></div>
-                    <div class="endpoint">GET /v1/statistics/users <span class="role-badge role-admin">ADMIN</span></div>
-                    <div class="endpoint">GET /v1/statistics/products <span class="role-badge role-admin">ADMIN</span></div>
+                    <div class="endpoint">GET /v1/statistics/sales <span class="role-badge role-admin">ADMIN</span>
+                    </div>
+                    <div class="endpoint">GET /v1/statistics/users <span class="role-badge role-admin">ADMIN</span>
+                    </div>
+                    <div class="endpoint">GET /v1/statistics/products <span class="role-badge role-admin">ADMIN</span>
+                    </div>
                 </div>
             </div>
 
@@ -148,6 +158,6 @@
 <!-- Контейнер для модальных окон -->
 <div id="modalContainer"></div>
 
-<script src="script.js"></script>
+<script src="/js/script.js"></script>
 </body>
 </html>
