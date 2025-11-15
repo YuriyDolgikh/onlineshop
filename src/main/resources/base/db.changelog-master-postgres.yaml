@@ -910,7 +910,9 @@ databaseChangeLog:
               UPDATE users u
               SET cart_id = c.cart_id
               FROM carts c
-              WHERE c.user_id = u.user_id;
+              WHERE c.user_id = u.user_id;                
+
+
 
 
 
