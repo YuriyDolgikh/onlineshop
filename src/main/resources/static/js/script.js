@@ -25,57 +25,56 @@ async function checkApiStatus() {
     }
 }
 
-// Загрузка модального окна
+// Загрузка модального окна с поддержкой языка
 async function loadModal(modalFile) {
     try {
-        // Обновленный путь для Heroku + Spring Boot
-        const modalPath = `/modal/${modalFile}`;
+        const lang = localStorage.getItem('preferred-language') || 'ru';
+        let modalPath;
+
+        // Если выбран английский язык, пробуем загрузить английскую версию
+        if (lang === 'en') {
+            modalPath = modalFile.replace('.html', '-en.html');
+        } else {
+            modalPath = modalFile;
+        }
+
         const response = await fetch(modalPath);
 
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            // Если файл на выбранном языке не найден, загружаем русскую версию
+            const fallbackResponse = await fetch(modalFile);
+            if (!fallbackResponse.ok) {
+                throw new Error(`HTTP error! status: ${fallbackResponse.status}`);
+            }
+            const fallbackContent = await fallbackResponse.text();
+            showModal(fallbackContent);
+            return;
         }
 
         const modalContent = await response.text();
-
-        const modalContainer = document.getElementById('modalContainer');
-        modalContainer.innerHTML = `
-            <div class="modal" id="dynamicModal">
-                ${modalContent}
-            </div>
-        `;
-
-        const modal = document.getElementById('dynamicModal');
-        modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-
-        // Добавляем обработчики событий для нового модального окна
-        setupModalEvents();
+        showModal(modalContent);
 
     } catch (error) {
         console.error('Error loading modal:', error);
-        // Fallback: попробовать загрузить из корневой директории
-        try {
-            const fallbackResponse = await fetch(modalFile);
-            if (fallbackResponse.ok) {
-                const fallbackContent = await fallbackResponse.text();
-                const modalContainer = document.getElementById('modalContainer');
-                modalContainer.innerHTML = `
-                    <div class="modal" id="dynamicModal">
-                        ${fallbackContent}
-                    </div>
-                `;
-
-                const modal = document.getElementById('dynamicModal');
-                modal.style.display = 'flex';
-                document.body.style.overflow = 'hidden';
-                setupModalEvents();
-            }
-        } catch (fallbackError) {
-            console.error('Fallback modal loading also failed:', fallbackError);
-            alert('Ошибка загрузки информации. Пожалуйста, попробуйте позже.');
-        }
+        alert('Ошибка загрузки информации. Пожалуйста, попробуйте позже.');
     }
+}
+
+// Показать модальное окно
+function showModal(modalContent) {
+    const modalContainer = document.getElementById('modalContainer');
+    modalContainer.innerHTML = `
+        <div class="modal" id="dynamicModal">
+            ${modalContent}
+        </div>
+    `;
+
+    const modal = document.getElementById('dynamicModal');
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+
+    // Добавляем обработчики событий для нового модального окна
+    setupModalEvents();
 }
 
 // Закрытие модального окна
@@ -134,11 +133,4 @@ document.addEventListener('DOMContentLoaded', function() {
 // Добавляем глобальную функцию для обработки ошибок
 window.addEventListener('error', function(event) {
     console.error('Global error:', event.error);
-});
-
-document.querySelectorAll('.section-card[data-modal]').forEach(card => {
-    card.addEventListener('click', function() {
-        const modalFile = this.getAttribute('data-modal');
-        loadModal(modalFile);
-    });
 });

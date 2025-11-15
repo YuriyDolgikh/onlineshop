@@ -1,0 +1,112 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <h2>🛒 Shopping Cart Details</h2>
+        <button onclick="closeModal()" class="modal-close-btn">&times;</button>
+    </div>
+
+    <div class="modal-body">
+        <!-- General Description -->
+        <div class="description-section">
+            <h3>General Description</h3>
+            <p>
+                The cart module is responsible for managing products that the user plans to purchase.
+                Includes functions for adding, removing, changing product quantities, as well as
+                converting cart to order.
+            </p>
+        </div>
+
+        <!-- Main Service Methods -->
+        <div class="methods-section">
+            <h3>Main Service Methods</h3>
+
+            <div class="method-card">
+                <h4>clearCart()</h4>
+                <p>Clears current user's cart.</p>
+                <div class="method-steps">
+                    <div>• Gets current user via UserService</div>
+                    <div>• Deletes all cart items</div>
+                    <div>• Saves user changes via UserRepository</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>transferCartToOrder()</h4>
+                <p>Transfers cart contents to new order.</p>
+                <div class="method-steps">
+                    <div>• Gets current cart and user</div>
+                    <div>• Converts CartItem to OrderItem</div>
+                    <div>• Creates new Order object with PENDING_PAYMENT status</div>
+                    <div>• Saves order via OrderRepository</div>
+                    <div>• Clears cart after successful transfer</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>getCartFullData()</h4>
+                <p>Returns full cart information as CartResponseDto.</p>
+                <div class="method-steps">
+                    <div>• Gets current user and cart</div>
+                    <div>• Converts cart items to DTO</div>
+                    <div>• Calculates total cost considering discounts</div>
+                    <div>• Returns DTO with ID, product list and total amount</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>getCurrentCart()</h4>
+                <p>Returns current user's cart.</p>
+                <div class="method-steps">
+                    <div>• Gets user via UserService</div>
+                    <div>• Searches cart via CartRepository</div>
+                    <div>• If cart is absent - BadRequestException("Cart is empty")</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>saveCart(Cart cart)</h4>
+                <p>Saves user's cart to database.</p>
+                <div class="method-steps">
+                    <div>• Checks that cart object is not null</div>
+                    <div>• Checks presence of user and cart items</div>
+                    <div>• Saves cart via CartRepository</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Endpoints -->
+        <div class="endpoints-section">
+            <h3>REST Endpoints</h3>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/carts</span>
+                    <span class="role-badge role-user">USER</span>
+                </div>
+                <p>Get full information about current user's cart</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method delete">DELETE</span>
+                    <span class="endpoint-path">/v1/carts</span>
+                    <span class="role-badge role-user">USER</span>
+                </div>
+                <p>Clear entire current user's cart</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/carts/toOrder</span>
+                    <span class="role-badge role-user">USER</span>
+                </div>
+                <p>Convert cart to order with subsequent cart clearing</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button onclick="closeModal()" class="btn btn-primary">Close</button>
+    </div>
+</div>

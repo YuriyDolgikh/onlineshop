@@ -1,0 +1,163 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <h2>📋 Order Management Details</h2>
+        <button onclick="closeModal()" class="modal-close-btn">&times;</button>
+    </div>
+
+    <div class="modal-body">
+        <!-- General Description -->
+        <div class="description-section">
+            <h3>General Description</h3>
+            <p>
+                OrderService is responsible for managing user orders.
+                Performs operations for saving, retrieving, updating status, canceling and confirming order payments.
+                Provides full order lifecycle from creation to completion.
+            </p>
+        </div>
+
+        <!-- Main Service Methods -->
+        <div class="methods-section">
+            <h3>Main Service Methods</h3>
+
+            <div class="method-card">
+                <h4>saveOrder(OrderRequestDto dto)</h4>
+                <p>Saves new order for current user.</p>
+                <div class="method-steps">
+                    <div>• Checks that dto is not null, otherwise throws BadRequestException</div>
+                    <div>• Converts delivery method to enum Order.DeliveryMethod</div>
+                    <div>• Gets current user</div>
+                    <div>• Creates Order object with data from dto and PENDING_PAYMENT status</div>
+                    <div>• If order items specified, adds them via OrderItemService</div>
+                    <div>• Saves order via OrderRepository</div>
+                    <div>• Returns OrderResponseDto via OrderConverter</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>getOrderById(Integer orderId)</h4>
+                <p>Gets order by ID.</p>
+                <div class="method-steps">
+                    <div>• Checks access to order via isAccessToOrderAllowed()</div>
+                    <div>• Finds order by ID, if not found - throws NotFoundException</div>
+                    <div>• Returns OrderResponseDto via OrderConverter</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>getOrdersByUser(Integer userId)</h4>
+                <p>Gets list of user's orders.</p>
+                <div class="method-steps">
+                    <div>• Checks that userId is not null</div>
+                    <div>• Finds user by ID, if not found - throws NotFoundException</div>
+                    <div>• Checks that regular user requests only their own orders, otherwise AccessDeniedException</div>
+                    <div>• Gets order list via OrderRepository</div>
+                    <div>• Returns list of OrderResponseDto via OrderConverter</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>cancelOrder(Integer orderId)</h4>
+                <p>Cancels order.</p>
+                <div class="method-steps">
+                    <div>• Checks access to order</div>
+                    <div>• Finds order by ID, if not found - throws NotFoundException</div>
+                    <div>• Sets status to CANCELLED and saves</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>confirmPayment(Integer orderId, String paymentMethod)</h4>
+                <p>Confirms order payment and sends confirmation by email.</p>
+                <div class="method-steps">
+                    <div>• Gets current user</div>
+                    <div>• Finds order by ID, checks that it belongs to user</div>
+                    <div>• Sets status to PAID and saves</div>
+                    <div>• Generates order PDF and sends email via MailUtil</div>
+                    <div>• Returns OrderResponseDto</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Endpoints -->
+        <div class="endpoints-section">
+            <h3>REST Endpoints</h3>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method post">POST</span>
+                    <span class="endpoint-path">/v1/orders</span>
+                    <span class="role-badge role-user">USER</span>
+                </div>
+                <p>Create new order for current user</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/orders/{orderId}</span>
+                    <span class="role-badge role-user">USER</span>
+                </div>
+                <p>Get order by ID (users see only their own orders)</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/orders/ordersHistory/{userId}</span>
+                    <span class="role-badge role-user">USER</span>
+                </div>
+                <p>Get user's order history</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/orders/cancel/{orderId}</span>
+                    <span class="role-badge role-user">USER</span>
+                </div>
+                <p>Cancel order</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/orders/confirm/{orderId}/{payMethod}</span>
+                    <span class="role-badge role-user">USER</span>
+                </div>
+                <p>Confirm order payment with email confirmation sending</p>
+            </div>
+        </div>
+
+        <!-- Implementation Features -->
+        <div class="features-section">
+            <h3>🔧 Implementation Features</h3>
+            <div class="method-card">
+                <div class="method-steps">
+                    <div>• <strong>Access Security:</strong> Users see only their own orders, ADMIN/MANAGER have access to all</div>
+                    <div>• <strong>Order Lifecycle:</strong> Support for statuses PENDING_PAYMENT, PAID, CANCELLED, DELIVERED</div>
+                    <div>• <strong>Email Notifications:</strong> Automatic sending of payment confirmations with PDF invoice</div>
+                    <div>• <strong>Data Validation:</strong> Validation of delivery data and payment methods correctness</div>
+                    <div>• <strong>Error Handling:</strong> Detailed exceptions for various error scenarios</div>
+                    <div>• <strong>Payment Integration:</strong> Support for various payment methods (CREDIT_CARD, PAYPAL, BANK_TRANSFER)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Business Logic -->
+        <div class="business-logic-section">
+            <h3>💼 Business Logic</h3>
+            <div class="method-card">
+                <div class="method-steps">
+                    <div>• <strong>Order Statuses:</strong> Clear workflow of status changes from creation to completion</div>
+                    <div>• <strong>Fixed Prices:</strong> Product prices are fixed at order creation moment</div>
+                    <div>• <strong>Automation:</strong> PDF invoice generation and email sending upon payment confirmation</div>
+                    <div>• <strong>Audit:</strong> Saving order creation and update dates for tracking history</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button onclick="closeModal()" class="btn btn-primary">Close</button>
+    </div>
+</div>

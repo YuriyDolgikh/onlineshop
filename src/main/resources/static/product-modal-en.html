@@ -1,0 +1,199 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <h2>📦 Product Management Details</h2>
+        <button onclick="closeModal()" class="modal-close-btn">&times;</button>
+    </div>
+
+    <div class="modal-body">
+        <!-- General Description -->
+        <div class="description-section">
+            <h3>General Description</h3>
+            <p>
+                ProductService is responsible for product management.
+                Performs operations for adding, updating, deleting and retrieving products with various filtering and sorting criteria.
+                Provides full cycle of product catalog management for the store.
+            </p>
+        </div>
+
+        <!-- Main Service Methods -->
+        <div class="methods-section">
+            <h3>Main Service Methods</h3>
+
+            <div class="method-card">
+                <h4>addProduct(ProductRequestDto productRequestDto)</h4>
+                <p>Adds a new product.</p>
+                <div class="method-steps">
+                    <div>• Gets category by name</div>
+                    <div>• Checks that product with this name doesn't exist in the category</div>
+                    <div>• Determines current date and time</div>
+                    <div>• Creates Product object and saves via ProductRepository</div>
+                    <div>• Returns ProductResponseDto via ProductConverter</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>updateProduct(Integer productId, ProductUpdateDto productUpdateDto)</h4>
+                <p>Updates data of existing product.</p>
+                <div class="method-steps">
+                    <div>• Finds product by ID, if not found - throws IllegalArgumentException</div>
+                    <div>• Updates category, name, description, price, discount and image</div>
+                    <div>• Validates data correctness (name length, price > 0, etc.)</div>
+                    <div>• Updates modification date</div>
+                    <div>• Saves product via ProductRepository</div>
+                    <div>• Returns ProductResponseDto</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>setDiscountPrice(Integer productId, BigDecimal newDiscountPrice)</h4>
+                <p>Sets new discount for product.</p>
+                <div class="method-steps">
+                    <div>• Finds product by ID</div>
+                    <div>• Sets discountPrice and saves</div>
+                    <div>• Returns ProductResponseDto</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>deleteProduct(Integer productId)</h4>
+                <p>Deletes product.</p>
+                <div class="method-steps">
+                    <div>• Finds product by ID</div>
+                    <div>• Deletes it via ProductRepository</div>
+                    <div>• Returns ProductResponseDto</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>getProductsByCriteria(String paramName, String paramValue, String sortDirection)</h4>
+                <p>Gets list of products by specified criteria.</p>
+                <div class="method-steps">
+                    <div>• Processes parameters: price, discount, category, name, createDate</div>
+                    <div>• Calls corresponding methods to get products</div>
+                    <div>• Returns list of ProductResponseDto</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>getTopFiveDiscountedProductsOfTheDay()</h4>
+                <p>Gets top-5 products with highest discount.</p>
+                <div class="method-steps">
+                    <div>• Finds products with active discounts</div>
+                    <div>• Sorts by discount size in descending order</div>
+                    <div>• Limits result to 5 records</div>
+                    <div>• Returns list of ProductResponseForUserDto</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Endpoints -->
+        <div class="endpoints-section">
+            <h3>REST Endpoints</h3>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method post">POST</span>
+                    <span class="endpoint-path">/v1/products</span>
+                    <span class="role-badge role-admin">ADMIN</span>
+                </div>
+                <p>Create new product (only for ADMIN and MANAGER)</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method put">PUT</span>
+                    <span class="endpoint-path">/v1/products/{productId}</span>
+                    <span class="role-badge role-manager">MANAGER</span>
+                </div>
+                <p>Update product data (only for ADMIN and MANAGER)</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method delete">DELETE</span>
+                    <span class="endpoint-path">/v1/products/{productId}</span>
+                    <span class="role-badge role-admin">ADMIN</span>
+                </div>
+                <p>Delete product (only for ADMIN and MANAGER)</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/products/updateProductDiscount/{productId}/{newDiscount}</span>
+                    <span class="role-badge role-manager">MANAGER</span>
+                </div>
+                <p>Update discount for product (only for ADMIN and MANAGER)</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/products</span>
+                    <span class="role-badge role-manager">MANAGER</span>
+                </div>
+                <p>Get all products (full information for ADMIN and MANAGER)</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/products/getAllProductForUser</span>
+                    <span class="role-badge role-user">USER</span>
+                </div>
+                <p>Get all products (simplified information for users)</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/products/getProductsByCriteria</span>
+                    <span class="role-badge role-user">USER</span>
+                </div>
+                <p>Search products by criteria (price, category, name, etc.)</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/products/getTopFiveProducts</span>
+                    <span class="role-badge role-user">USER</span>
+                </div>
+                <p>Get top-5 products with highest discounts</p>
+            </div>
+        </div>
+
+        <!-- Implementation Features -->
+        <div class="features-section">
+            <h3>🔧 Implementation Features</h3>
+            <div class="method-card">
+                <div class="method-steps">
+                    <div>• <strong>Permission Separation:</strong> Different access levels for users, MANAGER and ADMIN</div>
+                    <div>• <strong>Flexible Search:</strong> Support for multiple filtering and sorting criteria</div>
+                    <div>• <strong>Data Validation:</strong> Validation of prices, discounts and other parameters</div>
+                    <div>• <strong>Product Uniqueness:</strong> Guarantee of unique product name within category</div>
+                    <div>• <strong>Query Optimization:</strong> Efficient database queries via repositories</div>
+                    <div>• <strong>Caching:</strong> Ability to cache frequently requested data</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Business Logic -->
+        <div class="business-logic-section">
+            <h3>💼 Business Logic</h3>
+            <div class="method-card">
+                <div class="method-steps">
+                    <div>• <strong>Pricing Policy:</strong> Support for regular prices and discount prices</div>
+                    <div>• <strong>Categorization:</strong> Clear organization of products by categories</div>
+                    <div>• <strong>Promotions:</strong> Top-5 discounted products mechanism for sales stimulation</div>
+                    <div>• <strong>Management Flexibility:</strong> Ability to quickly update prices and discounts</div>
+                    <div>• <strong>Search and Filtering:</strong> Convenient product search by various parameters</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button onclick="closeModal()" class="btn btn-primary">Close</button>
+    </div>
+</div>
