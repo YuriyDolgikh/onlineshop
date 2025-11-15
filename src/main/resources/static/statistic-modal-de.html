@@ -1,0 +1,166 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <h2>📊 Statistiken und Analysen Details</h2>
+        <button onclick="closeModal()" class="modal-close-btn">&times;</button>
+    </div>
+
+    <div class="modal-body">
+        <!-- Allgemeine Beschreibung -->
+        <div class="description-section">
+            <h3>Allgemeine Beschreibung</h3>
+            <p>
+                StatisticService ist verantwortlich für das Abrufen von Statistiken zu Produkten und Gewinn.
+                Führt Operationen zum Zählen der meistverkauften, stornierten Produkte, Produkte im Zahlungsausstehend-Status durch,
+                sowie zur Berechnung des Gewinns für den ausgewählten Zeitraum. Bietet analytische Daten für Geschäftsentscheidungen.
+            </p>
+        </div>
+
+        <!-- Hauptservice-Methoden -->
+        <div class="methods-section">
+            <h3>Hauptservice-Methoden</h3>
+
+            <div class="method-card">
+                <h4>getTopTenPurchasedProducts()</h4>
+                <p>Ruft Liste von 10 meistgekauften Produkten mit PAID-Status ab.</p>
+                <div class="method-steps">
+                    <div>• Ruft private Methode getTopTenProducts(Order.Status.PAID) auf</div>
+                    <div>• Gibt Liste von ProductStatisticResponseDto zurück</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>getTenCanceledProducts()</h4>
+                <p>Ruft Liste von 10 Produkten ab, für die stornierte Bestellungen vorhanden waren.</p>
+                <div class="method-steps">
+                    <div>• Ruft private Methode getTopTenProducts(Order.Status.CANCELLED) auf</div>
+                    <div>• Gibt Liste von ProductStatisticResponseDto zurück</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>getProductsInPendingPaymentStatus(Integer days)</h4>
+                <p>Ruft Produkte mit Bestellungen im PENDING_PAYMENT-Status für die letzten N Tage ab.</p>
+                <div class="method-steps">
+                    <div>• Berechnet Periodenstartdatum</div>
+                    <div>• Erstellt productQuantityMap zum Zählen der Menge jedes Produkts</div>
+                    <div>• Ruft Bestellungen mit PENDING_PAYMENT-Status ab, die nach startDate erstellt wurden</div>
+                    <div>• Zählt Menge jedes Produkts in Bestellungen</div>
+                    <div>• Konvertiert Map zu ProductStatisticResponseDto-Liste über ProductConverter</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>getProfitStatistics(ProfitStatisticRequestDto request)</h4>
+                <p>Ruft Gewinnstatistiken für Zeitraum mit Gruppierung nach Stunde, Tag, Woche oder Monat ab.</p>
+                <div class="method-steps">
+                    <div>• Validiert Periodeneinheit (DAYS, WEEKS, MONTHS, YEARS) und groupBy (HOUR, DAY, WEEK, MONTH)</div>
+                    <div>• Bestimmt startDate und endDate</div>
+                    <div>• Ruft Bestellungen mit PAID-Status nach startDate ab</div>
+                    <div>• Gruppiert Gewinn nach Schlüssel abhängig von groupBy</div>
+                    <div>• Berechnet totalProfit</div>
+                    <div>• Gibt ProfitStatisticsResponseDto mit Gewinndaten zurück</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>getTopTenProducts(Order.Status orderStatus) [privat]</h4>
+                <p>Ruft Top-10 Produkte nach Verkaufsmenge für angegebenen Bestellstatus ab.</p>
+                <div class="method-steps">
+                    <div>• Erstellt productTopTenProducts Map zum Zählen der Menge jedes Produkts</div>
+                    <div>• Ruft alle Bestellungen mit angegebenem Status ab</div>
+                    <div>• Summiert Produktmengen nach Bestellungen</div>
+                    <div>• Sortiert absteigend und behält erste 10</div>
+                    <div>• Konvertiert zu ProductStatisticResponseDto-Liste über ProductConverter</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Endpoints -->
+        <div class="endpoints-section">
+            <h3>REST Endpoints</h3>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/statistics/topSold</span>
+                    <span class="role-badge role-admin">ADMIN</span>
+                </div>
+                <p>Ruft Top-10 meistverkaufte Produkte ab</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/statistics/topCanceled</span>
+                    <span class="role-badge role-admin">ADMIN</span>
+                </div>
+                <p>Ruft Top-10 meiststornierte Produkte ab</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/statistics/pendingPayment/{days}</span>
+                    <span class="role-badge role-admin">ADMIN</span>
+                </div>
+                <p>Ruft Produkte mit ausstehenden Zahlungen für die letzten N Tage ab</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method post">POST</span>
+                    <span class="endpoint-path">/v1/statistics/profit</span>
+                    <span class="role-badge role-admin">ADMIN</span>
+                </div>
+                <p>Ruft Gewinnstatistiken für angegebenen Zeitraum mit Gruppierung ab</p>
+            </div>
+        </div>
+
+        <!-- Implementierungsmerkmale -->
+        <div class="features-section">
+            <h3>🔧 Implementierungsmerkmale</h3>
+            <div class="method-card">
+                <div class="method-steps">
+                    <div>• <strong>Flexible Gruppierung:</strong> Unterstützung verschiedener Gruppierungsperioden (Stunde, Tag, Woche, Monat)</div>
+                    <div>• <strong>Effiziente Abfragen:</strong> Optimierte SQL-Abfragen für Arbeit mit großen Datenmengen</div>
+                    <div>• <strong>Parametervalidierung:</strong> Überprüfung der Perioden- und Gruppierungskriterienkorrektheit</div>
+                    <div>• <strong>Echtzeit-Statistiken:</strong> Aktuelle Daten basierend auf tatsächlichen Bestellungen</div>
+                    <div>• <strong>Skalierbarkeit:</strong> Fähigkeit zur Verarbeitung großer Mengen historischer Daten</div>
+                    <div>• <strong>Sicherheit:</strong> Zugriff nur für Systemadministratoren</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Geschäftslogik -->
+        <div class="business-logic-section">
+            <h3>💼 Geschäftslogik</h3>
+            <div class="method-card">
+                <div class="method-steps">
+                    <div>• <strong>Verkaufsanalyse:</strong> Identifizierung beliebtester und problematischer Produkte</div>
+                    <div>• <strong>Lagerverwaltung:</strong> Daten zur Optimierung von Lagerbeständen</div>
+                    <div>• <strong>Finanzanalyse:</strong> Detaillierte Gewinnstatistiken nach Perioden</div>
+                    <div>• <strong>Problemidentifikation:</strong> Analyse stornierter Bestellungen zur Serviceverbesserung</div>
+                    <div>• <strong>Planung:</strong> Daten für Verkaufsprognosen und Beschaffung</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Metriken und Indikatoren -->
+        <div class="metrics-section">
+            <h3>📈 Schlüsselmetriken</h3>
+            <div class="method-card">
+                <div class="method-steps">
+                    <div>• <strong>Top-Verkäufe:</strong> 10 meistverkaufte Produkte</div>
+                    <div>• <strong>Top-Stornierungen:</strong> 10 meiststornierte Produkte</div>
+                    <div>• <strong>Ausstehende Zahlungen:</strong> Produkte in Bestellungen mit PENDING_PAYMENT-Status</div>
+                    <div>• <strong>Gewinn nach Perioden:</strong> Gewinngruppierung nach Stunden, Tagen, Wochen, Monaten</div>
+                    <div>• <strong>Gesamtgewinn:</strong> Gesamtgewinn für ausgewählten Zeitraum</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button onclick="closeModal()" class="btn btn-primary">Schließen</button>
+    </div>
+</div>

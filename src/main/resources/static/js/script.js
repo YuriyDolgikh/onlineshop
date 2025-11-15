@@ -31,24 +31,34 @@ async function loadModal(modalFile) {
         const lang = localStorage.getItem('preferred-language') || 'ru';
         let modalPath;
 
-        // Если выбран английский язык, пробуем загрузить английскую версию
+        // Определяем путь к файлу в зависимости от языка
         if (lang === 'en') {
             modalPath = modalFile.replace('.html', '-en.html');
+        } else if (lang === 'de') {
+            modalPath = modalFile.replace('.html', '-de.html');
         } else {
-            modalPath = modalFile;
+            modalPath = modalFile; // русский по умолчанию
         }
+
+        console.log(`Loading modal: ${modalPath} for language: ${lang}`);
 
         const response = await fetch(modalPath);
 
         if (!response.ok) {
-            // Если файл на выбранном языке не найден, загружаем русскую версию
-            const fallbackResponse = await fetch(modalFile);
-            if (!fallbackResponse.ok) {
-                throw new Error(`HTTP error! status: ${fallbackResponse.status}`);
+            // Если файл на выбранном языке не найден, пробуем русскую версию
+            console.warn(`Modal file not found: ${modalPath}, trying fallback`);
+
+            if (lang !== 'ru') {
+                const fallbackResponse = await fetch(modalFile);
+                if (!fallbackResponse.ok) {
+                    throw new Error(`HTTP error! status: ${fallbackResponse.status}`);
+                }
+                const fallbackContent = await fallbackResponse.text();
+                showModal(fallbackContent);
+                return;
+            } else {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-            const fallbackContent = await fallbackResponse.text();
-            showModal(fallbackContent);
-            return;
         }
 
         const modalContent = await response.text();
@@ -56,7 +66,14 @@ async function loadModal(modalFile) {
 
     } catch (error) {
         console.error('Error loading modal:', error);
-        alert('Ошибка загрузки информации. Пожалуйста, попробуйте позже.');
+        // Показываем сообщение на текущем языке
+        const lang = localStorage.getItem('preferred-language') || 'ru';
+        const errorMessage = lang === 'en'
+            ? 'Error loading information. Please try again later.'
+            : lang === 'de'
+                ? 'Fehler beim Laden der Informationen. Bitte versuchen Sie es später erneut.'
+                : 'Ошибка загрузки информации. Пожалуйста, попробуйте позже.';
+        alert(errorMessage);
     }
 }
 
@@ -105,6 +122,12 @@ function setupModalEvents() {
             closeModal();
         }
     });
+
+    // Добавляем обработчик для кнопки закрытия внутри модального окна
+    const closeBtn = document.querySelector('.modal-close-btn');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeModal);
+    }
 }
 
 // Проверка доступности ресурсов

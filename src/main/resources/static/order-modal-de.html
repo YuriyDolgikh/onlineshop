@@ -1,0 +1,163 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <h2>📋 Bestellverwaltung Details</h2>
+        <button onclick="closeModal()" class="modal-close-btn">&times;</button>
+    </div>
+
+    <div class="modal-body">
+        <!-- Allgemeine Beschreibung -->
+        <div class="description-section">
+            <h3>Allgemeine Beschreibung</h3>
+            <p>
+                OrderService ist verantwortlich für die Verwaltung von Benutzerbestellungen.
+                Führt Operationen zum Speichern, Abrufen, Aktualisieren des Status, Stornieren und Bestätigen von Bestellzahlungen durch.
+                Bietet vollständigen Bestelllebenszyklus von der Erstellung bis zum Abschluss.
+            </p>
+        </div>
+
+        <!-- Hauptservice-Methoden -->
+        <div class="methods-section">
+            <h3>Hauptservice-Methoden</h3>
+
+            <div class="method-card">
+                <h4>saveOrder(OrderRequestDto dto)</h4>
+                <p>Speichert neue Bestellung für aktuellen Benutzer.</p>
+                <div class="method-steps">
+                    <div>• Prüft, dass dto nicht null ist, sonst wirft BadRequestException</div>
+                    <div>• Konvertiert Liefermethode zu enum Order.DeliveryMethod</div>
+                    <div>• Ruft aktuellen Benutzer ab</div>
+                    <div>• Erstellt Order-Objekt mit Daten aus dto und PENDING_PAYMENT-Status</div>
+                    <div>• Wenn Bestellpositionen angegeben, fügt sie über OrderItemService hinzu</div>
+                    <div>• Speichert Bestellung über OrderRepository</div>
+                    <div>• Gibt OrderResponseDto über OrderConverter zurück</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>getOrderById(Integer orderId)</h4>
+                <p>Ruft Bestellung nach ID ab.</p>
+                <div class="method-steps">
+                    <div>• Prüft Zugriff auf Bestellung über isAccessToOrderAllowed()</div>
+                    <div>• Findet Bestellung nach ID, wenn nicht gefunden - wirft NotFoundException</div>
+                    <div>• Gibt OrderResponseDto über OrderConverter zurück</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>getOrdersByUser(Integer userId)</h4>
+                <p>Ruft Liste von Benutzerbestellungen ab.</p>
+                <div class="method-steps">
+                    <div>• Prüft, dass userId nicht null ist</div>
+                    <div>• Findet Benutzer nach ID, wenn nicht gefunden - wirft NotFoundException</div>
+                    <div>• Prüft, dass regulärer Benutzer nur eigene Bestellungen anfordert, sonst AccessDeniedException</div>
+                    <div>• Ruft Bestellliste über OrderRepository ab</div>
+                    <div>• Gibt Liste von OrderResponseDto über OrderConverter zurück</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>cancelOrder(Integer orderId)</h4>
+                <p>Storniert Bestellung.</p>
+                <div class="method-steps">
+                    <div>• Prüft Zugriff auf Bestellung</div>
+                    <div>• Findet Bestellung nach ID, wenn nicht gefunden - wirft NotFoundException</div>
+                    <div>• Setzt Status auf CANCELLED und speichert</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>confirmPayment(Integer orderId, String paymentMethod)</h4>
+                <p>Bestätigt Bestellzahlung und sendet Bestätigung per E-Mail.</p>
+                <div class="method-steps">
+                    <div>• Ruft aktuellen Benutzer ab</div>
+                    <div>• Findet Bestellung nach ID, prüft, dass sie Benutzer gehört</div>
+                    <div>• Setzt Status auf PAID und speichert</div>
+                    <div>• Generiert Bestell-PDF und sendet E-Mail über MailUtil</div>
+                    <div>• Gibt OrderResponseDto zurück</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Endpoints -->
+        <div class="endpoints-section">
+            <h3>REST Endpoints</h3>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method post">POST</span>
+                    <span class="endpoint-path">/v1/orders</span>
+                    <span class="role-badge role-user">USER</span>
+                </div>
+                <p>Erstellt neue Bestellung für aktuellen Benutzer</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/orders/{orderId}</span>
+                    <span class="role-badge role-user">USER</span>
+                </div>
+                <p>Ruft Bestellung nach ID ab (Benutzer sehen nur eigene Bestellungen)</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/orders/ordersHistory/{userId}</span>
+                    <span class="role-badge role-user">USER</span>
+                </div>
+                <p>Ruft Bestellverlauf des Benutzers ab</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/orders/cancel/{orderId}</span>
+                    <span class="role-badge role-user">USER</span>
+                </div>
+                <p>Storniert Bestellung</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/orders/confirm/{orderId}/{payMethod}</span>
+                    <span class="role-badge role-user">USER</span>
+                </div>
+                <p>Bestätigt Bestellzahlung mit E-Mail-Bestätigungsversand</p>
+            </div>
+        </div>
+
+        <!-- Implementierungsmerkmale -->
+        <div class="features-section">
+            <h3>🔧 Implementierungsmerkmale</h3>
+            <div class="method-card">
+                <div class="method-steps">
+                    <div>• <strong>Zugriffssicherheit:</strong> Benutzer sehen nur eigene Bestellungen, ADMIN/MANAGER haben Zugriff auf alle</div>
+                    <div>• <strong>Bestelllebenszyklus:</strong> Unterstützung für Status PENDING_PAYMENT, PAID, CANCELLED, DELIVERED</div>
+                    <div>• <strong>E-Mail-Benachrichtigungen:</strong> Automatischer Versand von Zahlungsbestätigungen mit PDF-Rechnung</div>
+                    <div>• <strong>Datenvalidierung:</strong> Validierung von Lieferdaten und Zahlungsmethodenkorrektheit</div>
+                    <div>• <strong>Fehlerbehandlung:</strong> Detaillierte Ausnahmen für verschiedene Fehlerszenarien</div>
+                    <div>• <strong>Zahlungsintegration:</strong> Unterstützung verschiedener Zahlungsmethoden (CREDIT_CARD, PAYPAL, BANK_TRANSFER)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Geschäftslogik -->
+        <div class="business-logic-section">
+            <h3>💼 Geschäftslogik</h3>
+            <div class="method-card">
+                <div class="method-steps">
+                    <div>• <strong>Bestellstatus:</strong> Klarer Workflow von Statusänderungen von Erstellung bis Abschluss</div>
+                    <div>• <strong>Feste Preise:</strong> Produktpreise werden zum Zeitpunkt der Bestellungserstellung festgelegt</div>
+                    <div>• <strong>Automatisierung:</strong> PDF-Rechnungserstellung und E-Mail-Versand bei Zahlungsbestätigung</div>
+                    <div>• <strong>Audit:</strong> Speichern von Bestellungserstellungs- und Aktualisierungsdaten zur Verlaufverfolgung</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button onclick="closeModal()" class="btn btn-primary">Schließen</button>
+    </div>
+</div>

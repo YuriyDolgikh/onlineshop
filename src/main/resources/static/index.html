@@ -5,37 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OnlineShop API - Главная страница</title>
     <link rel="stylesheet" href="/css/styles.css">
-    <style>
-        .language-switcher {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin: 20px 0 30px 0;
-        }
-        .lang-btn {
-            padding: 10px 20px;
-            background: #f0f0f0;
-            border: 2px solid #ddd;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            color: #666;
-        }
-        .lang-btn.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-color: #667eea;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
-        }
-        .lang-btn:hover:not(.active) {
-            background: #e0e0e0;
-            border-color: #667eea;
-            color: #667eea;
-        }
-    </style>
 </head>
 <body>
 <div class="container">
@@ -45,8 +14,9 @@
 
     <!-- Переключатель языка в центре -->
     <div class="language-switcher">
-        <button class="lang-btn active" onclick="changeLanguage('ru')">Русский</button>
-        <button class="lang-btn" onclick="changeLanguage('en')">English</button>
+        <button class="lang-btn active" onclick="changeLanguage('en')">English</button>
+        <button class="lang-btn" onclick="changeLanguage('de')">Deutsch</button>
+        <button class="lang-btn" onclick="changeLanguage('ru')">Русский</button>
     </div>
 
     <div class="status" id="status">
@@ -186,165 +156,6 @@
 <div id="modalContainer"></div>
 
 <script src="/js/script.js"></script>
-<script>
-    // Тексты для перевода
-    const translations = {
-        ru: {
-            'main-title': 'OnlineShop API',
-            'subtitle': 'Full REST API для управления интернет-магазином',
-            'status': '🔄 Проверка статуса API...',
-            'swagger-btn': '📚 Открыть Swagger Documentation',
-            'base-url-label': 'Base URL:',
-            'api-version-label': 'API Version:',
-            'sections-title': '📋 Разделы API',
-            'users-title': 'Управление пользователями',
-            'users-desc': 'Регистрация, аутентификация, управление профилями и ролями пользователей',
-            'products-title': 'Каталог товаров',
-            'products-desc': 'Полное управление продуктами: создание, редактирование, поиск и фильтрация',
-            'carts-title': 'Корзина покупок',
-            'carts-desc': 'Управление корзиной: добавление, удаление товаров, изменение количества',
-            'cartitems-title': 'Элементы корзины',
-            'cartitems-desc': 'Детальное управление позициями в корзине и их количеством',
-            'favorites-title': 'Избранное',
-            'favorites-desc': 'Управление списком избранных товаров для пользователей',
-            'categories-title': 'Категории товаров',
-            'categories-desc': 'Управление категориями и подкатегориями для организации каталога',
-            'orders-title': 'Управление заказами',
-            'orders-desc': 'Создание, получение, отмена заказов и подтверждение оплаты',
-            'orderitems-title': 'Элементы заказов',
-            'orderitems-desc': 'Управление товарами в заказах: обновление количества, удаление',
-            'statistics-title': 'Статистика и аналитика',
-            'statistics-desc': 'Получение статистических данных и аналитических отчетов по магазину',
-            'footer': '&copy; 2025 OnlineShop API.'
-        },
-        en: {
-            'main-title': 'OnlineShop API',
-            'subtitle': 'Full REST API for managing an online store',
-            'status': '🔄 Checking API status...',
-            'swagger-btn': '📚 Open Swagger Documentation',
-            'base-url-label': 'Base URL:',
-            'api-version-label': 'API Version:',
-            'sections-title': '📋 API Sections',
-            'users-title': 'User Management',
-            'users-desc': 'Registration, authentication, profile and role management',
-            'products-title': 'Product Catalog',
-            'products-desc': 'Complete product management: creation, editing, search and filtering',
-            'carts-title': 'Shopping Cart',
-            'carts-desc': 'Cart management: adding, removing items, changing quantities',
-            'cartitems-title': 'Cart Items',
-            'cartitems-desc': 'Detailed management of cart positions and their quantities',
-            'favorites-title': 'Favorites',
-            'favorites-desc': 'Management of favorite products for users',
-            'categories-title': 'Product Categories',
-            'categories-desc': 'Management of categories and subcategories for catalog organization',
-            'orders-title': 'Order Management',
-            'orders-desc': 'Order creation, retrieval, cancellation and payment confirmation',
-            'orderitems-title': 'Order Items',
-            'orderitems-desc': 'Management of items in orders: updating quantities, deletion',
-            'statistics-title': 'Statistics and Analytics',
-            'statistics-desc': 'Retrieval of statistical data and analytical reports for the store',
-            'footer': '&copy; 2025 OnlineShop API.'
-        }
-    };
-
-    // Функция смены языка
-    function changeLanguage(lang) {
-        // Обновляем активную кнопку
-        document.querySelectorAll('.lang-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        event.target.classList.add('active');
-
-        // Обновляем тексты на странице
-        Object.keys(translations[lang]).forEach(key => {
-            const element = document.getElementById(key);
-            if (element) {
-                if (key === 'footer') {
-                    element.innerHTML = translations[lang][key];
-                } else {
-                    element.textContent = translations[lang][key];
-                }
-            }
-        });
-
-        // Сохраняем выбор языка
-        localStorage.setItem('preferred-language', lang);
-
-        // Обновляем модальные окна, если они открыты
-        updateModalLanguage(lang);
-    }
-
-    // Функция обновления языка в модальных окнах
-    function updateModalLanguage(lang) {
-        const modalContent = document.querySelector('.modal-content');
-        if (!modalContent) return;
-
-        // Получаем имя текущего модального окна
-        const modalName = getCurrentModalName();
-        if (!modalName) return;
-
-        // Загружаем контент на нужном языке
-        loadModalContent(modalName, lang);
-    }
-
-    // Функция для получения имени текущего модального окна
-    function getCurrentModalName() {
-        const modal = document.querySelector('.modal-content');
-        if (!modal) return null;
-
-        const header = modal.querySelector('.modal-header h2');
-        if (!header) return null;
-
-        // Определяем имя модального окна по заголовку
-        const title = header.textContent;
-        if (title.includes('корзины') || title.includes('Cart')) return 'cart-modal.html';
-        if (title.includes('элементов корзины') || title.includes('Cart Items')) return 'cartitem-modal.html';
-        if (title.includes('категорий') || title.includes('Categories')) return 'category-modal.html';
-        if (title.includes('избранных') || title.includes('Favorites')) return 'favourite-modal.html';
-        if (title.includes('заказами') || title.includes('Orders')) return 'order-modal.html';
-        if (title.includes('элементов заказов') || title.includes('Order Items')) return 'orderitem-modal.html';
-        if (title.includes('товарами') || title.includes('Products')) return 'product-modal.html';
-        if (title.includes('статистики') || title.includes('Statistics')) return 'statistic-modal.html';
-        if (title.includes('пользователями') || title.includes('Users')) return 'user-modal.html';
-
-        return null;
-    }
-
-    // Функция загрузки контента модального окна на нужном языке
-    function loadModalContent(modalName, lang) {
-        // В реальном приложении здесь был бы запрос к серверу
-        // Для демонстрации мы просто перезагрузим модальное окно
-        loadModal(modalName);
-    }
-
-    // При загрузке страницы устанавливаем язык из localStorage
-    document.addEventListener('DOMContentLoaded', function() {
-        const savedLang = localStorage.getItem('preferred-language') || 'ru';
-
-        // Активируем соответствующую кнопку
-        const ruBtn = document.querySelector('.lang-btn:first-child');
-        const enBtn = document.querySelector('.lang-btn:last-child');
-
-        if (savedLang === 'ru') {
-            ruBtn.classList.add('active');
-            enBtn.classList.remove('active');
-        } else {
-            enBtn.classList.add('active');
-            ruBtn.classList.remove('active');
-        }
-
-        // Применяем перевод
-        Object.keys(translations[savedLang]).forEach(key => {
-            const element = document.getElementById(key);
-            if (element) {
-                if (key === 'footer') {
-                    element.innerHTML = translations[savedLang][key];
-                } else {
-                    element.textContent = translations[savedLang][key];
-                }
-            }
-        });
-    });
-</script>
+<script src="/js/language.js"></script>
 </body>
 </html>

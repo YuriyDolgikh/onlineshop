@@ -43,6 +43,40 @@ h1 {
     margin-bottom: 30px;
 }
 
+/* Language Switcher Styles */
+.language-switcher {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 20px 0 30px 0;
+}
+
+.lang-btn {
+    padding: 10px 20px;
+    background: #f0f0f0;
+    border: 2px solid #ddd;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    color: #666;
+}
+
+.lang-btn.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+.lang-btn:hover:not(.active) {
+    background: #e0e0e0;
+    border-color: #667eea;
+    color: #667eea;
+}
+
 .buttons {
     display: flex;
     flex-direction: column;
@@ -385,6 +419,89 @@ footer {
     }
 }
 
+/* Features Sections */
+.features-section {
+    margin-top: 30px;
+}
+
+.features-section h3 {
+    color: #667eea;
+    margin-bottom: 15px;
+}
+
+.features-section .method-steps {
+    background: #fff3e0;
+    border-left: 4px solid #ff9800;
+}
+
+.features-section .method-steps div {
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+.features-section .method-steps div:last-child {
+    margin-bottom: 0;
+}
+
+.features-section strong {
+    color: #e65100;
+}
+
+.business-logic-section {
+    margin-top: 30px;
+}
+
+.business-logic-section h3 {
+    color: #667eea;
+    margin-bottom: 15px;
+}
+
+.business-logic-section .method-steps {
+    background: #e8f5e8;
+    border-left: 4px solid #4caf50;
+}
+
+.business-logic-section .method-steps div {
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+.business-logic-section .method-steps div:last-child {
+    margin-bottom: 0;
+}
+
+.business-logic-section strong {
+    color: #2e7d32;
+}
+
+.metrics-section {
+    margin-top: 30px;
+}
+
+.metrics-section h3 {
+    color: #667eea;
+    margin-bottom: 15px;
+}
+
+.metrics-section .method-steps {
+    background: #e1f5fe;
+    border-left: 4px solid #0288d1;
+}
+
+.metrics-section .method-steps div {
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+.metrics-section .method-steps div:last-child {
+    margin-bottom: 0;
+}
+
+.metrics-section strong {
+    color: #01579b;
+}
+
+/* Адаптивность */
 @media (max-width: 768px) {
     .container {
         padding: 20px;
@@ -412,207 +529,77 @@ footer {
         gap: 5px;
     }
 
-    .features-section {
-        margin-top: 30px;
+    .language-switcher {
+        flex-wrap: wrap;
     }
 
-    .features-section h3 {
-        color: #667eea;
-        margin-bottom: 15px;
+    .lang-btn {
+        font-size: 14px;
+        padding: 8px 16px;
     }
+}
 
-    .features-section .method-steps {
-        background: #fff3e0;
-        border-left: 4px solid #ff9800;
-    }
-
-    .features-section .method-steps div {
-        margin-bottom: 8px;
-        line-height: 1.5;
-    }
-
-    .features-section .method-steps div:last-child {
-        margin-bottom: 0;
-    }
-
-    .features-section strong {
-        color: #e65100;
-    }
-
-    .business-logic-section {
-        margin-top: 30px;
-    }
-
-    .business-logic-section h3 {
-        color: #667eea;
-        margin-bottom: 15px;
-    }
-
-    .business-logic-section .method-steps {
-        background: #e8f5e8;
-        border-left: 4px solid #4caf50;
-    }
-
-    .business-logic-section .method-steps div {
-        margin-bottom: 8px;
-        line-height: 1.5;
-    }
-
-    .business-logic-section .method-steps div:last-child {
-        margin-bottom: 0;
-    }
-
-    .business-logic-section strong {
-        color: #2e7d32;
-    }
-
-    /* Улучшаем отображение длинных путей endpoints */
+@media (max-width: 480px) {
     .endpoint-path {
-        font-family: 'Courier New', monospace;
-        font-weight: bold;
-        font-size: 0.9rem;
-        word-break: break-word;
+        font-size: 0.7rem;
     }
 
-    /* Адаптивность для мобильных устройств */
-    @media (max-width: 768px) {
-        .endpoint-header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 8px;
-        }
-
-        .endpoint-path {
-            font-size: 0.8rem;
-        }
-
-        .method-steps {
-            font-size: 0.85rem;
-        }
-    }
-
-    .integration-section {
-        margin-top: 30px;
-    }
-
-    .integration-section h3 {
-        color: #667eea;
-        margin-bottom: 15px;
-    }
-
-    .integration-section .method-steps {
-        background: #f3e5f5;
-        border-left: 4px solid #9c27b0;
-    }
-
-    .integration-section .method-steps div {
-        margin-bottom: 8px;
-        line-height: 1.5;
-    }
-
-    .integration-section .method-steps div:last-child {
-        margin-bottom: 0;
-    }
-
-    .integration-section strong {
-        color: #7b1fa2;
-    }
-
-    /* Улучшаем отображение длинных названий методов */
     .method-card h4 {
-        color: #333;
-        margin-bottom: 10px;
-        font-size: 1.1rem;
-        word-break: break-word;
-        line-height: 1.4;
+        font-size: 0.95rem;
     }
 
-    /* Адаптивность для очень длинных путей */
-    @media (max-width: 480px) {
-        .endpoint-path {
-            font-size: 0.75rem;
-        }
-
-        .method-card h4 {
-            font-size: 1rem;
-        }
-
-        .method-steps {
-            font-size: 0.8rem;
-        }
+    .method-steps {
+        font-size: 0.75rem;
     }
 
-    /* Добавляем в существующий styles.css */
-
-    .metrics-section {
-        margin-top: 30px;
-    }
-
-    .metrics-section h3 {
-        color: #667eea;
-        margin-bottom: 15px;
-    }
-
-    .metrics-section .method-steps {
-        background: #e1f5fe;
-        border-left: 4px solid #0288d1;
-    }
-
-    .metrics-section .method-steps div {
-        margin-bottom: 8px;
-        line-height: 1.5;
-    }
-
-    .metrics-section .method-steps div:last-child {
-        margin-bottom: 0;
-    }
-
-    .metrics-section strong {
-        color: #01579b;
-    }
-
-    /* Улучшаем отображение длинных списков endpoints */
     .endpoints-section {
-        max-height: 400px;
-        overflow-y: auto;
-        padding-right: 10px;
+        max-height: 300px;
     }
 
-    .endpoints-section::-webkit-scrollbar {
-        width: 6px;
+    .lang-btn {
+        font-size: 12px;
+        padding: 6px 12px;
     }
+}
 
-    .endpoints-section::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 3px;
-    }
+/* Улучшаем отображение длинных путей endpoints */
+.endpoint-path {
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    font-size: 0.9rem;
+    word-break: break-word;
+}
 
-    .endpoints-section::-webkit-scrollbar-thumb {
-        background: #c1c1c1;
-        border-radius: 3px;
-    }
+/* Улучшаем отображение длинных названий методов */
+.method-card h4 {
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+    word-break: break-word;
+    line-height: 1.4;
+}
 
-    .endpoints-section::-webkit-scrollbar-thumb:hover {
-        background: #a8a8a8;
-    }
+/* Улучшаем отображение длинных списков endpoints */
+.endpoints-section {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
 
-    /* Адаптивность для очень длинных путей */
-    @media (max-width: 480px) {
-        .endpoint-path {
-            font-size: 0.7rem;
-        }
+.endpoints-section::-webkit-scrollbar {
+    width: 6px;
+}
 
-        .method-card h4 {
-            font-size: 0.95rem;
-        }
+.endpoints-section::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
 
-        .method-steps {
-            font-size: 0.75rem;
-        }
+.endpoints-section::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
 
-        .endpoints-section {
-            max-height: 300px;
-        }
-    }
-
+.endpoints-section::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
 }

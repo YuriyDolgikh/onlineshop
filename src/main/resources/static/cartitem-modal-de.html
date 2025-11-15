@@ -1,0 +1,136 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <h2>📝 Warenkorbpositionen Details</h2>
+        <button onclick="closeModal()" class="modal-close-btn">&times;</button>
+    </div>
+
+    <div class="modal-body">
+        <!-- Allgemeine Beschreibung -->
+        <div class="description-section">
+            <h3>Allgemeine Beschreibung</h3>
+            <p>
+                CartItemService ist verantwortlich für die Verwaltung von Produkten im Benutzerwarenkorb.
+                Er bietet Hinzufügen, Entfernen, Aktualisieren und Abrufen von Warenkorbpositionen (CartItem),
+                gewährleistet bequeme Benutzerarbeit mit dem Warenkorb, erstellt ihn automatisch bei Bedarf
+                und synchronisiert Daten zwischen Order (Warenkorb) und OrderItem (Warenkorbpositionen) Entitäten.
+            </p>
+        </div>
+
+        <!-- Hauptservice-Methoden -->
+        <div class="methods-section">
+            <h3>Hauptservice-Methoden</h3>
+
+            <div class="method-card">
+                <h4>addItemToCart(CartItemRequestDto)</h4>
+                <p>Fügt Produkt zum aktuellen Benutzerwarenkorb hinzu.</p>
+                <div class="method-steps">
+                    <div>• Validiert Eingabedaten (Vorhandensein von productId und Menge)</div>
+                    <div>• Ruft aktuellen Benutzer aus Sicherheitskontext ab</div>
+                    <div>• Prüft, ob Produkt bereits im Warenkorb ist</div>
+                    <div>• Wenn Produkt gefunden - erhöht Menge</div>
+                    <div>• Wenn nicht - erstellt neue OrderItem, verknüpft mit offener Bestellung (Order)</div>
+                    <div>• Speichert Änderungen und gibt DTO des hinzugefügten Produkts zurück</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>removeItemFromCart(Integer productId)</h4>
+                <p>Entfernt bestimmtes Produkt aus Benutzerwarenkorb.</p>
+                <div class="method-steps">
+                    <div>• Validiert ID-Korrektheit</div>
+                    <div>• Ruft Benutzer und aktuellen Warenkorb ab</div>
+                    <div>• Findet OrderItem-Element und löscht es aus Repository</div>
+                    <div>• Gibt DTO des gelöschten Elements zurück</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>updateItemInCart(CartItemUpdateDto)</h4>
+                <p>Aktualisiert Produktmenge im Warenkorb.</p>
+                <div class="method-steps">
+                    <div>• Validiert Daten (Vorhandensein von productId und Menge > 0)</div>
+                    <div>• Findet erforderliches OrderItem</div>
+                    <div>• Setzt neue Menge und speichert Änderungen</div>
+                    <div>• Gibt aktualisiertes DTO zurück</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>getCartItems()</h4>
+                <p>Gibt alle Warenkorbpositionen des aktuellen Benutzers zurück.</p>
+                <div class="method-steps">
+                    <div>• Ruft Benutzer und deren offenen Warenkorb ab</div>
+                    <div>• Konvertiert OrderItem-Liste zu CartItemResponseDto-Liste und gibt an Client zurück</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hilfsmethoden -->
+        <div class="methods-section">
+            <h3>Hilfsmethoden</h3>
+
+            <div class="method-card">
+                <h4>getCurrentCart(User user)</h4>
+                <p>Gibt offenen Warenkorb des Benutzers zurück.</p>
+                <div class="method-steps">
+                    <div>• Wenn Warenkorb existiert und OPEN-Status hat - gibt ihn zurück</div>
+                    <div>• Wenn Warenkorb nicht existiert - erstellt neuen Warenkorb (Order) mit OPEN-Status und speichert in Datenbank</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>getOrderItemFromCart(User user, Integer productId)</h4>
+                <p>Gibt bestimmte Warenkorbposition nach Produkt-ID zurück.</p>
+                <div class="method-steps">
+                    <div>• Sucht OrderItem in offener Bestellung des Benutzers</div>
+                    <div>• Wenn Element nicht gefunden - wirft IllegalArgumentException</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Endpoints -->
+        <div class="endpoints-section">
+            <h3>REST Endpoints</h3>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method post">POST</span>
+                    <span class="endpoint-path">/v1/cartItems</span>
+                    <span class="role-badge role-user">USER</span>
+                </div>
+                <p>Fügt neues Produkt zum Benutzerwarenkorb hinzu</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method delete">DELETE</span>
+                    <span class="endpoint-path">/v1/cartItems/{productId}</span>
+                    <span class="role-badge role-user">USER</span>
+                </div>
+                <p>Entfernt bestimmtes Produkt aus Warenkorb nach Produkt-ID</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method put">PUT</span>
+                    <span class="endpoint-path">/v1/cartItems</span>
+                    <span class="role-badge role-user">USER</span>
+                </div>
+                <p>Aktualisiert Produktmenge im Warenkorb</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/cartItems</span>
+                    <span class="role-badge role-user">USER</span>
+                </div>
+                <p>Ruft alle Warenkorbpositionen des aktuellen Benutzers ab</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button onclick="closeModal()" class="btn btn-primary">Schließen</button>
+    </div>
+</div>
