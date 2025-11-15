@@ -76,16 +76,6 @@ Controller → Service → Repository → Database
      Security       DTOs        Entities
 ```
 
-### Mermaid Architecture Diagram
-```mermaid
-flowchart TD
-    Client[Frontend Client] --> API[REST API (Spring Boot)]
-    API --> Auth[Spring Security]
-    API --> Service[Business Logic]
-    Service --> Repo[Repository Layer]
-    Repo --> DB[(PostgreSQL Database)]
-```
-
 ---
 
 # 🗄 **Database Diagram (Mermaid)**
