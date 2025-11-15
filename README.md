@@ -1,16 +1,6 @@
 
 # 🛒 **OnlineShop – Full REST API Backend for E-Commerce**
 
-```
-   ___        _ _             _____ _                 
-  / _ \ _   _(_) |_ _   _    / ____| |                
- | | | | | | | | __| | | |  | (___ | |__   ___  _ __  
- | | | | | | | | |_| |_| |   \___ \| '_ \ / _ \| '_ \ 
- | |_| | |_| | |  _|  _  |   ____) | | | | (_) | |_) |
-  \__\_\\__,_|_|\__|_| |_|  |_____/|_| |_|\___/| .__/ 
-                                                |_|    
-```
-
 ![Java](https://img.shields.io/badge/Java-17-orange)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-Framework-brightgreen)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-blue)
