@@ -874,6 +874,44 @@ databaseChangeLog:
               - column: { name: created_at,       valueComputed: "now()" }
               - column: { name: updated_at,       valueComputed: "now()" }
 
+  - changeSet:
+      id: 20
+      author: 050525group
+      comment: "Create carts for default users"
+      changes:
+        - insert:
+            tableName: carts
+            columns:
+              - column:
+                  name: user_id
+                  valueComputed: "(SELECT user_id FROM users WHERE email = 'admin@example.com')"
+
+        - insert:
+            tableName: carts
+            columns:
+              - column:
+                  name: user_id
+                  valueComputed: "(SELECT user_id FROM users WHERE email = 'manager@example.com')"
+
+        - insert:
+            tableName: carts
+            columns:
+              - column:
+                  name: user_id
+                  valueComputed: "(SELECT user_id FROM users WHERE email = 'user@example.com')"
+
+  - changeSet:
+      id: 21
+      author: 050525group
+      comment: "Attach carts to default users"
+      changes:
+        - sql:
+            sql: |
+              UPDATE users u
+              SET cart_id = c.cart_id
+              FROM carts c
+              WHERE c.user_id = u.user_id;                
+
 
 
 
