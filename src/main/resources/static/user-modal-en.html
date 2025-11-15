@@ -1,0 +1,186 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <h2>👥 User Management Details</h2>
+        <button onclick="closeModal()" class="modal-close-btn">&times;</button>
+    </div>
+
+    <div class="modal-body">
+        <!-- General Description -->
+        <div class="description-section">
+            <h3>General Description</h3>
+            <p>
+                UserService is responsible for managing users, including registration,
+                email confirmation, data updates, deletion, user recovery and password encryption,
+                as well as obtaining information about the current user.
+            </p>
+        </div>
+
+        <!-- Main Service Methods -->
+        <div class="methods-section">
+            <h3>Main Service Methods</h3>
+
+            <div class="method-card">
+                <h4>registration(UserRequestDto request)</h4>
+                <p>Registers a new user.</p>
+                <div class="method-steps">
+                    <div>• Checks if a user with this email already exists</div>
+                    <div>• Validates required fields (name and hashPassword)</div>
+                    <div>• Creates a new user with USER role and NOT_CONFIRMED status</div>
+                    <div>• Saves the user to the database</div>
+                    <div>• Generates and sends confirmation code via confirmationCodeService</div>
+                    <div>• Returns UserResponseDto</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>confirmationEmail(String code)</h4>
+                <p>Confirms user email using the code.</p>
+                <div class="method-steps">
+                    <div>• Changes user status to CONFIRMED</div>
+                    <div>• Saves the user</div>
+                    <div>• Returns success confirmation message</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>updateUser(Integer userId, UserUpdateRequestDto updateRequest)</h4>
+                <p>Updates user data.</p>
+                <div class="method-steps">
+                    <div>• Checks if the user exists</div>
+                    <div>• Verifies that update is performed by the current user</div>
+                    <div>• Updates provided fields (username, phoneNumber, hashPassword)</div>
+                    <div>• Saves changes</div>
+                    <div>• Returns UserResponseDto</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>deleteUser(Integer userId)</h4>
+                <p>Performs logical user deletion.</p>
+                <div class="method-steps">
+                    <div>• Checks if the user exists</div>
+                    <div>• Prevents ADMIN user deletion</div>
+                    <div>• Verifies current user permissions</div>
+                    <div>• Deletes user confirmation codes</div>
+                    <div>• Changes status to DELETED</div>
+                    <div>• Saves the user</div>
+                    <div>• Returns UserResponseDto</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>renewUser(String email)</h4>
+                <p>Restores a deleted user.</p>
+                <div class="method-steps">
+                    <div>• Validates email</div>
+                    <div>• Checks that the user is deleted</div>
+                    <div>• Generates new confirmation code</div>
+                    <div>• Changes status to NOT_CONFIRMED</div>
+                    <div>• Saves the user</div>
+                    <div>• Returns UserResponseDto</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>getCurrentUser()</h4>
+                <p>Gets the current authenticated user.</p>
+                <div class="method-steps">
+                    <div>• Uses Spring Security mechanisms to get current user</div>
+                    <div>• Returns current user data</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Endpoints -->
+        <div class="endpoints-section">
+            <h3>REST Endpoints</h3>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method post">POST</span>
+                    <span class="endpoint-path">/v1/users/register</span>
+                    <span class="role-badge role-public">PUBLIC</span>
+                </div>
+                <p>Register a new user. User receives email with confirmation code.</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method post">POST</span>
+                    <span class="endpoint-path">/v1/users/login</span>
+                    <span class="role-badge role-public">PUBLIC</span>
+                </div>
+                <p>User authentication and JWT token retrieval.</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/users/confirmation?code={code}</span>
+                    <span class="role-badge role-public">PUBLIC</span>
+                </div>
+                <p>Email address confirmation using confirmation code.</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method put">PUT</span>
+                    <span class="endpoint-path">/v1/users/{userId}</span>
+                    <span class="role-badge role-user">USER</span>
+                </div>
+                <p>Update user information. Users can only update their own profile.</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method delete">DELETE</span>
+                    <span class="endpoint-path">/v1/users/{userId}</span>
+                    <span class="role-badge role-user">USER</span>
+                </div>
+                <p>Delete user account. ADMIN can delete any user.</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/users/renew/{email}</span>
+                    <span class="role-badge role-user">USER</span>
+                </div>
+                <p>Restore deleted user account.</p>
+            </div>
+        </div>
+
+        <!-- Implementation Features -->
+        <div class="features-section">
+            <h3>🔧 Implementation Features</h3>
+            <div class="method-card">
+                <div class="method-steps">
+                    <div>• <strong>Password Security:</strong> Passwords encoded via PasswordEncoder</div>
+                    <div>• <strong>Email Confirmation:</strong> Mandatory email confirmation before account activation</div>
+                    <div>• <strong>Permission Separation:</strong> Different access levels for users, MANAGER and ADMIN</div>
+                    <div>• <strong>Logical Deletion:</strong> Users marked as DELETED instead of physical deletion</div>
+                    <div>• <strong>Account Recovery:</strong> Ability to restore deleted accounts</div>
+                    <div>• <strong>Spring Security:</strong> Integration with Spring Security for authentication and authorization</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Business Logic -->
+        <div class="business-logic-section">
+            <h3>💼 Business Logic</h3>
+            <div class="method-card">
+                <div class="method-steps">
+                    <div>• <strong>Registration:</strong> Registration process with email confirmation for security</div>
+                    <div>• <strong>Authentication:</strong> JWT-based authentication for secure access</div>
+                    <div>• <strong>Profile Management:</strong> Users can update their data</div>
+                    <div>• <strong>Access Control:</strong> Different roles with different permission levels</div>
+                    <div>• <strong>Recovery:</strong> Mechanism for restoring deleted accounts</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button onclick="closeModal()" class="btn btn-primary">Close</button>
+    </div>
+</div>

@@ -1,0 +1,144 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <h2>📑 Product Categories Details</h2>
+        <button onclick="closeModal()" class="modal-close-btn">&times;</button>
+    </div>
+
+    <div class="modal-body">
+        <!-- General Description -->
+        <div class="description-section">
+            <h3>General Description</h3>
+            <p>
+                CategoryService is responsible for managing product categories in the system,
+                provides adding, updating, deleting categories,
+                as well as getting list of all categories and searching category by ID or name.
+            </p>
+        </div>
+
+        <!-- Main Service Methods -->
+        <div class="methods-section">
+            <h3>Main Service Methods</h3>
+
+            <div class="method-card">
+                <h4>addCategory(CategoryRequestDto categoryRequestDto)</h4>
+                <p>Adds new category.</p>
+                <div class="method-steps">
+                    <div>• Validates input data</div>
+                    <div>• Checks if category with this name doesn't already exist</div>
+                    <div>• Processes category image via helper.resolveImageUrl()</div>
+                    <div>• Creates new category and saves it to database</div>
+                    <div>• Returns DTO of created category</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>updateCategory(Integer categoryId, CategoryUpdateDto categoryUpdateDto)</h4>
+                <p>Updates existing category by its identifier.</p>
+                <div class="method-steps">
+                    <div>• Checks if category with specified ID exists</div>
+                    <div>• Validates new name correctness (length 3-20 characters, uniqueness)</div>
+                    <div>• Updates category name and/or image if provided</div>
+                    <div>• Saves changes and returns DTO of updated category</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>deleteCategory(Integer categoryId)</h4>
+                <p>Deletes category by its identifier.</p>
+                <div class="method-steps">
+                    <div>• Checks that ID is not null</div>
+                    <div>• Checks if category exists in database</div>
+                    <div>• Moves all products from deleted category to "Other" category</div>
+                    <div>• Deletes category from database</div>
+                    <div>• Returns DTO of deleted category</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>getAllCategories()</h4>
+                <p>Returns list of all categories.</p>
+                <div class="method-steps">
+                    <div>• Retrieves all categories from database via CategoryRepository</div>
+                    <div>• Converts them to DTO and returns as list</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>getCategoryById(Integer categoryId)</h4>
+                <p>Returns category by its identifier.</p>
+                <div class="method-steps">
+                    <div>• Searches category via CategoryRepository</div>
+                    <div>• If category not found, throws BadRequestException</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>getCategoryByName(String categoryName)</h4>
+                <p>Returns category by its name.</p>
+                <div class="method-steps">
+                    <div>• Searches category in database</div>
+                    <div>• If category not found, throws BadRequestException</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Endpoints -->
+        <div class="endpoints-section">
+            <h3>REST Endpoints</h3>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method post">POST</span>
+                    <span class="endpoint-path">/v1/categories</span>
+                    <span class="role-badge role-admin">ADMIN</span>
+                </div>
+                <p>Create new category in system</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method put">PUT</span>
+                    <span class="endpoint-path">/v1/categories/{categoryId}</span>
+                    <span class="role-badge role-manager">MANAGER</span>
+                </div>
+                <p>Update existing category by ID</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method delete">DELETE</span>
+                    <span class="endpoint-path">/v1/categories/{categoryId}</span>
+                    <span class="role-badge role-admin">ADMIN</span>
+                </div>
+                <p>Delete category from system (products are moved to "Other" category)</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/categories</span>
+                    <span class="role-badge role-user">USER</span>
+                </div>
+                <p>Get list of all categories</p>
+            </div>
+        </div>
+
+        <!-- Implementation Features -->
+        <div class="features-section">
+            <h3>🔧 Implementation Features</h3>
+            <div class="method-card">
+                <div class="method-steps">
+                    <div>• <strong>Data Validation:</strong> Checking category name uniqueness, name length (3-20 characters)</div>
+                    <div>• <strong>Image Processing:</strong> Automatic URL image conversion via ImageHelper</div>
+                    <div>• <strong>Safe Deletion:</strong> When deleting category, products are not deleted but moved to "Other" category</div>
+                    <div>• <strong>Error Handling:</strong> Detailed exceptions for cases when category not found</div>
+                    <div>• <strong>Flexible Updates:</strong> Support for partial updates (can update only name or only image)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button onclick="closeModal()" class="btn btn-primary">Close</button>
+    </div>
+</div>
