@@ -19,18 +19,17 @@ public class ChangeOrderStatusService {
     /**
      * Periodically processes the statuses of orders based on predefined criteria.
      * This method is scheduled to execute every 30 seconds.
-     *
+     * <p>
      * The method retrieves orders in specific statuses (e.g., PAID, IN_TRANSIT)
-     * that are eligible for status updates. If no eligible orders are found,
-     * it logs a message indicating no active orders are found.
-     *
+     * that are eligible for status updates.
+     * <p>
      * For each eligible order, the status is updated to the next logical status:
      * - PAID -> IN_TRANSIT
      * - IN_TRANSIT -> DELIVERED
-     *
+     * <p>
      * Updates to the status are saved to the database, and a log message is output
      * indicating the newly updated status for each order.
-     *
+     * <p>
      * This method is transactional to ensure consistency in the database
      * during the status update process.
      */
@@ -38,13 +37,11 @@ public class ChangeOrderStatusService {
     @Transactional
     public void processOrderStatus() {
         List<Order> ordersForProcess = getOrdersForChangeStatus();
-        if (ordersForProcess.isEmpty()) {
-            System.err.println("No active orders found");
-            return;
-        }
-        System.out.println("Orders for change status: " + ordersForProcess.size());
-        for (Order order : ordersForProcess) {
-            setNextOrderStatus(order);
+        if (!ordersForProcess.isEmpty()) {
+            System.out.println("Orders for change status: " + ordersForProcess.size());
+            for (Order order : ordersForProcess) {
+                setNextOrderStatus(order);
+            }
         }
     }
 
@@ -64,11 +61,11 @@ public class ChangeOrderStatusService {
 
     /**
      * Updates the status of the given order to the next logical status based on its current status.
-     *
+     * <p>
      * This method performs the following transitions for the provided order:
      * - If the current status is PAID, the status is updated to IN_TRANSIT.
      * - If the current status is IN_TRANSIT, the status is updated to DELIVERED.
-     *
+     * <p>
      * No action is performed if the order's status is already DELIVERED or CANCELLED.
      * The method also updates the order's last updated timestamp and saves the changes
      * to the order repository.

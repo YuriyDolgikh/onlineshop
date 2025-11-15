@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.user.UserRequestDto;
 import org.onlineshop.dto.user.UserResponseDto;
 import org.onlineshop.dto.user.UserUpdateRequestDto;
+import org.onlineshop.entity.Cart;
 import org.onlineshop.entity.User;
 import org.onlineshop.exception.AlreadyExistException;
 import org.onlineshop.exception.BadRequestException;
@@ -56,9 +57,16 @@ public class UserService implements UserServiceInterface {
         newUser.setOrders(new ArrayList<>());
         newUser.setFavourites(new HashSet<>());
 
-        userRepository.save(newUser);
-        confirmationCodeService.confirmationCodeManager(newUser);
-        return userConverter.toDto(newUser);
+        User savedUser = userRepository.save(newUser);
+
+        Cart newCartForUser = new Cart();
+        newCartForUser.setUser(savedUser);
+        savedUser.setCart(newCartForUser);
+
+        User finalUser = userRepository.save(savedUser);
+
+        confirmationCodeService.confirmationCodeManager(finalUser);
+        return userConverter.toDto(finalUser);
     }
 
     /**
@@ -263,9 +271,10 @@ public class UserService implements UserServiceInterface {
     }
 
     /**
-     * Persists the given user entity into the repository.
+     * Saves the given user to the repository.
      *
-     * @param user the User object to be saved. Must not be null.
+     * @param user the user entity to be saved
+     * @return the saved user entity
      */
     public User saveUser(User user) {
         userRepository.save(user);

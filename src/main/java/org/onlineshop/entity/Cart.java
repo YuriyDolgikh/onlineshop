@@ -19,7 +19,7 @@ public class Cart {
     private Integer cartId;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", unique = true)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private User user;

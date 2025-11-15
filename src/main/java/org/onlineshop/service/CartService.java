@@ -7,7 +7,6 @@ import org.onlineshop.entity.*;
 import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.repository.CartRepository;
 import org.onlineshop.repository.OrderRepository;
-import org.onlineshop.repository.UserRepository;
 import org.onlineshop.service.converter.CartItemConverter;
 import org.onlineshop.service.interfaces.CartServiceInterface;
 import org.onlineshop.service.interfaces.UserServiceInterface;
@@ -134,8 +133,7 @@ public class CartService implements CartServiceInterface {
         if (cart.getCartItems() == null) {
             throw new IllegalArgumentException("Cart items can't be null");
         }
-         Cart newCart = cartRepository.save(cart);
 
-        return  newCart;
+        return cartRepository.save(cart);
     }
 }
