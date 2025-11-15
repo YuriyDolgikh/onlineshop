@@ -7,37 +7,47 @@
     <link rel="stylesheet" href="/css/styles.css">
     <style>
         .language-switcher {
-            position: absolute;
-            top: 20px;
-            right: 20px;
             display: flex;
-            gap: 10px;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0 30px 0;
         }
         .lang-btn {
-            padding: 5px 10px;
+            padding: 10px 20px;
             background: #f0f0f0;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: #666;
         }
         .lang-btn.active {
-            background: #007bff;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            border-color: #007bff;
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        .lang-btn:hover:not(.active) {
+            background: #e0e0e0;
+            border-color: #667eea;
+            color: #667eea;
         }
     </style>
 </head>
 <body>
 <div class="container">
+    <div class="logo">🛒</div>
+    <h1 id="main-title">OnlineShop API</h1>
+    <p class="subtitle" id="subtitle">Full REST API для управления интернет-магазином</p>
+
+    <!-- Переключатель языка в центре -->
     <div class="language-switcher">
         <button class="lang-btn active" onclick="changeLanguage('ru')">Русский</button>
         <button class="lang-btn" onclick="changeLanguage('en')">English</button>
     </div>
-
-    <div class="logo">🛒</div>
-    <h1 id="main-title">OnlineShop API</h1>
-    <p class="subtitle" id="subtitle">Full REST API для управления интернет-магазином</p>
 
     <div class="status" id="status">
         🔄 Проверка статуса API...
@@ -307,19 +317,33 @@
         loadModal(modalName);
     }
 
-    // Переопределяем функцию loadModal для поддержки языка
-    const originalLoadModal = window.loadModal;
-    window.loadModal = function(modalName) {
-        const lang = localStorage.getItem('preferred-language') || 'ru';
-        // В реальном приложении здесь нужно загружать соответствующий файл
-        // Например: `/modals/${lang}/${modalName}`
-        originalLoadModal(modalName);
-    }
-
     // При загрузке страницы устанавливаем язык из localStorage
     document.addEventListener('DOMContentLoaded', function() {
         const savedLang = localStorage.getItem('preferred-language') || 'ru';
-        changeLanguage(savedLang);
+
+        // Активируем соответствующую кнопку
+        const ruBtn = document.querySelector('.lang-btn:first-child');
+        const enBtn = document.querySelector('.lang-btn:last-child');
+
+        if (savedLang === 'ru') {
+            ruBtn.classList.add('active');
+            enBtn.classList.remove('active');
+        } else {
+            enBtn.classList.add('active');
+            ruBtn.classList.remove('active');
+        }
+
+        // Применяем перевод
+        Object.keys(translations[savedLang]).forEach(key => {
+            const element = document.getElementById(key);
+            if (element) {
+                if (key === 'footer') {
+                    element.innerHTML = translations[savedLang][key];
+                } else {
+                    element.textContent = translations[savedLang][key];
+                }
+            }
+        });
     });
 </script>
 </body>
