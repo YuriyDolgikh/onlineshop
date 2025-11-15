@@ -64,6 +64,7 @@ databaseChangeLog:
               - column:
                   name: cart_id
                   type: INT
+                  autoIncrement: true
                   constraints:
                     primaryKey: true
                     nullable: false
@@ -71,7 +72,7 @@ databaseChangeLog:
                   name: user_id
                   type: INT
                   constraints:
-                    nullable: false
+                    nullable: true
                     unique: true
 
   - changeSet:
