@@ -21,6 +21,7 @@ import java.util.HashSet;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+
 @MockitoSettings(strictness = Strictness.LENIENT)
 @SpringBootTest
 @ActiveProfiles("test")
@@ -88,7 +89,7 @@ class CartServiceTransferCartToOrderTest {
 
         productTest = Product.builder()
                 .name("Test Product")
-                .price(BigDecimal.TEN)
+                .price(BigDecimal.valueOf(10))
                 .build();
 
         cartItemTest = CartItem.builder()
@@ -104,7 +105,6 @@ class CartServiceTransferCartToOrderTest {
         orderItemTest.setQuantity(1);
     }
 
-    // ---------- ТЕСТ ----------
     @Test
     void testTransferCartToOrder() {
 
