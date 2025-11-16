@@ -1,8 +1,8 @@
 package org.onlineshop.controller;
 
-import org.onlineshop.exception.BadRequestException;
 import org.junit.jupiter.api.Test;
 import org.onlineshop.dto.favourite.FavouriteResponseDto;
+import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.service.FavouriteService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @TestPropertySource(locations = "classpath:application-test.yml")
-class FavouriteControllerAddFavouriteTest {
+class FavouriteControllerDeleteFavouriteTest {
     @Autowired
     private MockMvc mockMvc;
 
@@ -38,79 +38,72 @@ class FavouriteControllerAddFavouriteTest {
     @Test
     @WithMockUser(username = "testUser@email.com",
             roles = {"ADMIN", "MANAGER", "USER"})
-    void addFavouriteIfOk() throws Exception {
-
+    void deleteFromFavouriteIfOk() throws Exception {
         FavouriteResponseDto dto = new FavouriteResponseDto(5, "bbbb");
 
-        when(favouriteService.addFavourite(5)).thenReturn(dto);
+        when(favouriteService.deleteFavourite(5)).thenReturn(dto);
 
-        mockMvc.perform(post("/v1/favorites/5"))
-                .andExpect(status().isCreated())
+        mockMvc.perform(delete("/v1/favorites/5"))
+                .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
 
                 .andExpect(jsonPath("$.favouriteId").value(5))
                 .andExpect(jsonPath("$.productName").value("bbbb"));
 
-        verify(favouriteService, times(1)).addFavourite(5);
+        verify(favouriteService, times(1)).deleteFavourite(5);
     }
 
     @Test
-    void addFavouriteUnauthorized() throws Exception {
-        mockMvc.perform(post("/v1/favorites/5"))
+    void deleteFavouriteUnauthorized() throws Exception {
+        mockMvc.perform(delete("/v1/favorites/5"))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     @WithMockUser(username = "testUser@email.com",
             roles = {"ADMIN", "MANAGER", "USER"})
-    void addFavouriteIfProductIdNull() throws Exception {
-        when(favouriteService.addFavourite(null))
-                .thenThrow(new IllegalArgumentException("Product Id cannot be null"));
+    void deleteFavouriteIfProductNotFound() throws Exception {
+        int productId = 99999;
+        when(favouriteService.deleteFavourite(productId))
+                .thenThrow(new NotFoundException("Product not found with ID: " + productId));
 
-        mockMvc.perform(post("/v1/favorites/null"))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @WithMockUser(username = "testUser@email.com",
-            roles = {"ADMIN", "MANAGER", "USER"})
-    void addFavouriteIfProductNotFound() throws Exception {
-
-        when(favouriteService.addFavourite(99999))
-                .thenThrow(new NotFoundException("Product not found with ID: 999"));
-
-        mockMvc.perform(post("/v1/favorites/99999"))
+        mockMvc.perform(delete("/v1/favorites/{productId}", productId))
                 .andExpect(status().isNotFound());
-        verify(favouriteService, times(1)).addFavourite(any());
+        verify(favouriteService, times(1)).deleteFavourite(productId);
     }
 
     @Test
     @WithMockUser(username = "testUser@email.com",
             roles = {"ADMIN", "MANAGER", "USER"})
-    void addFavouriteIAlreadyExist() throws Exception {
+    void deleteFavouriteIfAlreadyDeleted() throws Exception {
         Integer productId = 2;
 
-        doThrow(new BadRequestException("Product is already in favourites")).when(favouriteService).addFavourite(productId);
+        doThrow(new BadRequestException("Product is not in favourites"))
+                .when(favouriteService).deleteFavourite(productId);
 
-        mockMvc.perform(post("/v1/favorites/{productId}",productId))
+        mockMvc.perform(delete("/v1/favorites/{productId}", productId))
                 .andExpect(status().isBadRequest());
-        verify(favouriteService, times(1)).addFavourite(productId);
+
+        verify(favouriteService, times(1)).deleteFavourite(productId);
     }
 
     @Test
     @WithMockUser(username = "testUser@email.com",
             roles = {"ADMIN", "MANAGER", "USER"})
-    void addFavouriteIfServiceThrows() throws Exception {
-        when(favouriteService.addFavourite(10)).thenThrow(new RuntimeException("Something bad"));
+    void deleteFavouriteIfServiceThrows() throws Exception {
+        int productId = 10;
+        when(favouriteService.deleteFavourite(productId)).thenThrow(new RuntimeException("Something bad"));
 
-        mockMvc.perform(post("/v1/favorites/10"))
+        mockMvc.perform(delete("/v1/favorites/{productId}", productId))
                 .andExpect(status().is5xxServerError());
+        verify(favouriteService, times(1)).deleteFavourite(productId);
     }
 
     @Test
     @WithMockUser(username = "testUser@email.com",
             roles = {"ADMIN", "MANAGER", "USER"})
-    void addFavouriteIfProsuctInvalid() throws Exception {
-        mockMvc.perform(post("/v1/favorites/abc")).andExpect(status().isBadRequest());
+    void deleteFavouriteIfProductInvalid() throws Exception {
+        mockMvc.perform(delete("/v1/favorites/abc")).andExpect(status().isBadRequest());
+        verify(favouriteService, times(0)).deleteFavourite(any());
     }
 }

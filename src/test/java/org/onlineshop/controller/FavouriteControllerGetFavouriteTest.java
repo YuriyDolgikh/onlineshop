@@ -35,7 +35,7 @@ class FavouriteControllerGetFavouriteTest {
 
     @Test
     @WithMockUser(username = "testUser@email.com",
-            roles = {"ADMIN", "MANAGER"})
+            roles = {"ADMIN", "MANAGER", "USER"})
     void getFavouriteIfOk() throws Exception {
 
         List<FavouriteResponseDto> list = List.of(
@@ -71,7 +71,7 @@ class FavouriteControllerGetFavouriteTest {
 
     @Test
     @WithMockUser(username = "testUser@email.com",
-            roles = {"ADMIN", "MANAGER"})
+            roles = {"ADMIN", "MANAGER", "USER"})
     void getFavouriteIfEmpty() throws Exception {
 
         when(favouriteService.getFavourites()).thenReturn(List.of());
@@ -85,7 +85,7 @@ class FavouriteControllerGetFavouriteTest {
 
     @Test
     @WithMockUser(username = "testUser@email.com",
-            roles = {"ADMIN", "MANAGER"})
+            roles = {"ADMIN", "MANAGER", "USER"})
     void getFavouriteIfErrors() throws Exception {
         when(favouriteService.getFavourites())
                 .thenThrow(new RuntimeException("Test service failure"));
