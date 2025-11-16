@@ -2,6 +2,7 @@ package org.onlineshop.controller;
 
 
 import jakarta.validation.ConstraintViolationException;
+import lombok.Generated;
 import org.onlineshop.dto.ApiError;
 import org.onlineshop.exception.*;
 import org.onlineshop.security.exception.InvalidJwtException;
@@ -22,6 +23,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 @RestControllerAdvice
+@Generated
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(DateTimeParseException.class)
