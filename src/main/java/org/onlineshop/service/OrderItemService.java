@@ -77,13 +77,17 @@ public class OrderItemService implements OrderItemServiceInterface {
     }
 
     /**
-     * Removes an item from an order based on the provided order item ID.
-     * Ensures the item is removed from the order and the associated database entries
-     * are updated accordingly.
+     * Deletes an item from the specified order. The order item is identified
+     * by its unique ID. This method ensures that the order is in a modifiable
+     * state (e.g., `PENDING_PAYMENT`) and that the current user is authorized
+     * to delete the item. If these conditions are not met, an exception is thrown.
      *
-     * @param orderItemId the ID of the order item to be removed; must not be null
-     * @throws BadRequestException if the given order item ID is null
-     * @throws NotFoundException if no order item is found with the specified ID
+     * @param orderItemId the unique identifier of the order item to be deleted;
+     *                    must not be null
+     * @throws BadRequestException if the orderItemId is null, if the order
+     *                             is not in `PENDING_PAYMENT` status, or if
+     *                             the current user is not authorized to modify the order
+     * @throws NotFoundException if the order item with the specified ID is not found
      */
     @Transactional
     @Override
@@ -95,6 +99,12 @@ public class OrderItemService implements OrderItemServiceInterface {
                 .orElseThrow(() -> new NotFoundException("OrderItem not found with ID: " + orderItemId));
 
         Order currentOrder = orderItem.getOrder();
+        if (!currentOrder.getStatus().equals(Order.Status.PENDING_PAYMENT)) {
+            throw new BadRequestException("You can't delete an order that is not in PENDING_PAYMENT status");
+        }
+        if (!currentOrder.getUser().getUserId().equals(userService.getCurrentUser().getUserId())) {
+            throw new BadRequestException("You can't delete another user's order");
+        }
         currentOrder.getOrderItems().remove(orderItem);
         orderItemRepository.delete(orderItem);
         orderRepository.save(currentOrder);
@@ -130,6 +140,9 @@ public class OrderItemService implements OrderItemServiceInterface {
         User currentUser = userService.getCurrentUser();
         if (!orderItem.getOrder().getUser().getUserId().equals(currentUser.getUserId())){
             throw new BadRequestException("You can't update another user's order");
+        }
+        if (!orderItem.getOrder().getStatus().equals(Order.Status.PENDING_PAYMENT)) {
+            throw new BadRequestException("You can't update an order that is not in PENDING_PAYMENT status");
         }
         orderItem.setQuantity(dto.getQuantity());
         orderItemRepository.save(orderItem);
