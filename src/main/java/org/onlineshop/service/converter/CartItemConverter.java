@@ -1,5 +1,6 @@
 package org.onlineshop.service.converter;
 
+import org.onlineshop.dto.cartItem.CartItemFullResponseDto;
 import org.onlineshop.dto.cartItem.CartItemResponseDto;
 import org.onlineshop.dto.cartItem.CartItemSympleResponseDto;
 import org.onlineshop.entity.CartItem;
@@ -17,6 +18,23 @@ public class CartItemConverter {
                 .product(cartItem.getProduct())
                 .quantity(cartItem.getQuantity())
                 .build();
+    }
+
+    public CartItemFullResponseDto toFullDto(CartItem cartItem) {
+        return CartItemFullResponseDto.builder()
+                .cartItemId(cartItem.getCartItemId())
+                .productName(cartItem.getProduct().getName())
+                .categoryName(cartItem.getProduct().getCategory().getCategoryName())
+                .productPrice(cartItem.getProduct().getPrice().doubleValue())
+                .productDiscountPrice(cartItem.getProduct().getDiscountPrice().doubleValue())
+                .quantity(cartItem.getQuantity())
+                .build();
+    }
+
+    public Set<CartItemFullResponseDto> toFullDtos(Set<CartItem> cartItems) {
+        return cartItems.stream()
+                .map(this::toFullDto)
+                .collect(Collectors.toSet());
     }
 
     public Set<CartItemResponseDto> toDtos(Set<CartItem> cartItems) {

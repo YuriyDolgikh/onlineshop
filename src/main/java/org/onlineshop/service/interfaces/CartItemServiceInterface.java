@@ -1,9 +1,6 @@
 package org.onlineshop.service.interfaces;
 
-import org.onlineshop.dto.cartItem.CartItemRequestDto;
-import org.onlineshop.dto.cartItem.CartItemResponseDto;
-import org.onlineshop.dto.cartItem.CartItemSympleResponseDto;
-import org.onlineshop.dto.cartItem.CartItemUpdateDto;
+import org.onlineshop.dto.cartItem.*;
 
 import java.util.Set;
 
@@ -14,5 +11,5 @@ public interface CartItemServiceInterface {
 
     CartItemResponseDto updateItemInCart(CartItemUpdateDto cartItemUpdateDto);
 
-    Set<CartItemResponseDto> getCartItems();
+    Set<CartItemFullResponseDto> getCartItems();
 }

@@ -1,10 +1,7 @@
 package org.onlineshop.service;
 
 import lombok.RequiredArgsConstructor;
-import org.onlineshop.dto.cartItem.CartItemRequestDto;
-import org.onlineshop.dto.cartItem.CartItemResponseDto;
-import org.onlineshop.dto.cartItem.CartItemSympleResponseDto;
-import org.onlineshop.dto.cartItem.CartItemUpdateDto;
+import org.onlineshop.dto.cartItem.*;
 import org.onlineshop.entity.Cart;
 import org.onlineshop.entity.CartItem;
 import org.onlineshop.entity.Product;
@@ -14,6 +11,7 @@ import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.repository.CartItemRepository;
 import org.onlineshop.service.converter.CartItemConverter;
 import org.onlineshop.service.interfaces.CartItemServiceInterface;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,7 +63,7 @@ public class CartItemService implements CartItemServiceInterface {
         Cart cart = user.getCart();
         Set<CartItem> cartItems = cart.getCartItems();
         Optional<CartItem> existingCartItem = getCartItemFromCart(cartItemRequestDto.getProductId());
-        CartItem savedCartItem = new CartItem();
+        CartItem savedCartItem;
         if (existingCartItem.isPresent()) {
             CartItem cartItem = existingCartItem.get();
             cartItem.setQuantity(cartItem.getQuantity() + cartItemRequestDto.getQuantity());
@@ -154,9 +152,11 @@ public class CartItemService implements CartItemServiceInterface {
      */
     @Transactional
     @Override
-    public Set<CartItemResponseDto> getCartItems() {
+    @Lazy
+    public Set<CartItemFullResponseDto> getCartItems() {
         Cart cart = cartService.getCurrentCart();
-        return cartItemConverter.toDtos(cart.getCartItems());
+        Set<CartItem> cartItems = cart.getCartItems();
+        return cartItemConverter.toFullDtos(cartItems);
     }
 
     /**

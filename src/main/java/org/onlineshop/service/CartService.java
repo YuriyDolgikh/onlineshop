@@ -99,10 +99,8 @@ public class CartService implements CartServiceInterface {
                             .divide(BigDecimal.valueOf(100)));
             totalPrice = totalPrice.add(itemTotalWithDiscount);
         }
-        //
         List<CartItemSympleResponseDto> cartItemSympleDtos = cartItemDtos
                 .stream().map(o -> cartItemConverter.toSympleDtoFromDto(o)).toList();
-
 
         return CartResponseDto.builder()
                 .userId(user.getUserId())

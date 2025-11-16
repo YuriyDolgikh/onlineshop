@@ -9,10 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.onlineshop.dto.cartItem.CartItemRequestDto;
-import org.onlineshop.dto.cartItem.CartItemResponseDto;
-import org.onlineshop.dto.cartItem.CartItemSympleResponseDto;
-import org.onlineshop.dto.cartItem.CartItemUpdateDto;
+import org.onlineshop.dto.cartItem.*;
 import org.onlineshop.service.CartItemService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -143,7 +140,7 @@ public class CartItemController {
             )
     })
     @GetMapping
-    public ResponseEntity<Set<CartItemResponseDto>> getCartItems() {
+    public ResponseEntity<Set<CartItemFullResponseDto>> getCartItems() {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(cartItemService.getCartItems());
