@@ -73,7 +73,7 @@ public class FavouriteController {
                     description = "Not found - product not found"
             )
     })
-    @GetMapping("/{productId}")
+    @PostMapping("/{productId}")
     public ResponseEntity<FavouriteResponseDto> addFavourite(
             @Parameter(
                     description = "ID of the product to add to favorites",
