@@ -160,14 +160,16 @@ public class OrderService implements OrderServiceInterface {
     }
 
     /**
-     * Confirms payment for an order and sends an email notification.
+     * Confirms the payment for a given order if valid and updates the order status to PAID.
+     * Also, triggers the sending of a confirmation email with the order details.
      *
-     * @param orderId       the ID of the order to be confirmed - must not be null
-     * @param paymentMethod the payment method used to pay for the order - must not be null or blank
-     * @return an {@link OrderResponseDto} containing the updated order details
-     * @throws NotFoundException     if the order with the specified ID is not found
-     * @throws AccessDeniedException if the current user is not authorized to confirm payment for the order
-     * @throws MailSendingException  if an error occurs while attempting to send an email notification
+     * @param orderId        the unique identifier of the order to confirm payment for
+     * @param paymentMethod  the payment method used to confirm the payment. Must not be null or blank
+     * @return an OrderResponseDto containing the details of the updated order
+     * @throws NotFoundException       if the order with the specified ID is not found
+     * @throws AccessDeniedException   if the current user does not have access to the specified order
+     * @throws BadRequestException     if the payment method is invalid or the order status is not PENDING_PAYMENT
+     * @throws MailSendingException    if an error occurs while trying to send the order confirmation email
      */
     @Transactional
     @Override
@@ -177,6 +179,12 @@ public class OrderService implements OrderServiceInterface {
                 .orElseThrow(() -> new NotFoundException("Order not found with ID: " + orderId));
         if (!order.getUser().getUserId().equals(currentUser.getUserId())) {
             throw new AccessDeniedException("Access denied");
+        }
+        if (paymentMethod == null || paymentMethod.isBlank()) {
+            throw new BadRequestException("PaymentMethod cannot be null or blank");
+        }
+        if (!order.getStatus().equals(Order.Status.PENDING_PAYMENT)) {
+            throw new BadRequestException("You can't confirm payment for an order that is not in PENDING_PAYMENT status");
         }
         order.setStatus(Order.Status.PAID);
         orderRepository.save(order);
