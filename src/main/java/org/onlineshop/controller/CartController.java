@@ -89,7 +89,7 @@ public class CartController {
             )
     })
     @GetMapping
-    public ResponseEntity<CartItemSympleResponseDto> getCartFullData() {
+    public ResponseEntity<CartResponseDto> getCartFullData() {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(cartService.getCartFullData());

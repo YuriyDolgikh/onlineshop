@@ -17,7 +17,7 @@ public class CartResponseDto {
 
     private Integer userId;
 
-    private List<CartItemSympleResponseDto> cartItems;
+    private List<CartItemSympleResponseDto> cartSympleItems;
 
     private BigDecimal totalPrice;
 }

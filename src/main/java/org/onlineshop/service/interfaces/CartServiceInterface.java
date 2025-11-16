@@ -9,7 +9,7 @@ public interface CartServiceInterface {
 
     void transferCartToOrder();
 
-    CartItemSympleResponseDto getCartFullData();
+    CartResponseDto getCartFullData();
 
     Cart saveCart(Cart cart);
 }

@@ -82,7 +82,7 @@ public class CartService implements CartServiceInterface {
      */
     @Transactional
     @Override
-    public CartItemResponseDto getCartFullData() {
+    public CartResponseDto getCartFullData() {
         User user = userService.getCurrentUser();
         Cart cart = getCurrentCart();
         Set<CartItem> items = cart.getCartItems();
@@ -106,7 +106,7 @@ public class CartService implements CartServiceInterface {
 
         return CartResponseDto.builder()
                 .userId(user.getUserId())
-                .cartItems(cartItemSympleDtos)
+                .cartSympleItems(cartItemSympleDtos)
                 .totalPrice(totalPrice)
                 .build();
     }

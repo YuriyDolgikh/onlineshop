@@ -363,7 +363,4 @@ public class ProductService implements ProductServiceInterface {
     public Optional<Product> getProductById(Integer productId) {
         return productRepository.findById(productId);
     }
-
-    public Product getProductByName(String productName) {
-    }
 }
