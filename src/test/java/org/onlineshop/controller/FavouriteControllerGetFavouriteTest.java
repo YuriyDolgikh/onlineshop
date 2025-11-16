@@ -9,6 +9,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -33,17 +34,19 @@ class FavouriteControllerGetFavouriteTest {
     private FavouriteService favouriteService;
 
     @Test
+    @WithMockUser(username = "testUser@email.com",
+            roles = {"ADMIN", "MANAGER"})
     void getFavouriteIfOk() throws Exception {
 
         List<FavouriteResponseDto> list = List.of(
-                new FavouriteResponseDto(1,"aaaa"),
-                new FavouriteResponseDto(5,"bbbb"),
-                new FavouriteResponseDto(13,"dddd")
+                new FavouriteResponseDto(1, "aaaa"),
+                new FavouriteResponseDto(5, "bbbb"),
+                new FavouriteResponseDto(13, "dddd")
         );
 
         when(favouriteService.getFavourites()).thenReturn(list);
 
-        mockMvc.perform(get("v1/favorites"))
+        mockMvc.perform(get("/v1/favorites"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
 
@@ -61,11 +64,19 @@ class FavouriteControllerGetFavouriteTest {
     }
 
     @Test
+    void getFavouriteUnauthorized() throws Exception {
+        mockMvc.perform(get("/v1/favorites"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser(username = "testUser@email.com",
+            roles = {"ADMIN", "MANAGER"})
     void getFavouriteIfEmpty() throws Exception {
 
         when(favouriteService.getFavourites()).thenReturn(List.of());
 
-        mockMvc.perform(get("v1/favorites"))
+        mockMvc.perform(get("/v1/favorites"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()").value(0));
 
@@ -73,6 +84,8 @@ class FavouriteControllerGetFavouriteTest {
     }
 
     @Test
+    @WithMockUser(username = "testUser@email.com",
+            roles = {"ADMIN", "MANAGER"})
     void getFavouriteIfErrors() throws Exception {
         when(favouriteService.getFavourites())
                 .thenThrow(new RuntimeException("Test service failure"));
