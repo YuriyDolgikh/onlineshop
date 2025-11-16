@@ -1,6 +1,7 @@
 package org.onlineshop.service.converter;
 
 import org.onlineshop.dto.cartItem.CartItemResponseDto;
+import org.onlineshop.dto.cartItem.CartItemSympleResponseDto;
 import org.onlineshop.entity.CartItem;
 import org.onlineshop.entity.OrderItem;
 import org.springframework.stereotype.Service;
@@ -33,4 +34,16 @@ public class CartItemConverter {
                 .priceAtPurchase(price.subtract(discount))
                 .build();
     }
+
+    public CartItemSympleResponseDto toSympleDto(CartItem cartItem) {
+        return CartItemSympleResponseDto.builder()
+                .productName(cartItem.getProduct().getName())
+                .quantity(cartItem.getQuantity())
+                .build();    }
+
+    public CartItemSympleResponseDto toSympleDtoFromDto(CartItemResponseDto cartItemResponseDto) {
+        return CartItemSympleResponseDto.builder()
+                .productName(cartItemResponseDto.getProduct().getName())
+                .quantity(cartItemResponseDto.getQuantity())
+                .build();    }
 }

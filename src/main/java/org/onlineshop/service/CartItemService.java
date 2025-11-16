@@ -3,6 +3,7 @@ package org.onlineshop.service;
 import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.cartItem.CartItemRequestDto;
 import org.onlineshop.dto.cartItem.CartItemResponseDto;
+import org.onlineshop.dto.cartItem.CartItemSympleResponseDto;
 import org.onlineshop.dto.cartItem.CartItemUpdateDto;
 import org.onlineshop.entity.Cart;
 import org.onlineshop.entity.CartItem;
@@ -47,7 +48,7 @@ public class CartItemService implements CartItemServiceInterface {
      */
     @Transactional
     @Override
-    public CartItemResponseDto addItemToCart(CartItemRequestDto cartItemRequestDto) {
+    public CartItemSympleResponseDto addItemToCart(CartItemRequestDto cartItemRequestDto) {
         if (cartItemRequestDto.getProductId() == null) {
             throw new IllegalArgumentException("Product Id cannot be null");
         }
@@ -63,22 +64,28 @@ public class CartItemService implements CartItemServiceInterface {
         User user = userService.getCurrentUser();
         Cart cart = user.getCart();
         Set<CartItem> cartItems = cart.getCartItems();
-        Optional<CartItem> cartItem = getCartItemFromCart(cartItemRequestDto.getProductId());
+        Optional<CartItem> existingCartItem = getCartItemFromCart(cartItemRequestDto.getProductId());
         CartItem savedCartItem = new CartItem();
-        if (cartItem.isPresent()) {
-            cartItem.get().setQuantity(cartItem.get().getQuantity() + cartItemRequestDto.getQuantity());
+        if (existingCartItem.isPresent()) {
+            CartItem cartItem = existingCartItem.get();
+            cartItem.setQuantity(cartItem.getQuantity() + cartItemRequestDto.getQuantity());
+            savedCartItem = cartItemRepository.save(cartItem);
         } else {
-            Product product = productService.getProductById(cartItemRequestDto.getProductId()).get();
+            Product product = productService.getProductById(cartItemRequestDto.getProductId())
+                    .orElseThrow(() -> new BadRequestException("Product not found"));
+
             CartItem newCartItem = CartItem.builder()
                     .product(product)
                     .quantity(cartItemRequestDto.getQuantity())
+                    .cart(cart)
                     .build();
+
             savedCartItem = cartItemRepository.save(newCartItem);
             cartItems.add(savedCartItem);
-            cart.setCartItems(cartItems);
         }
+
         cartService.saveCart(cart);
-        return cartItemConverter.toDto(savedCartItem);
+        return cartItemConverter.toSympleDto(savedCartItem);
     }
 
     /**

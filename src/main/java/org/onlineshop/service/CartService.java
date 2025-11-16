@@ -3,6 +3,7 @@ package org.onlineshop.service;
 import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.cart.CartResponseDto;
 import org.onlineshop.dto.cartItem.CartItemResponseDto;
+import org.onlineshop.dto.cartItem.CartItemSympleResponseDto;
 import org.onlineshop.entity.*;
 import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.repository.CartRepository;
@@ -57,12 +58,16 @@ public class CartService implements CartServiceInterface {
         }
         Order newOrder = new Order();
         LocalDateTime now = LocalDateTime.now();
-        newOrder.setOrderItems(orderItems);
+//        newOrder.setOrderItems(orderItems);
         newOrder.setUser(user);
         newOrder.setStatus(Order.Status.PENDING_PAYMENT);
+        newOrder.setDeliveryMethod(Order.DeliveryMethod.PICKUP);
         newOrder.setCreatedAt(now);
         newOrder.setUpdatedAt(now);
         Order savedOrder = orderRepository.save(newOrder);
+        orderItems.forEach(oi -> oi.setOrder(savedOrder));
+        savedOrder.setOrderItems(orderItems);
+        orderRepository.save(savedOrder);
         user.getOrders().add(savedOrder);
         userService.saveUser(user);
         clearCart();
@@ -94,9 +99,14 @@ public class CartService implements CartServiceInterface {
                             .divide(BigDecimal.valueOf(100)));
             totalPrice = totalPrice.add(itemTotalWithDiscount);
         }
+        //
+        List<CartItemSympleResponseDto> cartItemSympleDtos = cartItemDtos
+                .stream().map(o -> cartItemConverter.toSympleDtoFromDto(o)).toList();
+
+
         return CartResponseDto.builder()
                 .userId(user.getUserId())
-                .cartItems(cartItemDtos)
+                .cartSympleItems(cartItemSympleDtos)
                 .totalPrice(totalPrice)
                 .build();
     }

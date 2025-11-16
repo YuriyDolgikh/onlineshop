@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.cartItem.CartItemRequestDto;
 import org.onlineshop.dto.cartItem.CartItemResponseDto;
+import org.onlineshop.dto.cartItem.CartItemSympleResponseDto;
 import org.onlineshop.dto.cartItem.CartItemUpdateDto;
 import org.onlineshop.service.CartItemService;
 import org.springframework.http.HttpStatus;
@@ -49,7 +50,7 @@ public class CartItemController {
             )
     })
     @PostMapping
-    public ResponseEntity<CartItemResponseDto> createCartItem(
+    public ResponseEntity<CartItemSympleResponseDto> createCartItem(
             @Parameter(description = "Cart item creation data", required = true)
             @Valid @RequestBody CartItemRequestDto cartItemRequestDto) {
         return ResponseEntity
