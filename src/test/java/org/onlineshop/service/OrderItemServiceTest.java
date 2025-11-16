@@ -279,6 +279,9 @@ class OrderItemServiceTest {
             when(orderItemRepository.findById(1))
                     .thenReturn(Optional.of(orderItem));
 
+            when(userService.getCurrentUser())
+                    .thenReturn(currentUser);
+
             orderItemService.deleteItemFromOrder(1);
 
             assertFalse(openOrder.getOrderItems().contains(orderItem));
@@ -381,6 +384,7 @@ class OrderItemServiceTest {
             Order ownOrder = Order.builder()
                     .orderId(300)
                     .user(currentUser)
+                    .status(Order.Status.PENDING_PAYMENT)
                     .build();
 
             OrderItem orderItem = OrderItem.builder()
