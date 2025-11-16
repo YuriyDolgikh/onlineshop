@@ -35,19 +35,19 @@ public class Order {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @NotBlank
+//    @NotBlank
     @Size(max = 100)
     private String deliveryAddress;
 
-    @NotBlank
+//    @NotBlank
     @Pattern(
             regexp = "^\\+?[0-9]{7,15}$",
             message = "Phone number must contain only digits and may start with +, length 7–15"
     )
-    @Column(nullable = false)
+//    @Column(nullable = false)
     private String contactPhone;
 
-    @Column(nullable = false)
+//    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private DeliveryMethod deliveryMethod;
 

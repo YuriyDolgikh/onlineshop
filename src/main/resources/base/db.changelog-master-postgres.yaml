@@ -126,6 +126,7 @@ databaseChangeLog:
               - column:
                   name: cart_item_id
                   type: INT
+                  autoIncrement: true
                   constraints:
                     primaryKey: true
                     nullable: false
@@ -188,6 +189,7 @@ databaseChangeLog:
               - column:
                   name: order_id
                   type: INT
+                  autoIncrement: true
                   constraints:
                     primaryKey: true
                     nullable: false
@@ -201,17 +203,17 @@ databaseChangeLog:
                   name: delivery_address
                   type: VARCHAR(100)
                   constraints:
-                    nullable: false
+                    nullable: true
               - column:
                   name: contact_phone
                   type: VARCHAR(20)
                   constraints:
-                    nullable: false
+                    nullable: true
               - column:
                   name: delivery_method
                   type: VARCHAR(50)
                   constraints:
-                    nullable: false
+                    nullable: true
               - column:
                   name: status
                   type: VARCHAR(50)
@@ -368,7 +370,7 @@ databaseChangeLog:
                   name: order_id
                   type: INT
                   constraints:
-                    nullable: false
+                    nullable: true
               - column:
                   name: product_id
                   type: INT
@@ -560,7 +562,7 @@ databaseChangeLog:
         - insert:
             tableName: products
             columns:
-              - column: { name: name,             value: "Agriculture fertilizer" }
+              - column: { name: name,             value: "Agricult. fertilizer" }
               - column: { name: description,      value: "Universal Fertilizer for indoor plants" }
               - column: { name: price,            valueNumeric: 50.00 }
               - column: { name: discount_price,   valueNumeric: 10.00 }
@@ -593,7 +595,7 @@ databaseChangeLog:
         - insert:
             tableName: products
             columns:
-              - column: { name: name,             value: "Soil chemical fertilizer" }
+              - column: { name: name,             value: "Chemical fertilizer" }
               - column: { name: description,      value: " Soil chemical fertilizer" }
               - column: { name: price,            valueNumeric: 5.50 }
               - column: { name: discount_price,   valueNumeric: 0.00 }
@@ -604,7 +606,7 @@ databaseChangeLog:
         - insert:
             tableName: products
             columns:
-              - column: { name: name,             value: "Super prom greenparadise" }
+              - column: { name: name,             value: "Prom greenparadise" }
               - column: { name: description,      value: "Super prom greenparadise" }
               - column: { name: price,            valueNumeric: 5.50 }
               - column: { name: discount_price,   valueNumeric: 0.00 }
@@ -693,7 +695,7 @@ databaseChangeLog:
         - insert:
             tableName: products
             columns:
-              - column: { name: name,             value: "Ceramic planter large" }
+              - column: { name: name,             value: "Ceramic planter lrg" }
               - column: { name: description,      value: "Ceramic planter large" }
               - column: { name: price,            valueNumeric: 20.50 }
               - column: { name: discount_price,   valueNumeric: 10.00 }
@@ -726,7 +728,7 @@ databaseChangeLog:
         - insert:
             tableName: products
             columns:
-              - column: { name: name,             value: "Outdoor planter green" }
+              - column: { name: name,             value: "Outdoor planter" }
               - column: { name: description,      value: "Outdoor planter green" }
               - column: { name: price,            valueNumeric: 5.50 }
               - column: { name: discount_price,   valueNumeric: 0.00 }
@@ -743,7 +745,7 @@ databaseChangeLog:
         - insert:
             tableName: products
             columns:
-              - column: { name: name,             value: "Chemical resistant sprayer suit" }
+              - column: { name: name,             value: "Chemical suit" }
               - column: { name: description,      value: "Chemical resistant sprayer suit" }
               - column: { name: price,            valueNumeric: 50.00 }
               - column: { name: discount_price,   valueNumeric: 10.00 }
@@ -754,7 +756,7 @@ databaseChangeLog:
         - insert:
             tableName: products
             columns:
-              - column: { name: name,             value: "Cultural protection grid" }
+              - column: { name: name,             value: "Protection grid" }
               - column: { name: description,      value: "Cultural protection grid" }
               - column: { name: price,            valueNumeric: 20.50 }
               - column: { name: discount_price,   valueNumeric: 10.00 }
@@ -776,7 +778,7 @@ databaseChangeLog:
         - insert:
             tableName: products
             columns:
-              - column: { name: name,             value: "Septic tank clean house" }
+              - column: { name: name,             value: "Septic clean house" }
               - column: { name: description,      value: "Septic tank clean house" }
               - column: { name: price,            valueNumeric: 5.50 }
               - column: { name: discount_price,   valueNumeric: 0.00 }
@@ -787,7 +789,7 @@ databaseChangeLog:
         - insert:
             tableName: products
             columns:
-              - column: { name: name,             value: "Septic tank tricel vento" }
+              - column: { name: name,             value: "Septic tricel vento" }
               - column: { name: description,      value: "Septic tank tricel vento" }
               - column: { name: price,            valueNumeric: 5.50 }
               - column: { name: discount_price,   valueNumeric: 0.00 }

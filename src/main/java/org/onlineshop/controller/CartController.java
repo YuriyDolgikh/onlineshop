@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.cart.CartResponseDto;
+import org.onlineshop.dto.cartItem.CartItemSympleResponseDto;
 import org.onlineshop.service.CartService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -88,7 +89,7 @@ public class CartController {
             )
     })
     @GetMapping
-    public ResponseEntity<CartResponseDto> getCartFullData() {
+    public ResponseEntity<CartItemSympleResponseDto> getCartFullData() {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(cartService.getCartFullData());
