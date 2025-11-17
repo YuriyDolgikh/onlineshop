@@ -94,9 +94,8 @@ public class CartService implements CartServiceInterface {
             Product product = item.getProduct();
             BigDecimal itemTotal = product.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
             BigDecimal itemTotalWithDiscount = itemTotal
-                    .subtract(product.getPrice()
-                            .multiply(product.getDiscountPrice())
-                            .divide(BigDecimal.valueOf(100)));
+                    .multiply(BigDecimal.valueOf(100).subtract(product.getDiscountPrice()))
+                    .divide(BigDecimal.valueOf(100));
             totalPrice = totalPrice.add(itemTotalWithDiscount);
         }
         List<CartItemSympleResponseDto> cartItemSympleDtos = cartItemDtos
