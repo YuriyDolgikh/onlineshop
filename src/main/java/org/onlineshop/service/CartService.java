@@ -117,6 +117,9 @@ public class CartService implements CartServiceInterface {
     @Transactional
     public Cart getCurrentCart() {
         User user = userService.getCurrentUser();
+        if (user.getCart() == null) {
+            throw new IllegalArgumentException("Cart cannot be null");
+        }
         return cartRepository.findByUser(user).orElseThrow(() -> new BadRequestException("Cart is empty"));
     }
 
