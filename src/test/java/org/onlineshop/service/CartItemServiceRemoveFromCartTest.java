@@ -2,112 +2,120 @@ package org.onlineshop.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.onlineshop.dto.cartItem.CartItemResponseDto;
-import org.onlineshop.entity.*;
-import org.onlineshop.repository.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
+import org.onlineshop.entity.Cart;
+import org.onlineshop.entity.CartItem;
+import org.onlineshop.entity.Product;
+import org.onlineshop.exception.NotFoundException;
+import org.onlineshop.repository.CartItemRepository;
+import org.onlineshop.service.converter.CartItemConverter;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@TestPropertySource(locations = "classpath:application-test.yml")
+@ExtendWith(MockitoExtension.class)
 class CartItemServiceRemoveFromCartTest {
 
-    @Autowired
-    private CartItemService cartItemService;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private CartRepository cartRepository;
-    @Autowired
-    private ProductRepository productRepository;
-    @Autowired
-    private CategoryRepository categoryRepository;
-    @Autowired
+    @Mock
     private CartItemRepository cartItemRepository;
 
-    private User testUser;
+    @Mock
+    private UserService userService;
+
+    @Mock
+    private CartItemConverter cartItemConverter;
+
+    @Mock
+    private CartService cartService;
+
+    @Mock
+    private ProductService productService;
+
+    @InjectMocks
+    private CartItemService cartItemService;
+
+    private Cart testCart;
     private Product testProduct;
+    private CartItem testCartItem;
+    private CartItemResponseDto expectedResponseDto;
 
     @BeforeEach
     void setUp() {
-        cartItemRepository.deleteAll();
-        cartRepository.deleteAll();
-        productRepository.deleteAll();
-        userRepository.deleteAll();
-        categoryRepository.deleteAll();
+        testProduct = new Product();
+        testProduct.setId(1);
+        testProduct.setName("Test Product");
+        testProduct.setPrice(BigDecimal.valueOf(100));
 
-       long stamp = Math.abs(System.currentTimeMillis());
+        testCartItem = new CartItem();
+        testCartItem.setProduct(testProduct);
+        testCartItem.setQuantity(2);
 
-        testUser = User.builder()
-                .username("testUser" + (stamp% 1_00))
-                .email("testUser" + stamp + "@tmail.com")
-                .hashPassword(stamp + "")
-                .phoneNumber("+491234567" + (stamp % 1_00000))
-                .role(User.Role.USER)
-                .status(User.Status.CONFIRMED)
-                .favourites(new HashSet<>())
-                .orders(new ArrayList<>())
-                .build();
-        userRepository.save(testUser);
+        testCart = new Cart();
+        Set<CartItem> cartItems = new HashSet<>();
+        cartItems.add(testCartItem);
+        testCart.setCartItems(cartItems);
 
-        System.out.println(testUser.getPhoneNumber() + " ==============================");
-
-        Cart cart = new Cart();
-        cart.setUser(testUser);
-        cartRepository.save(cart);
-        testUser.setCart(cart);
-        userRepository.save(testUser);
-
-        Category category = Category.builder()
-                .categoryName("Category" + stamp)
-                .build();
-        categoryRepository.save(category);
-
-        testProduct = Product.builder()
-                .name("ProductA")
-                .price(BigDecimal.valueOf(200))
-                .category(category)
-                .build();
-        productRepository.save(testProduct);
-
-
-        CartItem item = CartItem.builder()
-                .cart(cart)
-                .product(testProduct)
-                .quantity(3)
-                .build();
-        cartItemRepository.save(item);
-
-        cart.getCartItems().add(item);
-        cartRepository.save(cart);
+        expectedResponseDto = new CartItemResponseDto();
+        expectedResponseDto.setProduct(testProduct);
+        expectedResponseDto.setQuantity(2);
     }
 
     @Test
-    @WithMockUser(username = "#{testUser.email}", roles = {"USER"})
-    void testRemoveItemFromCartIfOk() {
-        CartItemResponseDto removed = cartItemService.removeItemFromCart(testProduct.getId());
+    void testRemoveItemFromCartIfAllOk() {
+        when(cartService.getCurrentCart()).thenReturn(testCart);
+        when(cartItemConverter.toDto(testCartItem)).thenReturn(expectedResponseDto);
 
-        assertNotNull(removed);
-        assertEquals(testProduct.getId(), removed.getProduct().getId());
-        assertEquals(3, removed.getQuantity());
+        CartItemResponseDto result = cartItemService.removeItemFromCart(1);
 
-        Cart cartAfter = cartRepository.findByUser(testUser).orElseThrow();
-        assertTrue(cartAfter.getCartItems().isEmpty(),"Cart should be empty after removal");
-        assertEquals(0,cartItemRepository.count(),"Cart should be empty after removal");
+        assertNotNull(result);
+        assertEquals(testProduct, result.getProduct());
+        assertEquals(2, result.getQuantity());
+        assertTrue(testCart.getCartItems().isEmpty());
 
+        verify(cartItemRepository).delete(testCartItem);
+        verify(cartService).saveCart(testCart);
     }
 
+    @Test
+    void testRemoveItemFromCartWhenProductNotInCart() {
+        when(cartService.getCurrentCart()).thenReturn(testCart);
 
+        NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> cartItemService.removeItemFromCart(999));
+
+        assertEquals("Product with ID: 999 not found in cart", exception.getMessage());
+        verify(cartItemRepository, never()).delete(any());
+        verify(cartService, never()).saveCart(any());
+    }
+
+    @Test
+    void testRemoveItemFromCartWhenProductIdIsNull() {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> cartItemService.removeItemFromCart(null));
+
+        assertEquals("Product Id cannot be null", exception.getMessage());
+        verifyNoInteractions(cartService, cartItemRepository, cartItemConverter);
+    }
+
+    @Test
+    void testRemoveItemFromCartWhenCartIsEmpty() {
+        testCart.setCartItems(new HashSet<>());
+        when(cartService.getCurrentCart()).thenReturn(testCart);
+
+        NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> cartItemService.removeItemFromCart(1));
+
+        assertEquals("Product with ID: 1 not found in cart", exception.getMessage());
+        verify(cartItemRepository, never()).delete(any());
+        verify(cartService, never()).saveCart(any());
+    }
 }
