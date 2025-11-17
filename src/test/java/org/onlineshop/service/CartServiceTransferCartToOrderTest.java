@@ -90,7 +90,7 @@ class CartServiceTransferCartToOrderTest {
     }
 
     @Test
-    void testTransferCartToOrder() {
+    void testTransferCartToOrderAllIsOk() {
         when(userService.getCurrentUser()).thenReturn(userTest);
         when(cartRepository.findByUser(userTest)).thenReturn(Optional.of(cartTest));
         when(cartItemConverter.cartItemToOrderItem(cartItemTest)).thenReturn(orderItemTest);
