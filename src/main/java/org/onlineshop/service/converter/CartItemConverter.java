@@ -1,5 +1,6 @@
 package org.onlineshop.service.converter;
 
+import lombok.Generated;
 import org.onlineshop.dto.cartItem.CartItemFullResponseDto;
 import org.onlineshop.dto.cartItem.CartItemResponseDto;
 import org.onlineshop.dto.cartItem.CartItemSympleResponseDto;
@@ -11,6 +12,7 @@ import java.math.BigDecimal;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Generated
 @Service
 public class CartItemConverter {
     public CartItemResponseDto toDto(CartItem cartItem) {
