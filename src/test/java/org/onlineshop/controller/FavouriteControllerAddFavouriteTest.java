@@ -16,8 +16,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.List;
-
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -110,7 +108,7 @@ class FavouriteControllerAddFavouriteTest {
     @Test
     @WithMockUser(username = "testUser@email.com",
             roles = {"ADMIN", "MANAGER", "USER"})
-    void addFavouriteIfProsuctInvalid() throws Exception {
+    void addFavouriteIfProductInvalid() throws Exception {
         mockMvc.perform(post("/v1/favorites/abc")).andExpect(status().isBadRequest());
     }
 }
