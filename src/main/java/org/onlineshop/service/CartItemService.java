@@ -165,7 +165,7 @@ public class CartItemService implements CartItemServiceInterface {
      * @param productId the ID of the product to search for within the user's cart
      * @return an Optional containing the CartItem if found; otherwise, an empty Optional
      */
-    private Optional<CartItem> getCartItemFromCart(Integer productId) {
+     public Optional<CartItem> getCartItemFromCart(Integer productId) {
         User user = userService.getCurrentUser();
         Cart userCart = user.getCart();
         Set<CartItem> cartItems = userCart.getCartItems();
