@@ -1,89 +1,54 @@
 package org.onlineshop.service;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.onlineshop.entity.*;
-import org.onlineshop.repository.CartItemRepository;
 import org.onlineshop.repository.CartRepository;
 import org.onlineshop.repository.OrderRepository;
-import org.onlineshop.repository.UserRepository;
 import org.onlineshop.service.converter.CartItemConverter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
+import org.onlineshop.service.interfaces.UserServiceInterface;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@MockitoSettings(strictness = Strictness.LENIENT)
-@SpringBootTest
-@ActiveProfiles("test")
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@TestPropertySource(locations = "classpath:application-test.yml")
+@ExtendWith(MockitoExtension.class)
 class CartServiceTransferCartToOrderTest {
 
-    @MockBean
+    @Mock
     private CartRepository cartRepository;
 
-    @MockBean
-    private UserService userService;
+    @Mock
+    private UserServiceInterface userService;
 
-    @MockBean
+    @Mock
     private CartItemConverter cartItemConverter;
 
-    @MockBean
+    @Mock
     private OrderRepository orderRepository;
 
-    @SpyBean
+    @InjectMocks
     private CartService cartService;
 
     private User userTest;
-
     private Cart cartTest;
-
     private Product productTest;
-
     private CartItem cartItemTest;
-
     private OrderItem orderItemTest;
-
-    @Autowired
-    private CartItemRepository cartItemRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-
-
-    static class TestOrder extends Order {
-        @Override
-        public String toString() {
-            return "TestOrder{id=" + getOrderId() + "}";
-        }
-    }
-
-    static class TestOrderItem extends OrderItem {
-        @Override
-        public String toString() {
-            return "TestOrderItem{id=" + getOrderItemId() + "}";
-        }
-    }
 
     @BeforeEach
     void setUp() {
-
         userTest = User.builder()
+                .userId(1)
                 .username("testUser")
                 .email("test@test.com")
                 .phoneNumber("+49787878787878")
@@ -93,6 +58,7 @@ class CartServiceTransferCartToOrderTest {
                 .build();
 
         cartTest = Cart.builder()
+                .cartId(1)
                 .user(userTest)
                 .cartItems(new HashSet<>())
                 .build();
@@ -100,11 +66,14 @@ class CartServiceTransferCartToOrderTest {
         userTest.setCart(cartTest);
 
         productTest = Product.builder()
+                .id(100)
                 .name("Test Product")
                 .price(BigDecimal.valueOf(10))
+                .discountPrice(BigDecimal.ZERO)
                 .build();
 
         cartItemTest = CartItem.builder()
+                .cartItemId(50)
                 .product(productTest)
                 .cart(cartTest)
                 .quantity(1)
@@ -112,43 +81,124 @@ class CartServiceTransferCartToOrderTest {
 
         cartTest.getCartItems().add(cartItemTest);
 
-        orderItemTest = new TestOrderItem();
-        orderItemTest.setOrderItemId(500);
-        orderItemTest.setQuantity(1);
+        orderItemTest = OrderItem.builder()
+                .orderItemId(500)
+                .product(productTest)
+                .quantity(1)
+                .priceAtPurchase(productTest.getPrice())
+                .build();
     }
 
-    @AfterEach
-    void tearDown() {
-        orderRepository.deleteAll();
-        cartRepository.deleteAll();
-        userRepository.deleteAll();
-        cartItemRepository.deleteAll();
+    @Test
+    void testTransferCartToOrder() {
+        when(userService.getCurrentUser()).thenReturn(userTest);
+        when(cartRepository.findByUser(userTest)).thenReturn(Optional.of(cartTest));
+        when(cartItemConverter.cartItemToOrderItem(cartItemTest)).thenReturn(orderItemTest);
 
+        Order savedOrder = Order.builder()
+                .orderId(200)
+                .user(userTest)
+                .status(Order.Status.PENDING_PAYMENT)
+                .deliveryMethod(Order.DeliveryMethod.PICKUP)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .orderItems(new ArrayList<>())
+                .build();
+
+        when(orderRepository.save(any(Order.class))).thenReturn(savedOrder);
+
+        cartService.transferCartToOrder();
+
+        verify(userService, atLeastOnce()).getCurrentUser();
+        verify(cartRepository, times(1)).findByUser(userTest);
+        verify(cartItemConverter, times(1)).cartItemToOrderItem(cartItemTest);
+        verify(orderRepository, times(2)).save(any(Order.class));
+        verify(userService, times(2)).saveUser(userTest);
+
+        CartService cartServiceSpy = spy(cartService);
+        cartServiceSpy.transferCartToOrder();
+        verify(cartServiceSpy, times(1)).clearCart();
     }
 
-//    @Test
-//    void testTransferCartToOrder() {
-//
-//        when(userService.getCurrentUser())
-//                .thenReturn(userTest);
-//
-//        doReturn(cartTest)
-//                .when(cartService)
-//                .getCurrentCart();
-//
-//        when(cartItemConverter.cartItemToOrderItem(cartItemTest))
-//                .thenReturn(orderItemTest);
-//
-//        TestOrder savedOrder = new TestOrder();
-//        savedOrder.setOrderId(200);
-//
-//        when(orderRepository.save(any(Order.class)))
-//                .thenReturn(savedOrder);
-//
-//        cartService.transferCartToOrder();
-//
-//        verify(orderRepository, times(2)).save(any(Order.class));
-//        verify(userService, times(2)).saveUser(userTest);
-//        verify(cartService, times(1)).clearCart();
-//    }
+    @Test
+    void testTransferCartToOrderWithMultipleItems() {
+        Product productTest2 = Product.builder()
+                .id(101)
+                .name("Test Product 2")
+                .price(BigDecimal.valueOf(20))
+                .discountPrice(BigDecimal.ZERO)
+                .build();
+
+        CartItem cartItemTest2 = CartItem.builder()
+                .cartItemId(51)
+                .product(productTest2)
+                .cart(cartTest)
+                .quantity(2)
+                .build();
+
+        cartTest.getCartItems().add(cartItemTest2);
+
+        OrderItem orderItemTest2 = OrderItem.builder()
+                .orderItemId(501)
+                .product(productTest2)
+                .quantity(2)
+                .priceAtPurchase(productTest2.getPrice())
+                .build();
+
+        when(userService.getCurrentUser()).thenReturn(userTest);
+        when(cartRepository.findByUser(userTest)).thenReturn(Optional.of(cartTest));
+        when(cartItemConverter.cartItemToOrderItem(cartItemTest)).thenReturn(orderItemTest);
+        when(cartItemConverter.cartItemToOrderItem(cartItemTest2)).thenReturn(orderItemTest2);
+
+        Order savedOrder = Order.builder()
+                .orderId(200)
+                .user(userTest)
+                .status(Order.Status.PENDING_PAYMENT)
+                .deliveryMethod(Order.DeliveryMethod.PICKUP)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .orderItems(new ArrayList<>())
+                .build();
+
+        when(orderRepository.save(any(Order.class))).thenReturn(savedOrder);
+
+        cartService.transferCartToOrder();
+
+        verify(cartItemConverter, times(2)).cartItemToOrderItem(any(CartItem.class));
+        verify(orderRepository, times(2)).save(any(Order.class));
+        verify(userService, times(2)).saveUser(userTest);
+
+        CartService cartServiceSpy = spy(cartService);
+        cartServiceSpy.transferCartToOrder();
+        verify(cartServiceSpy, times(1)).clearCart();
+    }
+
+    @Test
+    void testTransferCartToOrderWithEmptyCart() {
+        cartTest.getCartItems().clear();
+
+        when(userService.getCurrentUser()).thenReturn(userTest);
+        when(cartRepository.findByUser(userTest)).thenReturn(Optional.of(cartTest));
+
+        Order savedOrder = Order.builder()
+                .orderId(200)
+                .user(userTest)
+                .status(Order.Status.PENDING_PAYMENT)
+                .deliveryMethod(Order.DeliveryMethod.PICKUP)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .orderItems(new ArrayList<>())
+                .build();
+
+        when(orderRepository.save(any(Order.class))).thenReturn(savedOrder);
+
+        cartService.transferCartToOrder();
+
+        verify(orderRepository, times(2)).save(any(Order.class));
+        verify(userService, times(2)).saveUser(userTest);
+
+        CartService cartServiceSpy = spy(cartService);
+        cartServiceSpy.transferCartToOrder();
+        verify(cartServiceSpy, times(1)).clearCart();
+    }
 }
