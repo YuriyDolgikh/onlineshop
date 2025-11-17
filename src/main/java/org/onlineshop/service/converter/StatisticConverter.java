@@ -1,5 +1,6 @@
 package org.onlineshop.service.converter;
 
+import lombok.Generated;
 import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.statistic.ProductStatisticResponseDto;
 import org.onlineshop.entity.Product;
@@ -7,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Generated
 @Service
 @RequiredArgsConstructor
 public class StatisticConverter {

@@ -1,5 +1,6 @@
 package org.onlineshop.validation;
 
+import lombok.Generated;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
@@ -13,6 +14,7 @@ import java.util.List;
 @ControllerAdvice
 public class ValidationExceptionHandler {
 
+    @Generated
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ValidationErrorsDto> handlerValidationException(MethodArgumentNotValidException e) {
         List<ValidationErrorDto> validationErrors = new ArrayList<>();

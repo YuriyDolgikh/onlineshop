@@ -1,5 +1,6 @@
 package org.onlineshop.service.converter;
 
+import lombok.Generated;
 import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.product.ProductRequestDto;
 import org.onlineshop.dto.product.ProductResponseDto;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@Generated
 @Service
 @RequiredArgsConstructor
 public class ProductConverter {

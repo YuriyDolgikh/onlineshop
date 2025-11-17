@@ -1,5 +1,6 @@
 package org.onlineshop.service.converter;
 
+import lombok.Generated;
 import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.category.CategoryRequestDto;
 import org.onlineshop.dto.category.CategoryResponseDto;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Generated
 @Service
 @RequiredArgsConstructor
 public class CategoryConverter {
