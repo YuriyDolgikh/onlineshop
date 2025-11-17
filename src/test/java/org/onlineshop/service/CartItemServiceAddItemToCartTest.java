@@ -1,5 +1,6 @@
 package org.onlineshop.service;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.onlineshop.dto.cartItem.CartItemRequestDto;
@@ -10,7 +11,11 @@ import org.onlineshop.entity.Product;
 import org.onlineshop.entity.User;
 import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.repository.CartItemRepository;
+import org.onlineshop.repository.CartRepository;
+import org.onlineshop.repository.ProductRepository;
+import org.onlineshop.repository.UserRepository;
 import org.onlineshop.service.converter.CartItemConverter;
+import org.onlineshop.service.converter.ProductConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -36,16 +41,30 @@ class CartItemServiceAddItemToCartTest {
 
     @Autowired
     private CartItemService cartItemService;
+
     @MockBean
     private UserService userService;
+
     @MockBean
     private ProductService productService;
+
     @MockBean
     private CartItemRepository cartItemRepository;
+
     @MockBean
     private CartService cartService;
+
     @MockBean
     private CartItemConverter cartItemConverter;
+
+    @Autowired
+    private ProductRepository productRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private CartRepository cartRepository;
 
     @BeforeEach
     void setUp() {
@@ -70,6 +89,14 @@ class CartItemServiceAddItemToCartTest {
         testCart.setCartItems(cartItems);
 
         when(userService.getCurrentUser()).thenReturn(testUser);
+    }
+
+    @AfterEach
+    void tearDown() {
+        cartItemRepository.deleteAll();
+        productRepository.deleteAll();
+        userRepository.deleteAll();
+        cartRepository.deleteAll();
     }
 
     @Test

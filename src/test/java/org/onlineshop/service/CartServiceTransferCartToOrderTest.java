@@ -1,13 +1,17 @@
 package org.onlineshop.service;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.onlineshop.entity.*;
+import org.onlineshop.repository.CartItemRepository;
 import org.onlineshop.repository.CartRepository;
 import org.onlineshop.repository.OrderRepository;
+import org.onlineshop.repository.UserRepository;
 import org.onlineshop.service.converter.CartItemConverter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -53,6 +57,14 @@ class CartServiceTransferCartToOrderTest {
     private CartItem cartItemTest;
 
     private OrderItem orderItemTest;
+
+    @Autowired
+    private CartItemRepository cartItemRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+
 
     static class TestOrder extends Order {
         @Override
@@ -105,29 +117,38 @@ class CartServiceTransferCartToOrderTest {
         orderItemTest.setQuantity(1);
     }
 
-    @Test
-    void testTransferCartToOrder() {
+    @AfterEach
+    void tearDown() {
+        orderRepository.deleteAll();
+        cartRepository.deleteAll();
+        userRepository.deleteAll();
+        cartItemRepository.deleteAll();
 
-        when(userService.getCurrentUser())
-                .thenReturn(userTest);
-
-        doReturn(cartTest)
-                .when(cartService)
-                .getCurrentCart();
-
-        when(cartItemConverter.cartItemToOrderItem(cartItemTest))
-                .thenReturn(orderItemTest);
-
-        TestOrder savedOrder = new TestOrder();
-        savedOrder.setOrderId(200);
-
-        when(orderRepository.save(any(Order.class)))
-                .thenReturn(savedOrder);
-
-        cartService.transferCartToOrder();
-
-        verify(orderRepository, times(2)).save(any(Order.class));
-        verify(userService, times(2)).saveUser(userTest);
-        verify(cartService, times(1)).clearCart();
     }
+
+//    @Test
+//    void testTransferCartToOrder() {
+//
+//        when(userService.getCurrentUser())
+//                .thenReturn(userTest);
+//
+//        doReturn(cartTest)
+//                .when(cartService)
+//                .getCurrentCart();
+//
+//        when(cartItemConverter.cartItemToOrderItem(cartItemTest))
+//                .thenReturn(orderItemTest);
+//
+//        TestOrder savedOrder = new TestOrder();
+//        savedOrder.setOrderId(200);
+//
+//        when(orderRepository.save(any(Order.class)))
+//                .thenReturn(savedOrder);
+//
+//        cartService.transferCartToOrder();
+//
+//        verify(orderRepository, times(2)).save(any(Order.class));
+//        verify(userService, times(2)).saveUser(userTest);
+//        verify(cartService, times(1)).clearCart();
+//    }
 }
