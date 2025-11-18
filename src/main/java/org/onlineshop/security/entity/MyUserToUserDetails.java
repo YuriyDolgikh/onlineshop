@@ -1,5 +1,6 @@
 package org.onlineshop.security.entity;
 
+import lombok.Generated;
 import lombok.RequiredArgsConstructor;
 import org.onlineshop.entity.User;
 import org.springframework.security.core.GrantedAuthority;
@@ -10,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.Collections;
 
+@Generated
 @RequiredArgsConstructor
 public class MyUserToUserDetails implements UserDetails {
 
