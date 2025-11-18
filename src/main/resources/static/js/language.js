@@ -58,7 +58,7 @@ const translations = {
     },
     ru: {
         'main-title': 'OnlineShop API',
-        'subtitle': 'Full REST API für управления интернет-магазином',
+        'subtitle': 'Full REST API для управления интернет-магазином',
         'status': '🔄 Проверка статуса API...',
         'swagger-btn': '📚 Открыть Swagger Documentation',
         'base-url-label': 'Base URL:',
