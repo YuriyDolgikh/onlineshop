@@ -1,5 +1,6 @@
 package org.onlineshop.validation;
 
+import lombok.Generated;
 import org.onlineshop.config.ImageServiceConfig;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +13,7 @@ import java.time.Duration;
 import java.util.Locale;
 import java.util.Optional;
 
+@Generated
 @Service
 public final class ValidationUrlService {
 

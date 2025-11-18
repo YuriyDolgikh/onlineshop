@@ -5,6 +5,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import lombok.Generated;
 import org.onlineshop.security.exception.InvalidJwtException;
 import org.springframework.stereotype.Service;
 
@@ -46,6 +47,7 @@ public class JwtTokenProvider {
      * @UnsupportedJwtException - Unsupported Jwt token
      * @IllegalArgumentException - JWT claims is empty
      */
+    @Generated
     public boolean validateToken(String token) {
         Key key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
         try {
@@ -61,6 +63,7 @@ public class JwtTokenProvider {
      * @param token JWT token - String variable
      * @return - String variable with username (email of user)
      */
+    @Generated
     public String getUsernameFromJwt(String token) {
         Key key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
         Claims claimsPayload = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
