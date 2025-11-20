@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.onlineshop.dto.cartItem.CartItemResponseDto;
 import org.onlineshop.dto.cartItem.CartItemUpdateDto;
 import org.onlineshop.entity.Product;
+import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.service.CartItemService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,16 +19,14 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.mockito.Mockito.doThrow;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-
 import java.math.BigDecimal;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -35,6 +34,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @TestPropertySource(locations = "classpath:application-test.yml")
 class CartItemControllerUpdateCartItemTest {
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -55,13 +55,14 @@ class CartItemControllerUpdateCartItemTest {
         Product product = new Product();
         product.setId(1);
         product.setName("Test Product");
-        product.setPrice(new BigDecimal("100"));
+        product.setPrice(BigDecimal.valueOf(100));
 
         CartItemResponseDto responseDto = new CartItemResponseDto();
         responseDto.setProduct(product);
         responseDto.setQuantity(5);
 
-        when(cartItemService.updateItemInCart(any(CartItemUpdateDto.class))).thenReturn(responseDto);
+        when(cartItemService.updateItemInCart(any(CartItemUpdateDto.class)))
+                .thenReturn(responseDto);
 
         mockMvc.perform(
                         put("/v1/cartItems")
@@ -73,18 +74,20 @@ class CartItemControllerUpdateCartItemTest {
                 .andExpect(jsonPath("$.quantity").value(5));
     }
 
-
     @Test
     void updateCartItemUnauthorized() throws Exception {
         CartItemUpdateDto updateDto = new CartItemUpdateDto();
         updateDto.setProductId(1);
         updateDto.setQuantity(5);
 
-        mockMvc.perform(put("/v1/cartItems")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateDto)))
+        mockMvc.perform(
+                        put("/v1/cartItems")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(updateDto))
+                )
                 .andExpect(status().isUnauthorized());
     }
+
     @Test
     @WithMockUser(username = "testUser@email.com",
             roles = {"ADMIN", "MANAGER","USER"})
@@ -93,12 +96,15 @@ class CartItemControllerUpdateCartItemTest {
         updateDto.setProductId(1);
         updateDto.setQuantity(0);
 
-        doThrow(new IllegalArgumentException("Quantity must be at least 1"))
-                .when(cartItemService).updateItemInCart(any(CartItemUpdateDto.class));
+        doThrow(new BadRequestException("Quantity must be at least 1"))
+                .when(cartItemService)
+                .updateItemInCart(any(CartItemUpdateDto.class));
 
-        mockMvc.perform(put("/v1/cartItems")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateDto)))
+        mockMvc.perform(
+                        put("/v1/cartItems")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(updateDto))
+                )
                 .andExpect(status().isBadRequest());
     }
 
@@ -111,11 +117,14 @@ class CartItemControllerUpdateCartItemTest {
         updateDto.setQuantity(3);
 
         doThrow(new NotFoundException("Product not found"))
-                .when(cartItemService).updateItemInCart(any(CartItemUpdateDto.class));
+                .when(cartItemService)
+                .updateItemInCart(any(CartItemUpdateDto.class));
 
-        mockMvc.perform(put("/v1/cartItems")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateDto)))
+        mockMvc.perform(
+                        put("/v1/cartItems")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(updateDto))
+                )
                 .andExpect(status().isNotFound());
     }
 
@@ -126,9 +135,11 @@ class CartItemControllerUpdateCartItemTest {
         CartItemUpdateDto updateDto = new CartItemUpdateDto();
         updateDto.setProductId(1);
 
-        mockMvc.perform(put("/v1/cartItems")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateDto)))
+        mockMvc.perform(
+                        put("/v1/cartItems")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(updateDto))
+                )
                 .andExpect(status().isBadRequest());
     }
 
@@ -141,11 +152,14 @@ class CartItemControllerUpdateCartItemTest {
         updateDto.setQuantity(2);
 
         doThrow(new RuntimeException("Unexpected error"))
-                .when(cartItemService).updateItemInCart(any(CartItemUpdateDto.class));
+                .when(cartItemService)
+                .updateItemInCart(any(CartItemUpdateDto.class));
 
-        mockMvc.perform(put("/v1/cartItems")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateDto)))
+        mockMvc.perform(
+                        put("/v1/cartItems")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(updateDto))
+                )
                 .andExpect(status().isInternalServerError());
     }
 }

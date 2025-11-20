@@ -1,13 +1,9 @@
 package org.onlineshop.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.onlineshop.dto.cartItem.CartItemRequestDto;
 import org.onlineshop.dto.cartItem.CartItemSympleResponseDto;
-import org.onlineshop.entity.CartItem;
 import org.onlineshop.exception.NotFoundException;
-import org.onlineshop.repository.CartRepository;
-import org.onlineshop.repository.ProductRepository;
 import org.onlineshop.service.CartItemService;
 import org.onlineshop.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +18,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -66,7 +62,6 @@ class CartItemControllerCreateCartItemTest {
                         .andExpect(status().isCreated())
                         .andExpect(jsonPath("$.productName").value("product"))
                         .andExpect(jsonPath("$.quantity").value(3));
-
     }
 
     @Test
@@ -118,7 +113,6 @@ class CartItemControllerCreateCartItemTest {
                 .andExpect(status().isNotFound());
     }
 
-
     @Test
     @WithMockUser(username = "testUser@email.com",
             roles = {"ADMIN", "MANAGER","USER"})
@@ -147,5 +141,4 @@ class CartItemControllerCreateCartItemTest {
                     """))
                 .andExpect(status().isInternalServerError());
     }
-
 }
