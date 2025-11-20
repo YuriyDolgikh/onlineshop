@@ -16,6 +16,6 @@ public class CartItemRequestDto {
     private Integer productId;
 
     @NotNull
-    @Min(1) // quantity должен быть >= 1
+    @Min(value = 1, message = "Quantity must be at least 1")
     private Integer quantity;
 }

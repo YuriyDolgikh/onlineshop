@@ -2,6 +2,10 @@ package org.onlineshop.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.onlineshop.dto.cart.CartResponseDto;
 import org.onlineshop.dto.cartItem.CartItemResponseDto;
 import org.onlineshop.dto.cartItem.CartItemSympleResponseDto;
@@ -9,44 +13,36 @@ import org.onlineshop.entity.Cart;
 import org.onlineshop.entity.CartItem;
 import org.onlineshop.entity.Product;
 import org.onlineshop.entity.User;
+import org.onlineshop.repository.CartRepository;
 import org.onlineshop.service.converter.CartItemConverter;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@TestPropertySource(locations = "classpath:application-test.yml")
+@ExtendWith(MockitoExtension.class)
 class CartServiceGetCartFullDataTest {
-    @MockBean
+
+    @Mock
     private UserService userService;
 
-    @SpyBean
-    private CartService cartService;
+    @Mock
+    private CartRepository cartRepository;
 
-    @MockBean
+    @Mock
     private CartItemConverter cartItemConverter;
 
+    @InjectMocks
+    private CartService cartService;
+
     private User userTest;
-
     private Cart cartTest;
-
     private Product productTest;
-
     private CartItem cartItemTest;
-
     private CartItemResponseDto cartItemDto;
-
     private CartItemSympleResponseDto simpleDto;
 
     @BeforeEach
@@ -69,8 +65,6 @@ class CartServiceGetCartFullDataTest {
                 .cartItems(new HashSet<>())
                 .build();
 
-        userTest.setCart(cartTest);
-
         cartItemTest = CartItem.builder()
                 .cart(cartTest)
                 .product(productTest)
@@ -78,6 +72,7 @@ class CartServiceGetCartFullDataTest {
                 .build();
 
         cartTest.getCartItems().add(cartItemTest);
+        userTest.setCart(cartTest);
 
         cartItemDto = CartItemResponseDto.builder()
                 .product(productTest)
@@ -93,27 +88,22 @@ class CartServiceGetCartFullDataTest {
     @Test
     void testGetCartFullData() {
         when(userService.getCurrentUser()).thenReturn(userTest);
-        doReturn(cartTest).when(cartService).getCurrentCart();
-
-        when(cartItemConverter.toDto(cartItemTest))
-                .thenReturn(cartItemDto);
-
-        when(cartItemConverter.toSympleDtoFromDto(cartItemDto))
-                .thenReturn(simpleDto);
+        when(cartRepository.findByUser(userTest)).thenReturn(Optional.of(cartTest));
+        when(cartItemConverter.toDto(cartItemTest)).thenReturn(cartItemDto);
+        when(cartItemConverter.toSympleDtoFromDto(cartItemDto)).thenReturn(simpleDto);
 
         CartResponseDto result = cartService.getCartFullData();
 
         assertEquals(BigDecimal.valueOf(180), result.getTotalPrice());
-
         assertEquals(userTest.getUserId(), result.getUserId());
 
         assertEquals(1, result.getCartSympleItems().size());
         assertEquals("TestProduct", result.getCartSympleItems().get(0).getProductName());
         assertEquals(2, result.getCartSympleItems().get(0).getQuantity());
 
-        verify(userService, times(1)).getCurrentUser();
-        verify(cartService, times(1)).getCurrentCart();
-        verify(cartItemConverter, times(1)).toDto(cartItemTest);
-        verify(cartItemConverter, times(1)).toSympleDtoFromDto(cartItemDto);
+        verify(userService, times(2)).getCurrentUser();
+        verify(cartRepository).findByUser(userTest);
+        verify(cartItemConverter).toDto(cartItemTest);
+        verify(cartItemConverter).toSympleDtoFromDto(cartItemDto);
     }
 }

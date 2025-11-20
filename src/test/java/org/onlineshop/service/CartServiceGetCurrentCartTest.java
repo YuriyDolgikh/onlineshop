@@ -2,18 +2,16 @@ package org.onlineshop.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.onlineshop.entity.Cart;
 import org.onlineshop.entity.CartItem;
 import org.onlineshop.entity.Product;
 import org.onlineshop.entity.User;
 import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.repository.CartRepository;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
@@ -22,26 +20,21 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@TestPropertySource(locations = "classpath:application-test.yml")
+@ExtendWith(MockitoExtension.class)
 class CartServiceGetCurrentCartTest {
-    @MockBean
+
+    @Mock
     private CartRepository cartRepository;
 
-    @MockBean
+    @Mock
     private UserService userService;
 
-    @SpyBean
+    @InjectMocks
     private CartService cartService;
 
     private User userTest;
-
     private Cart cartTest;
-
     private Product productTest;
-
     private CartItem cartItemTest;
 
     @BeforeEach
@@ -72,7 +65,6 @@ class CartServiceGetCurrentCartTest {
                 .build();
 
         cartTest.getCartItems().add(cartItemTest);
-
     }
 
     @Test
@@ -85,8 +77,8 @@ class CartServiceGetCurrentCartTest {
         assertNotNull(result);
         assertEquals(cartTest, result);
 
-        verify(userService, times(1)).getCurrentUser();
-        verify(cartRepository, times(1)).findByUser(userTest);
+        verify(userService).getCurrentUser();
+        verify(cartRepository).findByUser(userTest);
     }
 
     @Test
@@ -96,5 +88,4 @@ class CartServiceGetCurrentCartTest {
 
         assertThrows(BadRequestException.class, () -> cartService.getCurrentCart());
     }
-
 }
