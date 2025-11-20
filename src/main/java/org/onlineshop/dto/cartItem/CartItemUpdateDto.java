@@ -1,5 +1,6 @@
 package org.onlineshop.dto.cartItem;
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,9 +13,10 @@ import org.onlineshop.entity.Product;
 @Data
 @Builder
 public class CartItemUpdateDto {
-    @NotNull
+    @NotNull(message = "Product ID cannot be null")
     private Integer productId;
 
-    @NotNull
+    @NotNull(message = "Quantity cannot be null")
+    @Min(value = 1, message = "Quantity must be at least 1")
     private Integer quantity;
 }
