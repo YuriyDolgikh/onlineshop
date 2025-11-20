@@ -1,77 +1,45 @@
 package org.onlineshop.service;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.onlineshop.dto.cartItem.CartItemFullResponseDto;
 import org.onlineshop.entity.Cart;
 import org.onlineshop.entity.CartItem;
 import org.onlineshop.entity.Product;
-import org.onlineshop.entity.User;
-import org.onlineshop.repository.CartItemRepository;
-import org.onlineshop.repository.CartRepository;
-import org.onlineshop.repository.ProductRepository;
-import org.onlineshop.repository.UserRepository;
-import org.onlineshop.service.converter.CartItemConverter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 
-import java.math.BigDecimal;
+import org.onlineshop.service.converter.CartItemConverter;
+
 import java.util.HashSet;
 import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.util.AssertionErrors.assertEquals;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@TestPropertySource(locations = "classpath:application-test.yml")
 class CartItemServiceGetCartItemsTest {
 
-    @Autowired
     private CartItemService cartItemService;
-
-    @MockBean
-    private UserService userService;
-
-    @MockBean
     private CartService cartService;
-
-    @MockBean
     private CartItemConverter cartItemConverter;
 
-    @Autowired
-    private ProductRepository productRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private CartRepository cartRepository;
-
     private Cart testCart;
-    private User testUser;
 
     @BeforeEach
     void setUp() {
-        testUser = new User();
+        cartService = mock(CartService.class);
+        cartItemConverter = mock(CartItemConverter.class);
+
+        cartItemService = new CartItemService(null, null, cartItemConverter, cartService, null);
+
         testCart = new Cart();
-        testUser.setCart(testCart);
 
         Product p1 = new Product();
         p1.setId(1);
         p1.setName("Product1");
-        p1.setPrice(new BigDecimal("100"));
 
         Product p2 = new Product();
         p2.setId(2);
         p2.setName("Product2");
-        p2.setPrice(new BigDecimal("200"));
 
         CartItem ci1 = new CartItem();
         ci1.setProduct(p1);
@@ -87,43 +55,37 @@ class CartItemServiceGetCartItemsTest {
 
         testCart.setCartItems(cartItems);
 
-        when(userService.getCurrentUser()).thenReturn(testUser);
-    }
-
-    @AfterEach
-    void tearDown() {
-        productRepository.deleteAll();
-        userRepository.deleteAll();
-        cartRepository.deleteAll();
-    }
-
-    @Test
-    void getCartItemsReturnsFullDtoSet() {
         when(cartService.getCurrentCart()).thenReturn(testCart);
 
-        when(cartItemConverter.toFullDtos(any(Set.class))).thenAnswer(invocation -> {
+        when(cartItemConverter.toFullDtos(any())).thenAnswer(invocation -> {
             Set<CartItem> items = invocation.getArgument(0);
             Set<CartItemFullResponseDto> dtos = new HashSet<>();
             for (CartItem ci : items) {
                 CartItemFullResponseDto dto = new CartItemFullResponseDto();
-                dto.setQuantity(ci.getQuantity());
                 dto.setProductName(ci.getProduct().getName());
+                dto.setQuantity(ci.getQuantity());
                 dtos.add(dto);
             }
             return dtos;
         });
+    }
 
+    @Test
+    void getCartItemsReturnsCorrectDtos() {
         Set<CartItemFullResponseDto> response = cartItemService.getCartItems();
 
-        assertEquals("Number of items should match", 2, response.size());
+        assertEquals(2, response.size(), "Should return 2 items");
 
-        boolean product1Found = response.stream().anyMatch(dto -> "Product1".equals(dto.getProductName()) && dto.getQuantity() == 1);
-        boolean product2Found = response.stream().anyMatch(dto -> "Product2".equals(dto.getProductName()) && dto.getQuantity() == 2);
+        boolean p1Found = response.stream()
+                .anyMatch(dto -> dto.getProductName()
+                        .equals("Product1") && dto.getQuantity() == 1);
+        boolean p2Found = response.stream()
+                .anyMatch(dto -> dto.getProductName()
+                        .equals("Product2") && dto.getQuantity() == 2);
 
-        assertEquals("Product1 should be present", true, product1Found);
-        assertEquals("Product2 should be present", true, product2Found);
+        assertTrue(p1Found, "Product1 should be present");
+        assertTrue(p2Found, "Product2 should be present");
 
-        verify(userService, times(0)).getCurrentUser();
         verify(cartService, times(1)).getCurrentCart();
         verify(cartItemConverter, times(1)).toFullDtos(testCart.getCartItems());
     }
