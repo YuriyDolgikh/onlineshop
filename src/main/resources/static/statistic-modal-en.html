@@ -1,0 +1,166 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <h2>📊 Statistics and Analytics Details</h2>
+        <button onclick="closeModal()" class="modal-close-btn">&times;</button>
+    </div>
+
+    <div class="modal-body">
+        <!-- General Description -->
+        <div class="description-section">
+            <h3>General Description</h3>
+            <p>
+                StatisticService is responsible for getting statistics on products and profit.
+                Performs operations for counting most sold, cancelled products, products in payment pending status,
+                as well as calculating profit for selected period. Provides analytical data for business decisions.
+            </p>
+        </div>
+
+        <!-- Main Service Methods -->
+        <div class="methods-section">
+            <h3>Main Service Methods</h3>
+
+            <div class="method-card">
+                <h4>getTopTenPurchasedProducts()</h4>
+                <p>Gets list of 10 most purchased products with PAID status.</p>
+                <div class="method-steps">
+                    <div>• Calls private method getTopTenProducts(Order.Status.PAID)</div>
+                    <div>• Returns list of ProductStatisticResponseDto</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>getTenCanceledProducts()</h4>
+                <p>Gets list of 10 products with cancelled orders.</p>
+                <div class="method-steps">
+                    <div>• Calls private method getTopTenProducts(Order.Status.CANCELLED)</div>
+                    <div>• Returns list of ProductStatisticResponseDto</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>getProductsInPendingPaymentStatus(Integer days)</h4>
+                <p>Gets products with orders in PENDING_PAYMENT status for last N days.</p>
+                <div class="method-steps">
+                    <div>• Calculates period start date</div>
+                    <div>• Creates productQuantityMap for counting each product quantity</div>
+                    <div>• Gets orders with PENDING_PAYMENT status created after startDate</div>
+                    <div>• Counts quantity of each product in orders</div>
+                    <div>• Converts map to ProductStatisticResponseDto list via ProductConverter</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>getProfitStatistics(ProfitStatisticRequestDto request)</h4>
+                <p>Gets profit statistics for period with grouping by hour, day, week or month.</p>
+                <div class="method-steps">
+                    <div>• Validates period unit (DAYS, WEEKS, MONTHS, YEARS) and groupBy (HOUR, DAY, WEEK, MONTH)</div>
+                    <div>• Determines startDate and endDate</div>
+                    <div>• Gets orders with PAID status after startDate</div>
+                    <div>• Groups profit by key depending on groupBy</div>
+                    <div>• Calculates totalProfit</div>
+                    <div>• Returns ProfitStatisticsResponseDto with profit data</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>getTopTenProducts(Order.Status orderStatus) [private]</h4>
+                <p>Gets top-10 products by sales quantity for specified order status.</p>
+                <div class="method-steps">
+                    <div>• Creates productTopTenProducts map for counting each product quantity</div>
+                    <div>• Gets all orders with specified status</div>
+                    <div>• Sums product quantities by orders</div>
+                    <div>• Sorts in descending order and keeps first 10</div>
+                    <div>• Converts to ProductStatisticResponseDto list via ProductConverter</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Endpoints -->
+        <div class="endpoints-section">
+            <h3>REST Endpoints</h3>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/statistics/topSold</span>
+                    <span class="role-badge role-admin">ADMIN</span>
+                </div>
+                <p>Get top-10 most sold products</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/statistics/topCanceled</span>
+                    <span class="role-badge role-admin">ADMIN</span>
+                </div>
+                <p>Get top-10 most cancelled products</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/statistics/pendingPayment/{days}</span>
+                    <span class="role-badge role-admin">ADMIN</span>
+                </div>
+                <p>Get products with pending payments for last N days</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method post">POST</span>
+                    <span class="endpoint-path">/v1/statistics/profit</span>
+                    <span class="role-badge role-admin">ADMIN</span>
+                </div>
+                <p>Get profit statistics for specified period with grouping</p>
+            </div>
+        </div>
+
+        <!-- Implementation Features -->
+        <div class="features-section">
+            <h3>🔧 Implementation Features</h3>
+            <div class="method-card">
+                <div class="method-steps">
+                    <div>• <strong>Flexible Grouping:</strong> Support for various grouping periods (hour, day, week, month)</div>
+                    <div>• <strong>Efficient Queries:</strong> Optimized SQL queries for working with large data volumes</div>
+                    <div>• <strong>Parameter Validation:</strong> Checking period and grouping criteria correctness</div>
+                    <div>• <strong>Real-time Statistics:</strong> Current data based on actual orders</div>
+                    <div>• <strong>Scalability:</strong> Ability to process large volumes of historical data</div>
+                    <div>• <strong>Security:</strong> Access only for system administrators</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Business Logic -->
+        <div class="business-logic-section">
+            <h3>💼 Business Logic</h3>
+            <div class="method-card">
+                <div class="method-steps">
+                    <div>• <strong>Sales Analysis:</strong> Identifying most popular and problematic products</div>
+                    <div>• <strong>Inventory Management:</strong> Data for optimizing warehouse stocks</div>
+                    <div>• <strong>Financial Analysis:</strong> Detailed profit statistics by periods</div>
+                    <div>• <strong>Problem Identification:</strong> Analysis of cancelled orders for service improvement</div>
+                    <div>• <strong>Planning:</strong> Data for sales forecasting and procurement</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Metrics and Indicators -->
+        <div class="metrics-section">
+            <h3>📈 Key Metrics</h3>
+            <div class="method-card">
+                <div class="method-steps">
+                    <div>• <strong>Top Sales:</strong> 10 most sold products</div>
+                    <div>• <strong>Top Cancellations:</strong> 10 most cancelled products</div>
+                    <div>• <strong>Pending Payments:</strong> Products in orders with PENDING_PAYMENT status</div>
+                    <div>• <strong>Profit by Periods:</strong> Profit grouping by hours, days, weeks, months</div>
+                    <div>• <strong>Total Profit:</strong> Total profit for selected period</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button onclick="closeModal()" class="btn btn-primary">Close</button>
+    </div>
+</div>

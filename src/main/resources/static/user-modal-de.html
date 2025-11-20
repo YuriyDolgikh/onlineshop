@@ -1,0 +1,186 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <h2>👥 Benutzerverwaltung Details</h2>
+        <button onclick="closeModal()" class="modal-close-btn">&times;</button>
+    </div>
+
+    <div class="modal-body">
+        <!-- Allgemeine Beschreibung -->
+        <div class="description-section">
+            <h3>Allgemeine Beschreibung</h3>
+            <p>
+                UserService ist verantwortlich für die Benutzerverwaltung, einschließlich Registrierung,
+                E-Mail-Bestätigung, Datenaktualisierung, Löschung, Benutzerwiederherstellung und Passwortverschlüsselung,
+                sowie das Abrufen von Informationen über den aktuellen Benutzer.
+            </p>
+        </div>
+
+        <!-- Hauptservice-Methoden -->
+        <div class="methods-section">
+            <h3>Hauptservice-Methoden</h3>
+
+            <div class="method-card">
+                <h4>registration(UserRequestDto request)</h4>
+                <p>Registriert einen neuen Benutzer.</p>
+                <div class="method-steps">
+                    <div>• Prüft, ob ein Benutzer mit dieser E-Mail bereits existiert</div>
+                    <div>• Validiert erforderliche Felder (Name und hashPassword)</div>
+                    <div>• Erstellt einen neuen Benutzer mit USER-Rolle und NOT_CONFIRMED-Status</div>
+                    <div>• Speichert den Benutzer in der Datenbank</div>
+                    <div>• Generiert und sendet Bestätigungscode über confirmationCodeService</div>
+                    <div>• Gibt UserResponseDto zurück</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>confirmationEmail(String code)</h4>
+                <p>Bestätigt Benutzer-E-Mail mit dem Code.</p>
+                <div class="method-steps">
+                    <div>• Ändert Benutzerstatus auf CONFIRMED</div>
+                    <div>• Speichert den Benutzer</div>
+                    <div>• Gibt Erfolgsbestätigungsnachricht zurück</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>updateUser(Integer userId, UserUpdateRequestDto updateRequest)</h4>
+                <p>Aktualisiert Benutzerdaten.</p>
+                <div class="method-steps">
+                    <div>• Prüft, ob der Benutzer existiert</div>
+                    <div>• Verifiziert, dass die Aktualisierung vom aktuellen Benutzer durchgeführt wird</div>
+                    <div>• Aktualisiert bereitgestellte Felder (username, phoneNumber, hashPassword)</div>
+                    <div>• Speichert Änderungen</div>
+                    <div>• Gibt UserResponseDto zurück</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>deleteUser(Integer userId)</h4>
+                <p>Führt logisches Löschen des Benutzers durch.</p>
+                <div class="method-steps">
+                    <div>• Prüft, ob der Benutzer existiert</div>
+                    <div>• Verhindert ADMIN-Benutzerlöschung</div>
+                    <div>• Überprüft aktuelle Benutzerberechtigungen</div>
+                    <div>• Löscht Benutzerbestätigungscodes</div>
+                    <div>• Ändert Status auf DELETED</div>
+                    <div>• Speichert den Benutzer</div>
+                    <div>• Gibt UserResponseDto zurück</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>renewUser(String email)</h4>
+                <p>Stellt einen gelöschten Benutzer wieder her.</p>
+                <div class="method-steps">
+                    <div>• Validiert E-Mail</div>
+                    <div>• Prüft, dass der Benutzer gelöscht ist</div>
+                    <div>• Generiert neuen Bestätigungscode</div>
+                    <div>• Ändert Status auf NOT_CONFIRMED</div>
+                    <div>• Speichert den Benutzer</div>
+                    <div>• Gibt UserResponseDto zurück</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>getCurrentUser()</h4>
+                <p>Ruft den aktuellen authentifizierten Benutzer ab.</p>
+                <div class="method-steps">
+                    <div>• Verwendet Spring-Security-Mechanismen zum Abrufen des aktuellen Benutzers</div>
+                    <div>• Gibt aktuelle Benutzerdaten zurück</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Endpoints -->
+        <div class="endpoints-section">
+            <h3>REST Endpoints</h3>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method post">POST</span>
+                    <span class="endpoint-path">/v1/users/register</span>
+                    <span class="role-badge role-public">PUBLIC</span>
+                </div>
+                <p>Registriert einen neuen Benutzer. Benutzer erhält E-Mail mit Bestätigungscode.</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method post">POST</span>
+                    <span class="endpoint-path">/v1/users/login</span>
+                    <span class="role-badge role-public">PUBLIC</span>
+                </div>
+                <p>Benutzerauthentifizierung und JWT-Token-Abruf.</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/users/confirmation?code={code}</span>
+                    <span class="role-badge role-public">PUBLIC</span>
+                </div>
+                <p>E-Mail-Adressenbestätigung mit Bestätigungscode.</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method put">PUT</span>
+                    <span class="endpoint-path">/v1/users/{userId}</span>
+                    <span class="role-badge role-user">USER</span>
+                </div>
+                <p>Aktualisiert Benutzerinformationen. Benutzer können nur ihr eigenes Profil aktualisieren.</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method delete">DELETE</span>
+                    <span class="endpoint-path">/v1/users/{userId}</span>
+                    <span class="role-badge role-user">USER</span>
+                </div>
+                <p>Löscht Benutzerkonto. ADMIN kann jeden Benutzer löschen.</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/users/renew/{email}</span>
+                    <span class="role-badge role-user">USER</span>
+                </div>
+                <p>Stellt gelöschtes Benutzerkonto wieder her.</p>
+            </div>
+        </div>
+
+        <!-- Implementierungsmerkmale -->
+        <div class="features-section">
+            <h3>🔧 Implementierungsmerkmale</h3>
+            <div class="method-card">
+                <div class="method-steps">
+                    <div>• <strong>Passwortsicherheit:</strong> Passwörter werden über PasswordEncoder verschlüsselt</div>
+                    <div>• <strong>E-Mail-Bestätigung:</strong> Obligatorische E-Mail-Bestätigung vor Kontaktivierung</div>
+                    <div>• <strong>Berechtigungstrennung:</strong> Unterschiedliche Zugriffsebenen für Benutzer, MANAGER und ADMIN</div>
+                    <div>• <strong>Logisches Löschen:</strong> Benutzer werden als DELETED markiert statt physisch gelöscht</div>
+                    <div>• <strong>Kontowiederherstellung:</strong> Möglichkeit, gelöschte Konten wiederherzustellen</div>
+                    <div>• <strong>Spring Security:</strong> Integration mit Spring Security für Authentifizierung und Autorisierung</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Geschäftslogik -->
+        <div class="business-logic-section">
+            <h3>💼 Geschäftslogik</h3>
+            <div class="method-card">
+                <div class="method-steps">
+                    <div>• <strong>Registrierung:</strong> Registrierungsprozess mit E-Mail-Bestätigung für Sicherheit</div>
+                    <div>• <strong>Authentifizierung:</strong> JWT-basierte Authentifizierung für sicheren Zugriff</div>
+                    <div>• <strong>Profilverwaltung:</strong> Benutzer können ihre Daten aktualisieren</div>
+                    <div>• <strong>Zugriffskontrolle:</strong> Unterschiedliche Rollen mit verschiedenen Berechtigungsebenen</div>
+                    <div>• <strong>Wiederherstellung:</strong> Mechanismus zur Wiederherstellung gelöschter Konten</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button onclick="closeModal()" class="btn btn-primary">Schließen</button>
+    </div>
+</div>

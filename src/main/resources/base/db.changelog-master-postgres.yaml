@@ -1,0 +1,933 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: 050525group
+      comment: "Create table users"
+      changes:
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: user_id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: username
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: email
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+                    unique: true
+
+              - column:
+                  name: phone_number
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+                    unique: true
+
+              - column:
+                  name: hash_password
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: role
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: status
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: 2
+      author: 050525group
+      comment: "Create table carts"
+      changes:
+        - createTable:
+            tableName: carts
+            columns:
+              - column:
+                  name: cart_id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: INT
+                  constraints:
+                    nullable: true
+                    unique: true
+
+  - changeSet:
+      id: 3
+      author: 050525group
+      comment: "Create table confirmation_codes"
+      changes:
+        - createTable:
+            tableName: confirmation_codes
+            columns:
+              - column:
+                  name: id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: code
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+
+              - column:
+                  name: user_id
+                  type: INT
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: expire_data_time
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: is_confirmed
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+
+  - changeSet:
+      id: 4
+      author: 050525group
+      comment: "Create table cart items"
+      changes:
+        - createTable:
+            tableName: cart_items
+            columns:
+              - column:
+                  name: cart_item_id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: quantity
+                  type: INT
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: 5
+      author: 050525group
+      comment: "Create table category"
+      changes:
+        - createTable:
+            tableName: category
+            columns:
+              - column:
+                  name: category_id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: category_name
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: image
+                  type: VARCHAR(256)
+
+
+  - changeSet:
+      id: 6
+      author: 050525group
+      comment: "Create table favourites"
+      changes:
+        - createTable:
+            tableName: favourites
+            columns:
+              - column:
+                  name: favourite_id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+  - changeSet:
+      id: 7
+      author: 050525group
+      comment: "Create table orders"
+      changes:
+        - createTable:
+            tableName: orders
+            columns:
+              - column:
+                  name: order_id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+              - column:
+                  name: delivery_address
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: contact_phone
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: delivery_method
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: status
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: 8
+      author: 050525group
+      comment: "Create table order items"
+      changes:
+        - createTable:
+            tableName: order_items
+            columns:
+              - column:
+                  name: order_item_id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: quantity
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: price_at_purchase
+                  type: DECIMAL(10,2)
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: 9
+      author: 050525group
+      comment: "Create table products"
+      changes:
+        - createTable:
+            tableName: products
+            columns:
+              - column:
+                  name: id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: name
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: description
+                  type: VARCHAR(500)
+
+              - column:
+                  name: price
+                  type: DECIMAL(10,2)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: image
+                  type: VARCHAR(256)
+
+              - column:
+                  name: discount_price
+                  type: DECIMAL(10,2)
+
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+
+  - changeSet:
+      id: 10
+      author: 050525group
+      comment: "Add missing FK columns"
+      changes:
+        - addColumn:
+            tableName: users
+            columns:
+              - column:
+                  name: cart_id
+                  type: INT
+                  constraints:
+                    nullable: true
+
+        - addColumn:
+            tableName: cart_items
+            columns:
+              - column:
+                  name: cart_id
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: product_id
+                  type: INT
+                  constraints:
+                    nullable: false
+
+        - addColumn:
+            tableName: favourites
+            columns:
+              - column:
+                  name: user_id
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: product_id
+                  type: INT
+                  constraints:
+                    nullable: false
+
+        - addColumn:
+            tableName: products
+            columns:
+              - column:
+                  name: category_id
+                  type: INT
+                  constraints:
+                    nullable: false
+
+        - addColumn:
+            tableName: orders
+            columns:
+              - column:
+                  name: user_id
+                  type: INT
+                  constraints:
+                    nullable: false
+
+        - addColumn:
+            tableName: order_items
+            columns:
+              - column:
+                  name: order_id
+                  type: INT
+                  constraints:
+                    nullable: true
+              - column:
+                  name: product_id
+                  type: INT
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: 11
+      author: 050525Group
+      comment: "Add ForeignKey"
+      changes:
+
+        - addForeignKeyConstraint:
+            baseTableName: carts
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: user_id
+            constraintName: fk_carts_user
+            onDelete: CASCADE
+            onUpdate: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: users
+            baseColumnNames: cart_id
+            referencedTableName: carts
+            referencedColumnNames: cart_id
+            constraintName: fk_users_cart
+            onDelete: SET NULL
+            onUpdate: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: cart_items
+            baseColumnNames: cart_id
+            referencedTableName: carts
+            referencedColumnNames: cart_id
+            constraintName: fk_cart_items_cart
+            onDelete: CASCADE
+            onUpdate: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: cart_items
+            baseColumnNames: product_id
+            referencedTableName: products
+            referencedColumnNames: id
+            constraintName: fk_cart_items_product
+            onDelete: CASCADE
+            onUpdate: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: favourites
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: user_id
+            constraintName: fk_favourites_user
+            onDelete: CASCADE
+            onUpdate: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: favourites
+            baseColumnNames: product_id
+            referencedTableName: products
+            referencedColumnNames: id
+            constraintName: fk_favourites_product
+            onDelete: CASCADE
+            onUpdate: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: products
+            baseColumnNames: category_id
+            referencedTableName: category
+            referencedColumnNames: category_id
+            constraintName: fk_products_category
+            onDelete: RESTRICT
+            onUpdate: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: orders
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: user_id
+            constraintName: fk_orders_user
+            onDelete: CASCADE
+            onUpdate: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: order_items
+            baseColumnNames: order_id
+            referencedTableName: orders
+            referencedColumnNames: order_id
+            constraintName: fk_order_items_order
+            onDelete: CASCADE
+            onUpdate: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: order_items
+            baseColumnNames: product_id
+            referencedTableName: products
+            referencedColumnNames: id
+            constraintName: fk_order_items_product
+            onDelete: CASCADE
+            onUpdate: CASCADE
+
+        - addForeignKeyConstraint:
+            constraintName: fk_confirmation_user
+            baseTableName: confirmation_codes
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: user_id
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+
+  - changeSet:
+      id: 12
+      author: 050525group
+      comment: "Create admin and manager"
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column: { name: username,      value: "admin" }
+              - column: { name: email,         value: "admin@example.com" }
+              - column: { name: phone_number,  value: "+49111111111" }
+              - column: { name: hash_password, value: "$2a$10$WiAt7dmC1vLIxjY9/9n7P.I5RQU1MKKSOI1Dy1pNLPPIts7K5RJR2" }
+              - column: { name: role,          value: "ADMIN" }
+              - column: { name: status,        value: "CONFIRMED" }
+
+        - insert:
+            tableName: users
+            columns:
+              - column: { name: username,      value: "manager" }
+              - column: { name: email,         value: "manager@example.com" }
+              - column: { name: phone_number,  value: "+493333333333333" }
+              - column: { name: hash_password, value: "$2a$10$35bmYiB2kQKydbNporsKfeYTff58vhJc0K0mSNXzbxetiXUJWSWFe" }
+              - column: { name: role,          value: "MANAGER" }
+              - column: { name: status,        value: "CONFIRMED" }
+
+        - insert:
+            tableName: users
+            columns:
+              - column: { name: username,      value: "user" }
+              - column: { name: email,         value: "user@example.com" }
+              - column: { name: phone_number,  value: "+49222222222" }
+              - column: { name: hash_password, value: "$2a$10$DBPg96Sl62tayvVs0Svr.u0xLD6MAmI2XAyQIWpDT06YGktnPi9be" }
+              - column: { name: role,          value: "USER" }
+              - column: { name: status,        value: "CONFIRMED" }
+
+  - changeSet:
+      id: 13
+      author: 050525group
+      comment: "Create default product categories"
+      changes:
+        - insert:
+            tableName: category
+            columns:
+              - column: { name: category_name, value: "Fertilizer" }
+              - column: { name: image, value: "https://drive.google.com/file/d/1y03Ct0ABP1X8O6NFvK6FdqiMacYpLeTs/view?usp=drive_link" }
+        - insert:
+            tableName: category
+            columns:
+              - column: { name: category_name, value: "Protective products and septic tanks" }
+              - column: { name: image, value: "https://drive.google.com/file/d/1yHqrJdiRrCIhfDyN9MPEJ1SIH2d7ZcFH/view?usp=drive_link" }
+        - insert:
+            tableName: category
+            columns:
+              - column: { name: category_name, value: "Tools and equipment" }
+              - column: { name: image, value: "https://drive.google.com/file/d/1zi9_yEyhHrWNOZvNXfqCKqODG3FzyZmE/view?usp=drive_link" }
+        - insert:
+            tableName: category
+            columns:
+              - column: { name: category_name, value: "Pots and planters" }
+              - column: { name: image, value: "https://drive.google.com/file/d/1vtkQq5v9RJaKXFR800jnNcSz327HsyDm/view?usp=drive_link" }
+        - insert:
+            tableName: category
+            columns:
+              - column: { name: category_name, value: "Building materials" }
+              - column: { name: image, value: "https://drive.google.com/file/d/1DTdfw6ukNcvzUZAy2-TcUAANdnPE-JfR/view?usp=drive_link" }
+
+        - insert:
+            tableName: category
+            columns:
+              - column: { name: category_name, value: "Other" }
+              - column: { name: image, value: "https://drive.google.com/file/d/1bpjJftEvSPBys8ESSX2AJu0fkBi57__d/view?usp=drive_link" }
+
+  - changeSet:
+      id: 14
+      author: 050525group
+      comment: "Create default products for category Fertilizer"
+      changes:
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Agricult. fertilizer" }
+              - column: { name: description,      value: "Universal fertilizer for indoor plants enriches the soil with essential nutrients, promoting strong root development and vibrant, healthy growth. Its balanced formula ensures long-lasting nourishment, helping houseplants thrive in any environment." }
+              - column: { name: price,            valueNumeric: 18.00 }
+              - column: { name: discount_price,   valueNumeric: 10.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1J67Lw6csryj5frmlma4FTfQJK7EAuEnp/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Fertilizer')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Brian Bell Chemicals" }
+              - column: { name: description,      value: "This highly effective product is designed to protect houseplants from common pests such as aphids, mites, and whiteflies. Its gentle yet powerful formula eliminates infestations while preserving the health and vitality of your plants." }
+              - column: { name: price,            valueNumeric: 27.50 }
+              - column: { name: discount_price,   valueNumeric: 10.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/10NqhqKW1exfzzTSfFUgUfzFE3-ky-C3x/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Fertilizer')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Guanos" }
+              - column: { name: description,      value: "This is a natural, nutrient-rich fertilizer derived from organic sources, designed to enhance soil fertility and stimulate vigorous plant growth. Its balanced composition provides essential nutrients that improve flowering, fruiting, and overall plant health." }
+              - column: { name: price,            valueNumeric: 65.50 }
+              - column: { name: discount_price,   valueNumeric: 0.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/16jJpz_TMGvx_--DpoUSNvrPrkkLfGLMk/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Fertilizer')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Chemical fertilizer" }
+              - column: { name: description,      value: "This is a powerful nutrient solution designed to replenish essential minerals in the soil, promoting healthy plant growth and increased crop yields. Its precise chemical blend ensures efficient nutrient absorption and long-lasting soil fertility." }
+              - column: { name: price,            valueNumeric: 15.50 }
+              - column: { name: discount_price,   valueNumeric: 0.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1-MoF8-rAxXjlV--2lp0JizyqFkuWq-l8/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Fertilizer')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Prom greenparadise" }
+              - column: { name: description,      value: "This premium fertilizer is designed to accelerate plant growth and improve leaf color and health. Its advanced formula promotes strong roots, lush foliage, and enhanced flowering and fruiting for all types of plants." }
+              - column: { name: price,            valueNumeric: 75.50 }
+              - column: { name: discount_price,   valueNumeric: 0.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1Nmejz4LhiB3mjfjnlGr020uj_EPra2pK/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Fertilizer')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+
+  - changeSet:
+      id: 15
+      author: 050525group
+      comment: "Create default products for category Building materials"
+      changes:
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Acer griseum" }
+              - column: { name: description,      value: "This small deciduous tree is prized for its unique bark and finely textured, three-lobed leaves. It thrives in well-drained soil, adds ornamental beauty with its vibrant autumn foliage, and serves as an elegant focal point in gardens and landscapes." }
+              - column: { name: price,            valueNumeric: 50.00 }
+              - column: { name: discount_price,   valueNumeric: 10.00 }
+              - column: { name: image,            value: "This small deciduous tree is prized for its unique bark and finely textured, three-lobed leaves. It thrives in well-drained soil, adds ornamental beauty with its vibrant autumn foliage, and serves as an elegant focal point in gardens and landscapes." }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Building materials')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Butter fly garden" }
+              - column: { name: description,      value: "This plant attracts butterflies with its bright, nectar-rich flowers. It adds natural beauty to the garden and makes the space feel more vibrant through the presence of butterflies." }
+              - column: { name: price,            valueNumeric: 90.50 }
+              - column: { name: discount_price,   valueNumeric: 10.00 }
+              - column: { name: image,            value: "This plant attracts butterflies with its bright, nectar-rich flowers. It adds natural beauty to the garden and makes the space feel more vibrant through the presence of butterflies." }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Building materials')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Corten Planter" }
+              - column: { name: description,      value: "This garden container is made from durable Corten steel, which naturally develops a protective rust-like patina over time. It gives the garden a modern, architectural look and features long-lasting durability and weather resistance." }
+              - column: { name: price,            valueNumeric: 15.50 }
+              - column: { name: discount_price,   valueNumeric: 30.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/12GDDnwPWT6hmcmxHnEy62ch2bCG6yzAi/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Building materials')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Leucadendron ChoLeuc" }
+              - column: { name: description,      value: "This evergreen shrub is prized for its striking foliage and cone-shaped flowers. It prefers well-drained soil and adds vibrant color and texture to gardens." }
+              - column: { name: price,            valueNumeric: 32.50 }
+              - column: { name: discount_price,   valueNumeric: 7.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1Ve9ZDqw8wtYabzZIwjsxHFwfReWBjS9b/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Building materials')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Mullai" }
+              - column: { name: description,      value: "This Indian fragrant flowering plant is renowned for its delicate blooms and soothing scent. It thrives in sunny locations and creates a pleasant, aromatic atmosphere in the garden." }
+              - column: { name: price,            valueNumeric: 68.50 }
+              - column: { name: discount_price,   valueNumeric: 0.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1cnV0o_bsvEe0s3Y689a4mEBjilzd0rQv/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Building materials')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+
+  - changeSet:
+      id: 16
+      author: 050525group
+      comment: "Create default products for category Pots and planters"
+      changes:
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Arttrees pot" }
+              - column: { name: description,      value: "This decorative garden pot features a stylish, modern design and durable construction. It is perfect for planting a variety of plants and adds an elegant accent to the garden or interior." }
+              - column: { name: price,            valueNumeric: 38.00 }
+              - column: { name: discount_price,   valueNumeric: 10.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1DsU7xOPiBRztPemFkDdWKJE3LlM3o30z/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Pots and planters')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Ceramic planter lrg" }
+              - column: { name: description,      value: "This large ceramic planter features elegant design and high durability. It is perfect for larger plants and adds a refined decorative touch to the garden or interior." }
+              - column: { name: price,            valueNumeric: 20.50 }
+              - column: { name: discount_price,   valueNumeric: 10.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1EOS7di97oBfWIhHx1NO2Q0ShojhA3QDd/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Pots and planters')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Chalk interiors" }
+              - column: { name: description,      value: "This decorative interior finish features a soft, matte texture and easy application. It gives walls a cozy, contemporary look and blends harmoniously into any interior." }
+              - column: { name: price,            valueNumeric: 65.50 }
+              - column: { name: discount_price,   valueNumeric: 0.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1MTROh_tvS7GaqITUxQ_Cmd5quy31rxXz/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Pots and planters')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Flower pot face" }
+              - column: { name: description,      value: "This unusual flower pot combines practicality with a unique design. It is ideal for small plants and adds a creative decorative touch to any interior or garden." }
+              - column: { name: price,            valueNumeric: 85.50 }
+              - column: { name: discount_price,   valueNumeric: 0.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1FRJXhL8uNwuDyMF538TDaAAYeLQNc4EX/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Pots and planters')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Outdoor planter" }
+              - column: { name: description,      value: "This green outdoor plant container features a durable construction and weather resistance. It is perfect for garden plants and adds a fresh, vibrant accent to any outdoor space." }
+              - column: { name: price,            valueNumeric: 25.50 }
+              - column: { name: discount_price,   valueNumeric: 0.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/14EmDFmNCahSKDN54Cqw404394MTyRtYa/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Pots and planters')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+
+  - changeSet:
+      id: 17
+      author: 050525group
+      comment: "Create default products for category Protective products and septic tanks"
+      changes:
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Chemical suit" }
+              - column: { name: description,      value: "This protective suit is designed for handling chemicals and features high resistance to their effects. It provides reliable protection and comfort for use in gardens, farms, or industrial settings." }
+              - column: { name: price,            valueNumeric: 50.00 }
+              - column: { name: discount_price,   valueNumeric: 10.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1ddSL8y6InjQ_jbl-423LKpPnNyZfB7Oh/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Protective products and septic tanks')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Protection grid" }
+              - column: { name: description,      value: "This protective grid is designed to shield plants and crops from birds, insects, and other pests. It is lightweight, durable, and helps preserve harvests and plant health." }
+              - column: { name: price,            valueNumeric: 20.50 }
+              - column: { name: discount_price,   valueNumeric: 10.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1pRukmeLaFEX-o2btoZ4zHYDj4EOrMcfW/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Protective products and septic tanks')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Plant cover" }
+              - column: { name: description,      value: "This lightweight and durable plant cover protects plants from frost, insects, and adverse weather conditions. It helps maintain plant health and supports successful growth." }
+              - column: { name: price,            valueNumeric: 18.50 }
+              - column: { name: discount_price,   valueNumeric: 0.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1E-S6rLON0vrbFOk0qCJrMdzK_OS6VVEN/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Protective products and septic tanks')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Septic clean house" }
+              - column: { name: description,      value: "This device is designed for cleaning and maintaining septic tanks, ensuring efficient operation and preventing blockages. It is reliable, easy to use, and helps maintain cleanliness and hygiene." }
+              - column: { name: price,            valueNumeric: 25.50 }
+              - column: { name: discount_price,   valueNumeric: 0.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1ojwGjo9DGWY9va4AyOJGGnxojlNydyid/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Protective products and septic tanks')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Septic tricel vento" }
+              - column: { name: description,      value: "This high-performance septic system provides reliable wastewater treatment and environmental protection. It is durable, easy to maintain, and suitable for installation in private homes and small buildings." }
+              - column: { name: price,            valueNumeric: 15.50 }
+              - column: { name: discount_price,   valueNumeric: 0.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/17qF1HzieJauwneiql1i8aYKx9Tq1wtGZ/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Protective products and septic tanks')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+
+  - changeSet:
+      id: 18
+      author: 050525group
+      comment: "Create default products for category Tools and equipment"
+      changes:
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Cultivating tool" }
+              - column: { name: description,      value: "This gardening tool is designed for loosening and cultivating soil, making it easier to prepare beds and flower plots. It is easy to use and helps maintain plant health." }
+              - column: { name: price,            valueNumeric: 50.00 }
+              - column: { name: discount_price,   valueNumeric: 00.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1e72E4r2iV0QNn1rwSeBmeUy2Q8xj6d2z/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Tools and equipment')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Garden Trowel" }
+              - column: { name: description,      value: "This garden trowel is designed for planting, transplanting, and caring for plants. It is easy to handle and makes working with soil and small plants more efficient." }
+              - column: { name: price,            valueNumeric: 20.50 }
+              - column: { name: discount_price,   valueNumeric: 5.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/15uQU3x2mvTq3dstIizQae7dLYGnmTVu5/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Tools and equipment')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Hand Fork" }
+              - column: { name: description,      value: "This hand fork is designed for loosening and aerating soil in gardens or flower beds. It is easy to use and helps maintain healthy soil structure." }
+              - column: { name: price,            valueNumeric: 11.50 }
+              - column: { name: discount_price,   valueNumeric: 10.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1HwSNqfOfB9jo1drSgFxVYDsb5Rl5FedX/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Tools and equipment')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Pruning Shears" }
+              - column: { name: description,      value: "These pruning shears are designed for trimming branches, shrubs, and small plants. They are easy to use and help maintain neat and healthy plants." }
+              - column: { name: price,            valueNumeric: 10.50 }
+              - column: { name: discount_price,   valueNumeric: 5.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1WlfPTGKyeuaZcfNWogB8wfY0pG_a-ZHo/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Tools and equipment')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Watering Can" }
+              - column: { name: description,      value: "This 5-liter watering can is designed for watering plants in gardens or indoors. It is easy to use and ensures even water distribution." }
+              - column: { name: price,            valueNumeric: 4.50 }
+              - column: { name: discount_price,   valueNumeric: 10.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1EUfal8QWEEHSUB6I3kM-E1XPgPWDFDlb/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Tools and equipment')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+
+  - changeSet:
+      id: 19
+      author: 050525group
+      comment: "Create default products for category Other"
+      changes:
+        - insert:
+            tableName: products
+            columns:
+              - column: { name: name,             value: "Other Product" }
+              - column: { name: description,      value: "other" }
+              - column: { name: price,            valueNumeric: 50.00 }
+              - column: { name: discount_price,   valueNumeric: 10.00 }
+              - column: { name: image,            value: "https://drive.google.com/file/d/1bpjJftEvSPBys8ESSX2AJu0fkBi57__d/view?usp=drive_link" }
+              - column: { name: category_id,      valueComputed: "(SELECT category_id FROM category WHERE category_name = 'Other')" }
+              - column: { name: created_at,       valueComputed: "now()" }
+              - column: { name: updated_at,       valueComputed: "now()" }
+
+  - changeSet:
+      id: 20
+      author: 050525group
+      comment: "Create carts for default users"
+      changes:
+        - insert:
+            tableName: carts
+            columns:
+              - column:
+                  name: user_id
+                  valueComputed: "(SELECT user_id FROM users WHERE email = 'admin@example.com')"
+
+        - insert:
+            tableName: carts
+            columns:
+              - column:
+                  name: user_id
+                  valueComputed: "(SELECT user_id FROM users WHERE email = 'manager@example.com')"
+
+        - insert:
+            tableName: carts
+            columns:
+              - column:
+                  name: user_id
+                  valueComputed: "(SELECT user_id FROM users WHERE email = 'user@example.com')"
+
+  - changeSet:
+      id: 21
+      author: 050525group
+      comment: "Attach carts to default users"
+      changes:
+        - sql:
+            sql: |
+              UPDATE users u
+              SET cart_id = c.cart_id
+              FROM carts c
+              WHERE c.user_id = u.user_id;                
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

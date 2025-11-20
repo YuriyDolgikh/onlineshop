@@ -1,0 +1,605 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #333;
+}
+
+.container {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    max-width: 1200px;
+    width: 90%;
+    margin: 20px;
+}
+
+.logo {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    color: #667eea;
+}
+
+h1 {
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 2.5rem;
+}
+
+.subtitle {
+    color: #666;
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+}
+
+/* Language Switcher Styles */
+.language-switcher {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 20px 0 30px 0;
+}
+
+.lang-btn {
+    padding: 10px 20px;
+    background: #f0f0f0;
+    border: 2px solid #ddd;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    color: #666;
+}
+
+.lang-btn.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+.lang-btn:hover:not(.active) {
+    background: #e0e0e0;
+    border-color: #667eea;
+    color: #667eea;
+}
+
+.buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin: 30px 0;
+    align-items: center;
+}
+
+.btn {
+    display: inline-block;
+    padding: 15px 30px;
+    text-decoration: none;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    min-width: 300px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+}
+
+.status {
+    margin-top: 20px;
+    padding: 15px;
+    background: #e8f5e8;
+    border-radius: 10px;
+    color: #2d5016;
+}
+
+.api-info {
+    margin-top: 20px;
+    padding: 15px;
+    background: #e3f2fd;
+    border-radius: 10px;
+    font-family: monospace;
+}
+
+.sections {
+    margin-top: 40px;
+    text-align: left;
+}
+
+.sections h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #333;
+    font-size: 2rem;
+}
+
+.section-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.section-card {
+    background: #f8f9fa;
+    border-radius: 15px;
+    padding: 25px;
+    transition: all 0.3s ease;
+    border-left: 4px solid #667eea;
+    cursor: pointer;
+}
+
+.section-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    background: white;
+}
+
+.section-icon {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+}
+
+.section-card h3 {
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 1.3rem;
+}
+
+.section-card p {
+    color: #666;
+    line-height: 1.5;
+    margin-bottom: 15px;
+}
+
+.endpoints {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+
+.endpoint {
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    color: #555;
+    padding: 5px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.endpoint:last-child {
+    border-bottom: none;
+}
+
+.role-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    margin-left: 5px;
+}
+
+.role-admin {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.role-manager {
+    background: #e3f2fd;
+    color: #1565c0;
+}
+
+.role-user {
+    background: #e8f5e8;
+    color: #2e7d32;
+}
+
+.role-public {
+    background: #f3e5f5;
+    color: #7b1fa2;
+}
+
+footer {
+    margin: 30px 0;
+    color: white;
+    text-align: center;
+    padding: 20px;
+}
+
+/* Стили для модального окна */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    max-width: 800px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.modal-header h2 {
+    color: #333;
+    margin: 0;
+}
+
+.modal-close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #666;
+}
+
+.modal-body {
+    margin-bottom: 20px;
+}
+
+.description-section {
+    margin-bottom: 30px;
+}
+
+.description-section h3 {
+    color: #667eea;
+    margin-bottom: 15px;
+}
+
+.description-section p {
+    line-height: 1.6;
+    color: #555;
+}
+
+.methods-section {
+    margin-bottom: 30px;
+}
+
+.methods-section h3 {
+    color: #667eea;
+    margin-bottom: 15px;
+}
+
+.method-card {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+}
+
+.method-card:hover {
+    transform: translateX(5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.method-card h4 {
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.method-card p {
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.method-steps {
+    background: #e9ecef;
+    padding: 10px;
+    border-radius: 5px;
+    font-family: monospace;
+    font-size: 0.9rem;
+}
+
+.endpoints-section h3 {
+    color: #667eea;
+    margin-bottom: 15px;
+}
+
+.endpoint-detail {
+    background: #e3f2fd;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+}
+
+.endpoint-detail:hover {
+    transform: translateX(5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.endpoint-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.http-method {
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 0.8rem;
+}
+
+.http-method.get {
+    background: #4caf50;
+}
+
+.http-method.post {
+    background: #2196f3;
+}
+
+.http-method.put {
+    background: #ff9800;
+}
+
+.http-method.delete {
+    background: #f44336;
+}
+
+.endpoint-path {
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.endpoint-detail p {
+    color: #555;
+    margin: 0;
+}
+
+.modal-footer {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.modal-footer .btn {
+    min-width: 200px;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Features Sections */
+.features-section {
+    margin-top: 30px;
+}
+
+.features-section h3 {
+    color: #667eea;
+    margin-bottom: 15px;
+}
+
+.features-section .method-steps {
+    background: #fff3e0;
+    border-left: 4px solid #ff9800;
+}
+
+.features-section .method-steps div {
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+.features-section .method-steps div:last-child {
+    margin-bottom: 0;
+}
+
+.features-section strong {
+    color: #e65100;
+}
+
+.business-logic-section {
+    margin-top: 30px;
+}
+
+.business-logic-section h3 {
+    color: #667eea;
+    margin-bottom: 15px;
+}
+
+.business-logic-section .method-steps {
+    background: #e8f5e8;
+    border-left: 4px solid #4caf50;
+}
+
+.business-logic-section .method-steps div {
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+.business-logic-section .method-steps div:last-child {
+    margin-bottom: 0;
+}
+
+.business-logic-section strong {
+    color: #2e7d32;
+}
+
+.metrics-section {
+    margin-top: 30px;
+}
+
+.metrics-section h3 {
+    color: #667eea;
+    margin-bottom: 15px;
+}
+
+.metrics-section .method-steps {
+    background: #e1f5fe;
+    border-left: 4px solid #0288d1;
+}
+
+.metrics-section .method-steps div {
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+.metrics-section .method-steps div:last-child {
+    margin-bottom: 0;
+}
+
+.metrics-section strong {
+    color: #01579b;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .container {
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    .section-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .btn {
+        min-width: 250px;
+    }
+
+    .modal-content {
+        padding: 20px;
+    }
+
+    .endpoint-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+
+    .language-switcher {
+        flex-wrap: wrap;
+    }
+
+    .lang-btn {
+        font-size: 14px;
+        padding: 8px 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .endpoint-path {
+        font-size: 0.7rem;
+    }
+
+    .method-card h4 {
+        font-size: 0.95rem;
+    }
+
+    .method-steps {
+        font-size: 0.75rem;
+    }
+
+    .endpoints-section {
+        max-height: 300px;
+    }
+
+    .lang-btn {
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+}
+
+/* Улучшаем отображение длинных путей endpoints */
+.endpoint-path {
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    font-size: 0.9rem;
+    word-break: break-word;
+}
+
+/* Улучшаем отображение длинных названий методов */
+.method-card h4 {
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+    word-break: break-word;
+    line-height: 1.4;
+}
+
+/* Улучшаем отображение длинных списков endpoints */
+.endpoints-section {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+.endpoints-section::-webkit-scrollbar {
+    width: 6px;
+}
+
+.endpoints-section::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.endpoints-section::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.endpoints-section::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}

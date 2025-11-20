@@ -1,0 +1,53 @@
+Описание сервиса ProductService
+
+Сервис ProductService отвечает за управление товарами.
+Выполняет операции добавления, обновления, удаления и получения товаров с различными критериями фильтрации и сортировки.
+
+Основные методы:
+
+1. addProduct(ProductRequestDto productRequestDto)
+   Добавляет новый продукт.
+   * Получает категорию по имени.
+   * Проверяет, что продукт с таким именем не существует в категории.
+   * Определяет текущую дату и время.
+   * Создаёт объект Product и сохраняет через ProductRepository.
+   * Возвращает ProductResponseDto через ProductConverter.
+
+2. updateProduct(Integer productId, ProductUpdateDto productUpdateDto)
+   Обновляет данные существующего продукта.
+   * Находит продукт по ID, если не найден — выбрасывает IllegalArgumentException.
+   * Обновляет категорию, имя, описание, цену, скидку и изображение.
+   * Проверяет корректность данных (длина имени, цена > 0 и т.д.).
+   * Обновляет дату изменения.
+   * Сохраняет продукт через ProductRepository.
+   * Возвращает ProductResponseDto.
+
+3. setDiscountPrice(Integer productId, BigDecimal newDiscountPrice)
+   Устанавливает новую скидку для продукта.
+   * Находит продукт по ID.
+   * Устанавливает discountPrice и сохраняет.
+   * Возвращает ProductResponseDto.
+
+4. deleteProduct(Integer productId)
+   Удаляет продукт.
+   * Находит продукт по ID.
+   * Удаляет его через ProductRepository.
+   * Возвращает ProductResponseDto.
+
+5. getProductsByCriteria(String paramName, String paramValue, String sortDirection)
+   Получает список продуктов по заданному критерию.
+   * Обрабатывает параметры: price, discount, category, name, createDate.
+   * Вызывает соответствующие методы для получения продуктов.
+   * Возвращает список ProductResponseDto.
+
+6. getAllProducts()
+    Получает все продукты.
+
+7. getAllProductsForUser()
+    Получает все продукты для пользователя (ProductResponseForUserDto).
+
+8. getTopFiveDiscountedProductsOfTheDay()
+    Получает топ-5 продуктов с наибольшей скидкой.
+
+
+

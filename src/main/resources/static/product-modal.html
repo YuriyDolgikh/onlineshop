@@ -1,0 +1,199 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <h2>📦 Детальное описание управления товарами</h2>
+        <button onclick="closeModal()" class="modal-close-btn">&times;</button>
+    </div>
+
+    <div class="modal-body">
+        <!-- Общее описание -->
+        <div class="description-section">
+            <h3>Общее описание</h3>
+            <p>
+                Сервис ProductService отвечает за управление товарами.
+                Выполняет операции добавления, обновления, удаления и получения товаров с различными критериями фильтрации и сортировки.
+                Обеспечивает полный цикл управления товарным каталогом магазина.
+            </p>
+        </div>
+
+        <!-- Основные методы сервиса -->
+        <div class="methods-section">
+            <h3>Основные сервисные методы</h3>
+
+            <div class="method-card">
+                <h4>addProduct(ProductRequestDto productRequestDto)</h4>
+                <p>Добавляет новый продукт.</p>
+                <div class="method-steps">
+                    <div>• Получает категорию по имени</div>
+                    <div>• Проверяет, что продукт с таким именем не существует в категории</div>
+                    <div>• Определяет текущую дату и время</div>
+                    <div>• Создаёт объект Product и сохраняет через ProductRepository</div>
+                    <div>• Возвращает ProductResponseDto через ProductConverter</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>updateProduct(Integer productId, ProductUpdateDto productUpdateDto)</h4>
+                <p>Обновляет данные существующего продукта.</p>
+                <div class="method-steps">
+                    <div>• Находит продукт по ID, если не найден — выбрасывает IllegalArgumentException</div>
+                    <div>• Обновляет категорию, имя, описание, цену, скидку и изображение</div>
+                    <div>• Проверяет корректность данных (длина имени, цена > 0 и т.д.)</div>
+                    <div>• Обновляет дату изменения</div>
+                    <div>• Сохраняет продукт через ProductRepository</div>
+                    <div>• Возвращает ProductResponseDto</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>setDiscountPrice(Integer productId, BigDecimal newDiscountPrice)</h4>
+                <p>Устанавливает новую скидку для продукта.</p>
+                <div class="method-steps">
+                    <div>• Находит продукт по ID</div>
+                    <div>• Устанавливает discountPrice и сохраняет</div>
+                    <div>• Возвращает ProductResponseDto</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>deleteProduct(Integer productId)</h4>
+                <p>Удаляет продукт.</p>
+                <div class="method-steps">
+                    <div>• Находит продукт по ID</div>
+                    <div>• Удаляет его через ProductRepository</div>
+                    <div>• Возвращает ProductResponseDto</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>getProductsByCriteria(String paramName, String paramValue, String sortDirection)</h4>
+                <p>Получает список продуктов по заданному критерию.</p>
+                <div class="method-steps">
+                    <div>• Обрабатывает параметры: price, discount, category, name, createDate</div>
+                    <div>• Вызывает соответствующие методы для получения продуктов</div>
+                    <div>• Возвращает список ProductResponseDto</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>getTopFiveDiscountedProductsOfTheDay()</h4>
+                <p>Получает топ-5 продуктов с наибольшей скидкой.</p>
+                <div class="method-steps">
+                    <div>• Находит продукты с активными скидками</div>
+                    <div>• Сортирует по размеру скидки в убывающем порядке</div>
+                    <div>• Ограничивает результат 5 записями</div>
+                    <div>• Возвращает список ProductResponseForUserDto</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Endpoints -->
+        <div class="endpoints-section">
+            <h3>REST Endpoints</h3>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method post">POST</span>
+                    <span class="endpoint-path">/v1/products</span>
+                    <span class="role-badge role-admin">ADMIN</span>
+                </div>
+                <p>Создание нового товара (только для ADMIN и MANAGER)</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method put">PUT</span>
+                    <span class="endpoint-path">/v1/products/{productId}</span>
+                    <span class="role-badge role-manager">MANAGER</span>
+                </div>
+                <p>Обновление данных товара (только для ADMIN и MANAGER)</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method delete">DELETE</span>
+                    <span class="endpoint-path">/v1/products/{productId}</span>
+                    <span class="role-badge role-admin">ADMIN</span>
+                </div>
+                <p>Удаление товара (только для ADMIN и MANAGER)</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/products/updateProductDiscount/{productId}/{newDiscount}</span>
+                    <span class="role-badge role-manager">MANAGER</span>
+                </div>
+                <p>Обновление скидки для товара (только для ADMIN и MANAGER)</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/products</span>
+                    <span class="role-badge role-manager">MANAGER</span>
+                </div>
+                <p>Получение всех товаров (полная информация для ADMIN и MANAGER)</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/products/getAllProductForUser</span>
+                    <span class="role-badge role-user">USER</span>
+                </div>
+                <p>Получение всех товаров (упрощенная информация для пользователей)</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/products/getProductsByCriteria</span>
+                    <span class="role-badge role-user">USER</span>
+                </div>
+                <p>Поиск товаров по критериям (цена, категория, название и т.д.)</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/products/getTopFiveProducts</span>
+                    <span class="role-badge role-user">USER</span>
+                </div>
+                <p>Получение топ-5 товаров с наибольшими скидками</p>
+            </div>
+        </div>
+
+        <!-- Особенности реализации -->
+        <div class="features-section">
+            <h3>🔧 Особенности реализации</h3>
+            <div class="method-card">
+                <div class="method-steps">
+                    <div>• <strong>Разграничение прав:</strong> Разные уровни доступа для пользователей, MANAGER и ADMIN</div>
+                    <div>• <strong>Гибкий поиск:</strong> Поддержка множественных критериев фильтрации и сортировки</div>
+                    <div>• <strong>Валидация данных:</strong> Проверка корректности цен, скидок и других параметров</div>
+                    <div>• <strong>Уникальность товаров:</strong> Гарантия уникальности имени товара в пределах категории</div>
+                    <div>• <strong>Оптимизация запросов:</strong> Эффективные запросы к базе данных через репозитории</div>
+                    <div>• <strong>Кэширование:</strong> Возможность кэширования часто запрашиваемых данных</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Бизнес-логика -->
+        <div class="business-logic-section">
+            <h3>💼 Бизнес-логика</h3>
+            <div class="method-card">
+                <div class="method-steps">
+                    <div>• <strong>Ценовая политика:</strong> Поддержка регулярных цен и скидочных цен</div>
+                    <div>• <strong>Категоризация:</strong> Чёткая организация товаров по категориям</div>
+                    <div>• <strong>Промо-акции:</strong> Механизм топ-5 товаров со скидками для стимулирования продаж</div>
+                    <div>• <strong>Гибкость управления:</strong> Возможность быстрого обновления цен и скидок</div>
+                    <div>• <strong>Поиск и фильтрация:</strong> Удобный поиск товаров по различным параметрам</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button onclick="closeModal()" class="btn btn-primary">Закрыть</button>
+    </div>
+</div>

@@ -1,0 +1,89 @@
+Описание сервиса OrderService
+
+Сервис OrderService отвечает за управление заказами пользователя.
+Он реализует интерфейс OrderServiceInterface и выполняет операции сохранения,
+получения, обновления статуса, отмены и подтверждения оплаты заказов.
+
+Основные зависимости:
+
+  * OrderRepository — для сохранения и получения заказов из базы данных. 
+
+  * UserService — для получения текущего пользователя.
+
+  * UserRepository — для поиска пользователей.
+
+  * OrderConverter — для преобразования сущностей Order в DTO.
+
+  * OrderItemService — для добавления элементов заказа.
+
+  * MailUtil — для отправки уведомлений о заказах.
+
+Основные методы:
+
+1. saveOrder(OrderRequestDto dto)
+   Сохраняет новый заказ для текущего пользователя.
+   * Проверяет, что dto не null, иначе выбрасывает BadRequestException.
+   * Преобразует метод доставки в enum Order.DeliveryMethod.
+   * Получает текущего пользователя.
+   * Создаёт объект Order с данными из dto и статусом PENDING_PAYMENT.
+   * Если указаны элементы заказа, добавляет их через OrderItemService.
+   * Сохраняет заказ через OrderRepository.
+   * Возвращает OrderResponseDto через OrderConverter.
+
+2. getOrderById(Integer orderId)
+   Получает заказ по ID.
+   * Проверяет доступ к заказу через isAccessToOrderAllowed().
+   * Находит заказ по ID, если не найден — выбрасывает NotFoundException.
+   * Возвращает OrderResponseDto через OrderConverter.
+
+3. getOrdersByUser(Integer userId)
+   Получает список заказов пользователя.
+   * Проверяет, что userId не null.
+   * Находит пользователя по ID, если не найден — выбрасывает NotFoundException.
+   * Проверяет, что обычный пользователь запрашивает только свои заказы, иначе AccessDeniedException.
+   * Получает список заказов через OrderRepository.
+   * Возвращает список OrderResponseDto через OrderConverter.
+
+4. updateOrderStatus(Integer orderId, String newStatus)
+   Обновляет статус заказа.
+   * Проверяет доступ к заказу.
+   * Проверяет, что newStatus не null и не пуст.
+   * Находит заказ по ID, если не найден — выбрасывает NotFoundException.
+   * Преобразует строку статуса в Order.Status.
+   * Обновляет статус заказа и сохраняет через OrderRepository.
+   * Возвращает OrderResponseDto.
+
+5. cancelOrder(Integer orderId)
+   Отменяет заказ.
+   * Проверяет доступ к заказу.
+   * Находит заказ по ID, если не найден — выбрасывает NotFoundException.
+   * Устанавливает статус CANCELLED и сохраняет.
+
+6. confirmPayment(Integer orderId, String paymentMethod)
+   Подтверждает оплату заказа и отправляет подтверждение по email.
+   * Получает текущего пользователя.
+   * Находит заказ по ID, проверяет, что он принадлежит пользователю.
+   * Устанавливает статус PAID и сохраняет.
+   * Генерирует PDF заказа и отправляет email через MailUtil.
+   * Возвращает OrderResponseDto.
+
+7. updateOrderDelivery(Integer orderId, OrderRequestDto dto)
+   Обновляет информацию о доставке заказа.
+   * Проверяет доступ к заказу.
+   * Проверяет dto и его поля (адрес, телефон).
+   * Находит заказ по ID.
+   * Обновляет метод доставки, адрес и контактный телефон.
+   * Сохраняет заказ и возвращает OrderResponseDto.
+
+8. getOrderStatusDto(Integer orderId)
+   Получает статус заказа.
+   * Проверяет доступ к заказу.
+   * Находит заказ по ID, если не найден — выбрасывает NotFoundException.
+   * Возвращает OrderStatusResponseDto с текущим статусом и датой обновления.
+
+Приватные методы:
+
+9. isAccessToOrderAllowed(Integer orderId)
+   Проверяет, имеет ли текущий пользователь доступ к заказу (ADMIN/MANAGER или владелец заказа).
+
+

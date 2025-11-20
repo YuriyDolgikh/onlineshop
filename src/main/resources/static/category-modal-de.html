@@ -1,0 +1,119 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <h2>❤️ Favoriten Details</h2>
+        <button onclick="closeModal()" class="modal-close-btn">&times;</button>
+    </div>
+
+    <div class="modal-body">
+        <!-- Allgemeine Beschreibung -->
+        <div class="description-section">
+            <h3>Allgemeine Beschreibung</h3>
+            <p>
+                FavouriteService ist verantwortlich für die Verwaltung der Favoritenproduktliste des Benutzers und bietet Hinzufügen,
+                Entfernen und Abrufen von Favoritenprodukten. Ermöglicht Benutzern, gemochte Produkte für schnellen Zugriff zu speichern.
+            </p>
+        </div>
+
+        <!-- Hauptservice-Methoden -->
+        <div class="methods-section">
+            <h3>Hauptservice-Methoden</h3>
+
+            <div class="method-card">
+                <h4>addFavourite(Integer productId)</h4>
+                <p>Fügt Produkt zur Favoritenliste des Benutzers hinzu.</p>
+                <div class="method-steps">
+                    <div>• Prüft, dass Produkt-ID nicht null ist</div>
+                    <div>• Ruft aktuellen Benutzer über UserService ab</div>
+                    <div>• Prüft Produktexistenz in Datenbank über ProductRepository</div>
+                    <div>• Prüft, dass dieses Produkt nicht bereits zu Favoriten hinzugefügt wurde</div>
+                    <div>• Erstellt neues Favourite-Objekt, speichert es in Datenbank</div>
+                    <div>• Gibt DTO mit Daten über dieses Element zurück</div>
+                    <div>• Im Fehlerfall wirft IllegalArgumentException, NotFoundException oder BadRequestException</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>deleteFavourite(Integer productId)</h4>
+                <p>Entfernt Produkt aus Favoritenliste des Benutzers.</p>
+                <div class="method-steps">
+                    <div>• Prüft, dass Produkt-ID nicht null ist</div>
+                    <div>• Ruft aktuellen Benutzer über UserService ab</div>
+                    <div>• Sucht Favoritenprodukt für diesen Benutzer</div>
+                    <div>• Löscht gefundenes Favourite-Objekt aus Datenbank</div>
+                    <div>• Gibt DTO des gelöschten Favoritenprodukts zurück</div>
+                    <div>• Im Fehlerfall wirft IllegalArgumentException oder NotFoundException</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>getFavourites()</h4>
+                <p>Gibt Liste aller Favoritenprodukte des aktuellen Benutzers zurück.</p>
+                <div class="method-steps">
+                    <div>• Ruft aktuellen Benutzer über UserService ab</div>
+                    <div>• Ruft alle Favoritenprodukte des Benutzers aus Datenbank über FavouriteRepository ab</div>
+                    <div>• Konvertiert Favourite-Liste zu FavouriteResponseDto-Liste mit FavouriteConverter</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Endpoints -->
+        <div class="endpoints-section">
+            <h3>REST Endpoints</h3>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/favorites</span>
+                    <span class="role-badge role-user">USER</span>
+                </div>
+                <p>Ruft Liste aller Favoritenprodukte des aktuellen Benutzers ab</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/favorites/{productId}</span>
+                    <span class="role-badge role-user">USER</span>
+                </div>
+                <p>Fügt Produkt zur Favoritenliste hinzu (verwendet GET für Client-Anwendungen Bequemlichkeit)</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method delete">DELETE</span>
+                    <span class="endpoint-path">/v1/favorites/{productId}</span>
+                    <span class="role-badge role-user">USER</span>
+                </div>
+                <p>Entfernt Produkt aus Favoritenliste</p>
+            </div>
+        </div>
+
+        <!-- Implementierungsmerkmale -->
+        <div class="features-section">
+            <h3>🔧 Implementierungsmerkmale</h3>
+            <div class="method-card">
+                <div class="method-steps">
+                    <div>• <strong>Favoriteneindeutigkeit:</strong> Ein Produkt kann nur einmal pro Benutzer zu Favoriten hinzugefügt werden</div>
+                    <div>• <strong>Datenvalidierung:</strong> Überprüfung der Produktexistenz und Abwesenheit von Duplikaten in Favoriten</div>
+                    <div>• <strong>Sicherheit:</strong> Zugriff nur auf eigene Favoritenliste des Benutzers</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Geschäftslogik -->
+        <div class="business-logic-section">
+            <h3>💼 Geschäftslogik</h3>
+            <div class="method-card">
+                <div class="method-steps">
+                    <div>• <strong>Einschränkungen:</strong> Maximale Anzahl von Favoritenprodukten kann auf Geschäftsregeln-Ebene begrenzt werden</div>
+                    <div>• <strong>Validierung:</strong> Produkt muss im System existieren, bevor es zu Favoriten hinzugefügt wird</div>
+                    <div>• <strong>Datenintegrität:</strong> Wenn Produkt aus System gelöscht wird, wird es automatisch aus allen Favoritenlisten entfernt</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button onclick="closeModal()" class="btn btn-primary">Schließen</button>
+    </div>
+</div>

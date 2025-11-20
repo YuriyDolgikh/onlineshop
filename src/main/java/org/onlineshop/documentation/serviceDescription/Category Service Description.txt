@@ -1,0 +1,62 @@
+Category Service Description
+
+CategoryService – сервисный класс для управления категориями товаров в интернет-магазине.
+Реализует интерфейс CategoryServiceInterface. Сервис обеспечивает добавление, обновление, удаление категорий,
+а также получение списка всех категорий и поиск категории по ID или имени.
+
+Аннотации:
+
+@Service – указывает, что класс является Spring-сервисом.
+
+@RequiredArgsConstructor – Lombok генерирует конструктор для всех финальных полей.
+
+Зависимости:
+
+CategoryRepository – репозиторий для работы с сущностью Category.
+
+CategoryConverter – конвертер между DTO и сущностью Category.
+
+Основные методы:
+
+addCategory(CategoryRequestDto categoryRequestDto)
+
+Добавляет новую категорию.
+
+Проверяет корректность запроса и уникальность имени категории.
+
+Создаёт и сохраняет категорию в базе данных.
+
+Возвращает CategoryResponseDto.
+
+updateCategory(Integer categoryId, CategoryRequestDto categoryRequestDto)
+
+Обновляет данные существующей категории.
+
+Проверяет корректность запроса и уникальность имени категории.
+
+Сохраняет обновлённую категорию и возвращает DTO.
+
+deleteCategory(Integer categoryId)
+
+Удаляет категорию по ID.
+
+Перед удалением отвязывает все товары от категории (пока устанавливается null, TODO: изменить на "OTHER" категорию).
+
+Возвращает DTO удалённой категории.
+
+getAllCategories()
+
+Возвращает список всех категорий в виде DTO.
+
+getCategoryById(Integer categoryId)
+
+Возвращает категорию по ID.
+
+Выбрасывает BadRequestException, если категория не найдена.
+
+getCategoryByName(String categoryName)
+
+Возвращает категорию по имени.
+
+Выбрасывает BadRequestException, если категория не найдена.
+
