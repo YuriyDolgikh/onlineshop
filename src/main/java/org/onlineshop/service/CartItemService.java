@@ -132,7 +132,7 @@ public class CartItemService implements CartItemServiceInterface {
             throw new IllegalArgumentException("Quantity cannot be null");
         }
         if (cartItemUpdateDto.getQuantity() < 1) {
-            throw new IllegalArgumentException("Quantity must be at least 1");
+            throw new BadRequestException("Quantity must be at least 1");
         }
         if (productService.getProductById(cartItemUpdateDto.getProductId()).isEmpty()) {
             throw new NotFoundException("Product with ID: " + cartItemUpdateDto.getProductId() + " not found");
