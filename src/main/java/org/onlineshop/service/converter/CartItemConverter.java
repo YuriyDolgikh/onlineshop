@@ -59,11 +59,13 @@ public class CartItemConverter {
         return CartItemSympleResponseDto.builder()
                 .productName(cartItem.getProduct().getName())
                 .quantity(cartItem.getQuantity())
-                .build();    }
+                .build();
+    }
 
     public CartItemSympleResponseDto toSympleDtoFromDto(CartItemResponseDto cartItemResponseDto) {
         return CartItemSympleResponseDto.builder()
                 .productName(cartItemResponseDto.getProduct().getName())
                 .quantity(cartItemResponseDto.getQuantity())
-                .build();    }
+                .build();
+    }
 }

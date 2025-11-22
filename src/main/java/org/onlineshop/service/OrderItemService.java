@@ -20,6 +20,18 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 
+/**
+ * Service class handling operations related to order items, including adding items
+ * to orders, updating their quantities, and deleting them. Ensures validation of
+ * input data and user authorization before performing operations.
+ *
+ * This class works with various repositories and services to manage interactions
+ * with the database and user-related operations. It also leverages converters to
+ * handle mappings between DTOs and entity objects.
+ *
+ * Annotated with `@Service` to indicate that it is a service layer class, and
+ * `@RequiredArgsConstructor` to enable constructor-based dependency injection.
+ */
 @Service
 @RequiredArgsConstructor
 public class OrderItemService implements OrderItemServiceInterface {
@@ -149,6 +161,16 @@ public class OrderItemService implements OrderItemServiceInterface {
         return orderItemConverter.toDto(orderItem);
     }
 
+    /**
+     * Retrieves the current pending payment order for the currently authenticated user.
+     *
+     * The method gets the currently authenticated user and searches through their orders
+     * to find an order with the status of PENDING_PAYMENT. If no such order is found,
+     * a NotFoundException is thrown.
+     *
+     * @return the current order with a status of PENDING_PAYMENT for the current user
+     * @throws NotFoundException if no order with PENDING_PAYMENT status is found
+     */
     private Order getCurrentOrder() {
         User user = userService.getCurrentUser();
         return user.getOrders().stream()

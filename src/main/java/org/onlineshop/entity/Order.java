@@ -1,7 +1,6 @@
 package org.onlineshop.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -35,19 +34,15 @@ public class Order {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-//    @NotBlank
     @Size(max = 100)
     private String deliveryAddress;
 
-//    @NotBlank
     @Pattern(
             regexp = "^\\+?[0-9]{7,15}$",
             message = "Phone number must contain only digits and may start with +, length 7–15"
     )
-//    @Column(nullable = false)
     private String contactPhone;
 
-//    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private DeliveryMethod deliveryMethod;
 
@@ -59,6 +54,7 @@ public class Order {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<OrderItem> orderItems = new ArrayList<>();
 
     public enum Status {

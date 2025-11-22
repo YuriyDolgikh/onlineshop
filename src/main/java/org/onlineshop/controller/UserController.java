@@ -210,5 +210,4 @@ public class UserController {
     public ResponseEntity<UserResponseDto> renewUser(@Email @PathVariable String email) {
         return ResponseEntity.ok(userService.renewUser(email));
     }
-
 }

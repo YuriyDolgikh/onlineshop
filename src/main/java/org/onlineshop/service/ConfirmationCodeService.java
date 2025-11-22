@@ -7,13 +7,21 @@ import org.onlineshop.entity.User;
 import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.repository.ConfirmationCodeRepository;
 import org.onlineshop.service.interfaces.ConfirmationCodeServiceInterface;
-import org.onlineshop.service.mail.MailUtil;
+import org.onlineshop.service.util.MailUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+/**
+ * Service class for managing user confirmation codes.
+ *
+ * Provides functionalities to generate, save, retrieve, update,
+ * send, and delete confirmation codes for user verification purposes.
+ *
+ * Implements the {@code ConfirmationCodeServiceInterface}.
+ */
 @Data
 @RequiredArgsConstructor
 @Service
@@ -132,9 +140,8 @@ public class ConfirmationCodeService implements ConfirmationCodeServiceInterface
         if (user == null) {
             throw new IllegalArgumentException("User must be provided");
         }
-        ConfirmationCode confirmationCode = repository.findByUser(user)
+        return repository.findByUser(user)
                 .orElseThrow(() -> new NotFoundException("Confirmation code for user: " + user.getUsername() + " not found"));
-        return confirmationCode;
     }
 
     /**

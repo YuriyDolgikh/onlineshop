@@ -3,9 +3,6 @@ package org.onlineshop.service;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
-import org.onlineshop.dto.statistic.GroupByPeriod;
 import org.onlineshop.dto.statistic.ProfitStatisticRequestDto;
 import org.onlineshop.dto.statistic.ProfitStatisticsResponseDto;
 import org.onlineshop.entity.*;
@@ -64,7 +61,7 @@ class StatisticServiceProfitStatisticsTest {
         }
         List<Product> savedProducts = products.stream()
                 .map(productRepository::save)
-                .collect(Collectors.toList());
+                .toList();
 
         List<Order> orders = new ArrayList<>();
         for (int i = 0; i < 5; i++) {

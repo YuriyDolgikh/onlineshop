@@ -9,6 +9,4 @@ import java.util.List;
 public interface FavouriteRepository extends JpaRepository<Favourite,Integer> {
 
     List<Favourite> findByUser(User user);
-
-
 }

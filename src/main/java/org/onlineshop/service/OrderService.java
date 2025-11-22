@@ -14,7 +14,7 @@ import org.onlineshop.repository.OrderRepository;
 import org.onlineshop.repository.UserRepository;
 import org.onlineshop.service.converter.OrderConverter;
 import org.onlineshop.service.interfaces.OrderServiceInterface;
-import org.onlineshop.service.mail.MailUtil;
+import org.onlineshop.service.util.MailUtil;
 import org.onlineshop.service.util.PdfOrderGenerator;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -57,7 +57,7 @@ public class OrderService implements OrderServiceInterface {
                 .deliveryAddress(dto.getDeliveryAddress())
                 .contactPhone(dto.getContactPhone())
                 .deliveryMethod(method)
-                .status(Order.Status.PENDING_PAYMENT) // TODO - Зачем, ести тут же меняется на "Ожидает оплаты"?
+                .status(Order.Status.PENDING_PAYMENT)
                 .build();
         if (dto.getItems() != null) {
             for (OrderItemRequestDto item : dto.getItems()) {

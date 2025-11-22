@@ -20,6 +20,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Service class to manage shopping cart operations. This class provides functionality
+ * to manage the current user's shopping cart, including clearing the cart, transferring
+ * cart items to orders, retrieving cart details, and saving cart data. The service interacts
+ * with user, cart, and order repositories and performs the necessary transformations for handling
+ * business logic related to carts.
+ */
 @Service
 @RequiredArgsConstructor
 public class CartService implements CartServiceInterface {

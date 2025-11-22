@@ -16,6 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * Service for managing user's favourite products.
+ * Provides functionality to add, delete, and retrieve user favourites.
+ */
 @Service
 @RequiredArgsConstructor
 public class FavouriteService implements FavouriteServiceInterface {

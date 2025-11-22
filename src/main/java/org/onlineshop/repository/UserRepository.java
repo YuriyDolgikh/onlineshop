@@ -11,5 +11,5 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     boolean existsByEmail(String email);
 
-    void deleteConfirmationCodeByUserId(Integer userId);
+//    void deleteConfirmationCodeByUserId(Integer userId);
 }

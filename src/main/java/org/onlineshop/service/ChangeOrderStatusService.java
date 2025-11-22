@@ -17,21 +17,17 @@ public class ChangeOrderStatusService {
     private final OrderRepository orderRepository;
 
     /**
-     * Periodically processes the statuses of orders based on predefined criteria.
-     * This method is scheduled to execute every 30 seconds.
-     * <p>
-     * The method retrieves orders in specific statuses (e.g., PAID, IN_TRANSIT)
-     * that are eligible for status updates.
-     * <p>
-     * For each eligible order, the status is updated to the next logical status:
-     * - PAID -> IN_TRANSIT
-     * - IN_TRANSIT -> DELIVERED
-     * <p>
-     * Updates to the status are saved to the database, and a log message is output
-     * indicating the newly updated status for each order.
-     * <p>
-     * This method is transactional to ensure consistency in the database
-     * during the status update process.
+     * Periodically processes the status of orders to move them to the next logical status.
+     *
+     * This method is executed at a fixed interval defined by a cron expression and is transactional by nature.
+     * It retrieves a list of orders that are eligible for status updates based on their current status.
+     *
+     * For each eligible order:
+     * - Orders with a status of PAID will be updated to IN_TRANSIT.
+     * - Orders with a status of IN_TRANSIT will be updated to DELIVERED.
+     * - No action is performed on orders with a status of DELIVERED or CANCELLED.
+     *
+     * If there are eligible orders, logs the number of orders processed and performs the updates.
      */
     @Scheduled(cron = "*/30 * * * * *")
     @Transactional
@@ -60,15 +56,14 @@ public class ChangeOrderStatusService {
     }
 
     /**
-     * Updates the status of the given order to the next logical status based on its current status.
-     * <p>
-     * This method performs the following transitions for the provided order:
-     * - If the current status is PAID, the status is updated to IN_TRANSIT.
-     * - If the current status is IN_TRANSIT, the status is updated to DELIVERED.
-     * <p>
-     * No action is performed if the order's status is already DELIVERED or CANCELLED.
-     * The method also updates the order's last updated timestamp and saves the changes
-     * to the order repository.
+     * Updates the order's status to the next logical stage based on its current status.
+     *
+     * The transition rules are as follows:
+     * - If the current status is PAID, it transitions to IN_TRANSIT.
+     * - If the current status is IN_TRANSIT, it transitions to DELIVERED.
+     * - If the current status is DELIVERED or CANCELLED, no action is performed.
+     *
+     * The method also updates the order's updatedAt field to the current timestamp and saves the updated order.
      *
      * @param order the order whose status is to be updated
      */

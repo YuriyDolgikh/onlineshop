@@ -20,5 +20,4 @@ public class ProductUpdateDto {
     private BigDecimal productDiscountPrice;
 
     private String image;
-
 }
