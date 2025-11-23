@@ -49,6 +49,7 @@ public class SecurityConfig {
                         .requestMatchers("/*.html").permitAll()
 
                         .requestMatchers("/v1/users/**").permitAll()
+                        .requestMatchers("/v1/categories/**").permitAll()
                         .requestMatchers("/v1/products/**").hasAnyRole("ADMIN", "MANAGER", "USER")
                         .requestMatchers("/v1/carts/**").hasAnyRole("ADMIN", "MANAGER", "USER")
                         .requestMatchers("/v1/cartItems/**").hasAnyRole("ADMIN", "MANAGER", "USER")
@@ -56,7 +57,6 @@ public class SecurityConfig {
                         .requestMatchers("/v1/orders/**").hasAnyRole("ADMIN", "MANAGER", "USER")
                         .requestMatchers("/v1/orderItems/**").hasAnyRole("ADMIN", "MANAGER", "USER")
                         .requestMatchers("/v1/statistics/**").hasRole("ADMIN")
-                        .requestMatchers("/v1/categories/**").hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .anyRequest().authenticated()
