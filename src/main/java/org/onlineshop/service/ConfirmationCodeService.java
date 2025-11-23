@@ -8,6 +8,7 @@ import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.repository.ConfirmationCodeRepository;
 import org.onlineshop.service.interfaces.ConfirmationCodeServiceInterface;
 import org.onlineshop.service.util.MailUtil;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,8 +31,11 @@ public class ConfirmationCodeService implements ConfirmationCodeServiceInterface
     private final ConfirmationCodeRepository repository;
     private final MailUtil mailUtil;
 
-    private final int EXPIRATION_PERIOD = 180; // in days
-    private final String LINK_PATH = "http://localhost:8080/v1/users/confirmation?code=";
+    @Value("${confirmation.expiration-period}")
+    private int EXPIRATION_PERIOD; // in days
+
+    @Value("${confirmation.link-path}")
+    private String LINK_PATH;
 
     /**
      * Main service to generate and send a confirmation code for the given user.
