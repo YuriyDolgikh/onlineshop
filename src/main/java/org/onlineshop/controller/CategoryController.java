@@ -49,7 +49,6 @@ public class CategoryController {
             )
     })
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<CategoryResponseDto> addCategory(
             @Parameter(description = "Category creation data", required = true)
             @RequestBody CategoryRequestDto categoryRequestDto) {
@@ -85,7 +84,6 @@ public class CategoryController {
             )
     })
     @PutMapping("/{categoryId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<CategoryResponseDto> updateCategory(
             @Parameter(description = "ID of the category to update", required = true)
             @PathVariable Integer categoryId,
@@ -120,7 +118,6 @@ public class CategoryController {
             )
     })
     @DeleteMapping("/{categoryId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<CategoryResponseDto> deleteCategory(
             @Parameter(description = "ID of the category to delete", required = true)
             @PathVariable Integer categoryId) {

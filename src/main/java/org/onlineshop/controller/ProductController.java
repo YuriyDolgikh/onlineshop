@@ -308,7 +308,6 @@ public class ProductController {
             )
     })
     @GetMapping("/getAllProductForUser")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'USER')")
     public ResponseEntity<List<ProductResponseForUserDto>> getAllProductForUser() {
         return ResponseEntity
                 .status(HttpStatus.OK)
