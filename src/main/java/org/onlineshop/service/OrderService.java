@@ -273,8 +273,6 @@ public class OrderService implements OrderServiceInterface {
         if (orderId == null) {
             throw new BadRequestException("OrderId cannot be null");
         }
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new NotFoundException("Order not found with ID: " + orderId));
         User currentUser = userService.getCurrentUser();
         if (currentUser.getRole() == User.Role.ADMIN || currentUser.getRole() == User.Role.MANAGER) {
             return true;
