@@ -57,13 +57,11 @@ public class UserService implements UserServiceInterface {
         newUser.setOrders(new ArrayList<>());
         newUser.setFavourites(new HashSet<>());
 
-        User savedUser = userRepository.save(newUser);
-
         Cart newCartForUser = new Cart();
-        newCartForUser.setUser(savedUser);
-        savedUser.setCart(newCartForUser);
+        newCartForUser.setUser(newUser);
+        newUser.setCart(newCartForUser);
 
-        User finalUser = userRepository.save(savedUser);
+        User finalUser = userRepository.save(newUser);
 
         confirmationCodeService.confirmationCodeManager(finalUser);
         return userConverter.toDto(finalUser);

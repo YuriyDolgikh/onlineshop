@@ -18,7 +18,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("v1/favorites")
+@RequestMapping("/v1/favorites")
 @Tag(name = "Favorites Management", description = "APIs for managing user favorite products")
 public class FavouriteController {
     private final FavouriteService favouriteService;

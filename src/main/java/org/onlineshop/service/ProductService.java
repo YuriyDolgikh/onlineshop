@@ -41,6 +41,7 @@ public class ProductService implements ProductServiceInterface {
     @Transactional
     @Override
     public ProductResponseDto addProduct(ProductRequestDto productRequestDto) {
+        validateProductRequestDto(productRequestDto);
         Category category = categoryService.getCategoryByName(productRequestDto.getProductCategory());
         List<Product> productListFromCategory = category.getProducts();
         productListFromCategory.stream().map(Product::getName)
@@ -362,5 +363,46 @@ public class ProductService implements ProductServiceInterface {
     @Override
     public Optional<Product> getProductById(Integer productId) {
         return productRepository.findById(productId);
+    }
+
+    /**
+     * Validates the given ProductRequestDto object to ensure it adheres to required business rules.
+     * This includes checks for non-null, non-empty, and properly formatted fields such as product name,
+     * category, price, and discount price.
+     *
+     * @param productRequestDto the ProductRequestDto object containing details about the product to be validated
+     *                          including product name, category, price, and discount price
+     * @throws IllegalArgumentException if any of the following conditions are violated:
+     *                                  - Product name is null, empty, or does not have a length between 3 and 20 characters
+     *                                  - Product category is null or empty
+     *                                  - Product price is null or less than or equal to 0.01
+     *                                  - Product discount price is null or less than 0
+     */
+    private void validateProductRequestDto(ProductRequestDto productRequestDto) {
+        String productName = productRequestDto.getProductName();
+        String productCategory = productRequestDto.getProductCategory();
+        BigDecimal productPrice = productRequestDto.getProductPrice();
+        BigDecimal productDiscountPrice = productRequestDto.getProductDiscountPrice();
+        if (productName == null || productName.isBlank()) {
+            throw new IllegalArgumentException("Product name cannot be null or empty");
+        }
+        if (productName.length() < 3 || productName.length() > 20) {
+            throw new IllegalArgumentException("Product title must be between 3 and 20 characters");
+        }
+        if (productCategory == null || productCategory.isBlank()) {
+            throw new IllegalArgumentException("Product category cannot be null or empty");
+        }
+        if (productPrice == null){
+            throw new IllegalArgumentException("Product price cannot be null");
+        }
+        if (productPrice.compareTo(BigDecimal.valueOf(0.01)) <= 0) {
+            throw new IllegalArgumentException("Product price must be greater than 0. Minimum price is 0.01");
+        }
+        if (productDiscountPrice == null){
+            throw new IllegalArgumentException("Product discount price cannot be null");
+        }
+        if (productDiscountPrice.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Product discount price must be greater than 0");
+        }
     }
 }
