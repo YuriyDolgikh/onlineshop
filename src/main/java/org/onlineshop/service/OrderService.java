@@ -216,6 +216,11 @@ public class OrderService implements OrderServiceInterface {
         if (!isAccessToOrderAllowed(orderId)) {
             throw new AccessDeniedException("Access denied");
         }
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+        if (order.getStatus() != Order.Status.PENDING_PAYMENT && order.getStatus() != Order.Status.PAID) {
+            throw new RuntimeException("You can't update delivery details for an order that is not in PENDING_PAYMENT or PAID status");
+        }
         if (orderRequestDto == null) {
             throw new IllegalArgumentException("OrderRequestDto cannot be null");
         }
@@ -226,8 +231,6 @@ public class OrderService implements OrderServiceInterface {
         if (orderRequestDto.getContactPhone() == null || orderRequestDto.getContactPhone().isBlank()) {
             throw new IllegalArgumentException("Contact phone cannot be null empty");
         }
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
 
         try {
             order.setDeliveryMethod(Order.DeliveryMethod.valueOf(orderRequestDto.getDeliveryMethod().toUpperCase()));
