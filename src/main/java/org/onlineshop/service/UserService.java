@@ -92,14 +92,27 @@ public class UserService implements UserServiceInterface {
     }
 
     /**
-     * Confirms a user's email by validating the provided confirmation code and updating their status to confirmed.
+     * Confirms the email associated with a given confirmation code.
+     * Verifies the provided confirmation code, checks if it has expired, and updates the user's status accordingly.
+     * If the code is expired, a new code is generated and sent to the user.
      *
-     * @param code the confirmation code associated with the user's email verification
-     * @return a message indicating that the email has been successfully confirmed
+     * @param code the confirmation code associated with the user's email
+     * @return a message indicating success, failure, or additional actions required for email confirmation
      */
     @Override
+    @Transactional
     public String confirmationEmail(String code) {
-        User user = confirmationCodeService.changeConfirmationStatusByCode(code);
+        if (code == null || code.isBlank()) {
+            return "Code is null or blank";
+        }
+        User user = confirmationCodeService.getConfirmationCodeByCode(code).getUser();
+        if (confirmationCodeService.isConfirmationCodeExpired(code)){
+            confirmationCodeService.deleteConfirmationCodeByUser(user);
+            confirmationCodeService.confirmationCodeManager(user);
+            return "Confirmation code for email: " + user.getEmail() + " is expired. " +
+                    "Please, check your email again for the new one.";
+        }
+        confirmationCodeService.changeConfirmationStatusByCode(code);
         user.setStatus(User.Status.CONFIRMED);
         userRepository.save(user);
         return "Email " + user.getEmail() + " is successfully confirmed";
