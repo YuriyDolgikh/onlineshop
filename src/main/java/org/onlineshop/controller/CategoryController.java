@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.category.CategoryRequestDto;
 import org.onlineshop.dto.category.CategoryResponseDto;
@@ -50,7 +51,7 @@ public class CategoryController {
     @PostMapping
     public ResponseEntity<CategoryResponseDto> addCategory(
             @Parameter(description = "Category creation data", required = true)
-            @RequestBody CategoryRequestDto categoryRequestDto) {
+            @Valid @RequestBody CategoryRequestDto categoryRequestDto) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(categoryService.addCategory(categoryRequestDto));
@@ -85,9 +86,9 @@ public class CategoryController {
     @PutMapping("/{categoryId}")
     public ResponseEntity<CategoryResponseDto> updateCategory(
             @Parameter(description = "ID of the category to update", required = true)
-            @PathVariable Integer categoryId,
+            @Valid @PathVariable Integer categoryId,
             @Parameter(description = "Updated category data", required = true)
-            @RequestBody CategoryUpdateDto categoryUpdateDto) {
+            @Valid @RequestBody CategoryUpdateDto categoryUpdateDto) {
         return ResponseEntity.ok(categoryService.updateCategory(categoryId, categoryUpdateDto));
     }
 
@@ -119,7 +120,7 @@ public class CategoryController {
     @DeleteMapping("/{categoryId}")
     public ResponseEntity<CategoryResponseDto> deleteCategory(
             @Parameter(description = "ID of the category to delete", required = true)
-            @PathVariable Integer categoryId) {
+            @Valid @PathVariable Integer categoryId) {
         return ResponseEntity.ok(categoryService.deleteCategory(categoryId));
     }
 

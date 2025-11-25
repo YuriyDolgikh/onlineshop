@@ -3,6 +3,7 @@ package org.onlineshop.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -237,15 +238,15 @@ public class ProductController {
                     description = "Criteria name: price, discount, category, name, createDate",
                     required = true,
                     examples = {
-                            @io.swagger.v3.oas.annotations.media.ExampleObject(
+                            @ExampleObject(
                                     name = "Price range",
                                     value = "price"
                             ),
-                            @io.swagger.v3.oas.annotations.media.ExampleObject(
+                            @ExampleObject(
                                     name = "Discount",
                                     value = "discount"
                             ),
-                            @io.swagger.v3.oas.annotations.media.ExampleObject(
+                            @ExampleObject(
                                     name = "Category",
                                     value = "category"
                             )
@@ -256,15 +257,15 @@ public class ProductController {
                     description = "Criteria value (for price use format: minPrice-maxPrice, e.g., 100-300)",
                     required = true,
                     examples = {
-                            @io.swagger.v3.oas.annotations.media.ExampleObject(
+                            @ExampleObject(
                                     name = "Price range",
                                     value = "100-300"
                             ),
-                            @io.swagger.v3.oas.annotations.media.ExampleObject(
+                            @ExampleObject(
                                     name = "Category name",
                                     value = "electronics"
                             ),
-                            @io.swagger.v3.oas.annotations.media.ExampleObject(
+                            @ExampleObject(
                                     name = "Product name part",
                                     value = "phone"
                             )
@@ -275,11 +276,11 @@ public class ProductController {
                     description = "Sort direction: asc (ascending) or desc (descending)",
                     required = true,
                     examples = {
-                            @io.swagger.v3.oas.annotations.media.ExampleObject(
+                            @ExampleObject(
                                     name = "Ascending",
                                     value = "asc"
                             ),
-                            @io.swagger.v3.oas.annotations.media.ExampleObject(
+                            @ExampleObject(
                                     name = "Descending",
                                     value = "desc"
                             )

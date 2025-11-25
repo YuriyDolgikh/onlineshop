@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.favourite.FavouriteResponseDto;
 import org.onlineshop.service.FavouriteService;
@@ -27,7 +28,7 @@ public class FavouriteController {
      * Retrieves a list of favorite items for the current user.
      *
      * @return a ResponseEntity containing a List of FavouriteResponseDto objects,
-     *         representing the user's favorite items, with an HTTP status of OK.
+     * representing the user's favorite items, with an HTTP status of OK.
      */
     @Operation(
             summary = "Get user favorites",
@@ -80,7 +81,7 @@ public class FavouriteController {
                     required = true,
                     example = "123"
             )
-            @PathVariable Integer productId) {
+            @Valid @PathVariable Integer productId) {
         FavouriteResponseDto response = favouriteService.addFavourite(productId);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -115,7 +116,7 @@ public class FavouriteController {
                     required = true,
                     example = "123"
             )
-            @PathVariable Integer productId) {
+            @Valid @PathVariable Integer productId) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(favouriteService.deleteFavourite(productId));

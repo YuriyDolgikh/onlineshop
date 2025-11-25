@@ -3,6 +3,7 @@ package org.onlineshop.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -32,7 +33,7 @@ public class OrderController {
      * @param orderRequestDto the details of the order to be created, including delivery address,
      *                        delivery method, contact phone, and list of items, must not be null
      * @return a response entity containing the created order details as {@link OrderResponseDto},
-     *         with an HTTP status of 201 (Created)
+     * with an HTTP status of 201 (Created)
      */
     @Operation(
             summary = "Create new order",
@@ -52,7 +53,7 @@ public class OrderController {
     @PostMapping
     public ResponseEntity<OrderResponseDto> saveOrder(
             @Parameter(description = "Order creation data", required = true)
-            @RequestBody OrderRequestDto orderRequestDto) {
+            @Valid @RequestBody OrderRequestDto orderRequestDto) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(orderService.saveOrder(orderRequestDto));
@@ -100,9 +101,9 @@ public class OrderController {
     /**
      * Retrieves a list of orders associated with a specific user ID.
      *
-     * @param userId the ID of the user whose order history is to be retrieved, must not be null
+     * @param userId the ID of the user whose order history is to be retrieved must not be null
      * @return a response entity containing a list of {@link OrderResponseDto} objects representing the user's orders,
-     *         with an HTTP status of 200 (OK)
+     * with an HTTP status of 200 (OK)
      */
     @Operation(
             summary = "Get user order history",
@@ -160,7 +161,7 @@ public class OrderController {
                     description = "Not found - order not found"
             )
     })
-    @GetMapping("/cancel/{orderId}")
+    @DeleteMapping("/cancel/{orderId}")
     public ResponseEntity<HttpStatus> cancelOrder(
             @Parameter(
                     description = "ID of the order to cancel",
@@ -176,9 +177,9 @@ public class OrderController {
      * Confirms the payment for an order with the specified ID using the given payment method.
      *
      * @param orderId   the ID of the order to confirm the payment for, must not be null
-     * @param payMethod the payment method to be used, must not be null
+     * @param payMethod the payment method to be used must not be null
      * @return a response entity containing the updated order details as {@link OrderResponseDto},
-     *         with an HTTP status of 200 (OK)
+     * with an HTTP status of 200 (OK)
      */
     @Operation(
             summary = "Confirm order payment",
@@ -207,7 +208,7 @@ public class OrderController {
                     description = "Internal server error - failed to send confirmation email"
             )
     })
-    @GetMapping("/confirm/{orderId}/{payMethod}")
+    @PostMapping("/confirm/{orderId}/{payMethod}")
     public ResponseEntity<OrderResponseDto> confirmOrder(
             @Parameter(
                     description = "ID of the order to confirm payment for",
@@ -219,15 +220,15 @@ public class OrderController {
                     description = "Payment method to use",
                     required = true,
                     examples = {
-                            @io.swagger.v3.oas.annotations.media.ExampleObject(
+                            @ExampleObject(
                                     name = "Credit Card",
                                     value = "CREDIT_CARD"
                             ),
-                            @io.swagger.v3.oas.annotations.media.ExampleObject(
+                            @ExampleObject(
                                     name = "PayPal",
                                     value = "PAYPAL"
                             ),
-                            @io.swagger.v3.oas.annotations.media.ExampleObject(
+                            @ExampleObject(
                                     name = "Bank Transfer",
                                     value = "BANK_TRANSFER"
                             )
