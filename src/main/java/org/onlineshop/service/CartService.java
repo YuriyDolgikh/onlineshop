@@ -47,8 +47,11 @@ public class CartService implements CartServiceInterface {
     public void transferCartToOrder() {
 
         Cart cart = getCurrentCart();
-        User user = userService.getCurrentUser();
         Set<CartItem> cartItems = cart.getCartItems();
+        if (cartItems.isEmpty()) {
+            throw new BadRequestException("User's cart is empty. Nothing to transfer.");
+        }
+        User user = userService.getCurrentUser();
 
         List<OrderItem> orderItems = new ArrayList<>();
 
@@ -56,21 +59,23 @@ public class CartService implements CartServiceInterface {
             OrderItem orderItem = cartItemConverter.cartItemToOrderItem(cartItem);
             orderItems.add(orderItem);
         }
-        Order newOrder = new Order();
+        Order currentOrder = orderRepository.findByUserAndStatus(user, Order.Status.PENDING_PAYMENT);
+        if (currentOrder == null) {
+            currentOrder = new Order();
+        }
+        currentOrder.getOrderItems().clear();
         LocalDateTime now = LocalDateTime.now();
-//        newOrder.setOrderItems(orderItems);
-        newOrder.setUser(user);
-        newOrder.setStatus(Order.Status.PENDING_PAYMENT);
-        newOrder.setDeliveryMethod(Order.DeliveryMethod.PICKUP);
-        newOrder.setCreatedAt(now);
-        newOrder.setUpdatedAt(now);
-        Order savedOrder = orderRepository.save(newOrder);
+        currentOrder.setUser(user);
+        currentOrder.setStatus(Order.Status.PENDING_PAYMENT);
+        currentOrder.setDeliveryMethod(Order.DeliveryMethod.PICKUP);
+        currentOrder.setCreatedAt(now);
+        currentOrder.setUpdatedAt(now);
+        Order savedOrder = orderRepository.save(currentOrder);
         orderItems.forEach(oi -> oi.setOrder(savedOrder));
         savedOrder.setOrderItems(orderItems);
         orderRepository.save(savedOrder);
         user.getOrders().add(savedOrder);
         userService.saveUser(user);
-        clearCart();
     }
 
     /**
@@ -143,7 +148,6 @@ public class CartService implements CartServiceInterface {
         if (cart.getCartItems() == null) {
             throw new IllegalArgumentException("Cart items can't be null");
         }
-
         return cartRepository.save(cart);
     }
 }

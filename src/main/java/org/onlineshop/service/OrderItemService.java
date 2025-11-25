@@ -40,41 +40,41 @@ public class OrderItemService implements OrderItemServiceInterface {
      * @throws IllegalArgumentException if the product ID or quantity is null, or if the quantity is less than 1
      * @throws NotFoundException if the product with the specified ID is not found
      */
-    @Transactional
-    @Override
-    public OrderItemResponseDto addItemToOrder(OrderItemRequestDto dto) {
-
-        if (dto == null) {
-            throw new BadRequestException("Request cannot be null");
-        }
-        if (dto.getProductId() == null || dto.getQuantity() == null) {
-            throw new IllegalArgumentException("Params cannot be null");
-        }
-        if (dto.getQuantity() < 1) {
-            throw new IllegalArgumentException("Quantity cannot be less than 1");
-        }
-        Order currentOrder = getCurrentOrder();
-        Integer quantity = dto.getQuantity();
-
-        Product product = productRepository.findById(dto.getProductId())
-                .orElseThrow(() -> new NotFoundException("Product not found with ID: " + dto.getProductId()));
-
-        BigDecimal price = product.getPrice();
-        BigDecimal priceAtPurchase = !product.getDiscountPrice().equals(BigDecimal.ZERO)
-                ? price.multiply(product.getDiscountPrice()).divide(new BigDecimal(100))
-                : product.getPrice();
-
-        OrderItem orderItem = OrderItem.builder()
-                .order(currentOrder)
-                .product(product)
-                .quantity(quantity)
-                .priceAtPurchase(priceAtPurchase)
-                .build();
-
-        currentOrder.getOrderItems().add(orderItem);
-        OrderItem savedOrderItem = orderItemRepository.save(orderItem);
-        return orderItemConverter.toDto(savedOrderItem);
-    }
+//    @Transactional
+//    @Override
+//    public OrderItemResponseDto addItemToOrder(OrderItemRequestDto dto) {
+//
+//        if (dto == null) {
+//            throw new BadRequestException("Request cannot be null");
+//        }
+//        if (dto.getProductId() == null || dto.getQuantity() == null) {
+//            throw new IllegalArgumentException("Params cannot be null");
+//        }
+//        if (dto.getQuantity() < 1) {
+//            throw new IllegalArgumentException("Quantity cannot be less than 1");
+//        }
+//        Order currentOrder = getCurrentOrder();
+//        Integer quantity = dto.getQuantity();
+//
+//        Product product = productRepository.findById(dto.getProductId())
+//                .orElseThrow(() -> new NotFoundException("Product not found with ID: " + dto.getProductId()));
+//
+//        BigDecimal price = product.getPrice();
+//        BigDecimal priceAtPurchase = !product.getDiscountPrice().equals(BigDecimal.ZERO)
+//                ? price.multiply(product.getDiscountPrice()).divide(new BigDecimal(100))
+//                : product.getPrice();
+//
+//        OrderItem orderItem = OrderItem.builder()
+//                .order(currentOrder)
+//                .product(product)
+//                .quantity(quantity)
+//                .priceAtPurchase(priceAtPurchase)
+//                .build();
+//
+//        currentOrder.getOrderItems().add(orderItem);
+//        OrderItem savedOrderItem = orderItemRepository.save(orderItem);
+//        return orderItemConverter.toDto(savedOrderItem);
+//    }
 
     /**
      * Deletes an item from the specified order. The order item is identified
@@ -149,11 +149,11 @@ public class OrderItemService implements OrderItemServiceInterface {
         return orderItemConverter.toDto(orderItem);
     }
 
-    private Order getCurrentOrder() {
-        User user = userService.getCurrentUser();
-        return user.getOrders().stream()
-                .filter(o -> o.getStatus().equals(Order.Status.PENDING_PAYMENT))
-                .findFirst()
-                .orElseThrow(() -> new NotFoundException("No opened order found for current user"));
-    }
+//    private Order getCurrentOrder() {
+//        User user = userService.getCurrentUser();
+//        return user.getOrders().stream()
+//                .filter(o -> o.getStatus().equals(Order.Status.PENDING_PAYMENT))
+//                .findFirst()
+//                .orElseThrow(() -> new NotFoundException("No opened order found for current user"));
+//    }
 }
