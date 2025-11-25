@@ -68,6 +68,12 @@ public class StatisticService implements StatisticServiceInterface {
     @Transactional
     @Override
     public List<ProductStatisticResponseDto> getProductsInPendingPaymentStatus(Integer days) {
+        if (days == null) {
+            throw new BadRequestException("Day number can't be null");
+        }
+        if (days <= 0) {
+            throw new BadRequestException("Day number must be greater than 0");
+        }
         LocalDateTime since = LocalDateTime.now().minusDays(days);
         Map<Product, Integer> productQuantityMap = new LinkedHashMap<>();
         orderRepository.findByStatusAndCreatedAtAfter(List.of(Order.Status.PENDING_PAYMENT), since)

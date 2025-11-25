@@ -18,5 +18,7 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     @Query("SELECT o FROM Order o WHERE o.status IN :statuses AND o.createdAt > :createdAt")
     List<Order> findByStatusAndCreatedAtAfter(@Param("statuses") List<Order.Status> statuses,
                                                 @Param("createdAt") LocalDateTime createdAt);
+
+    Order findByUserAndStatus(User user, Order.Status status);
 //    List<Order> findByStatusAndCreatedAtAfter(List<Order.Status> statuses, LocalDateTime dateTime);
 }

@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.order.OrderRequestDto;
 import org.onlineshop.dto.order.OrderResponseDto;
 import org.onlineshop.dto.order.OrderStatusResponseDto;
-import org.onlineshop.dto.orderItem.OrderItemRequestDto;
 import org.onlineshop.entity.Order;
 import org.onlineshop.entity.User;
 import org.onlineshop.exception.BadRequestException;
@@ -31,6 +30,7 @@ public class OrderService implements OrderServiceInterface {
     private final OrderConverter orderConverter;
     private final OrderItemService orderItemService;
     private final MailUtil mailUtil;
+    private final CartService cartService;
 
     /**
      * Saves an order based on the provided order request data.
@@ -43,30 +43,30 @@ public class OrderService implements OrderServiceInterface {
      * @throws IllegalArgumentException if the specified delivery method in {@code dto}
      *                                  does not match any {@code Order.DeliveryMethod} constants.
      */
-    @Transactional
-    @Override
-    public OrderResponseDto saveOrder(OrderRequestDto dto) {
-        if (dto == null) {
-            throw new BadRequestException("OrderRequestDto cannot be null");
-        }
-        // Throws: IllegalArgumentException – if this enum type has no constant with the specified name
-        Order.DeliveryMethod method = Order.DeliveryMethod.valueOf(dto.getDeliveryMethod().toUpperCase());
-        User currentUser = userService.getCurrentUser();
-        Order order = Order.builder()
-                .user(currentUser)
-                .deliveryAddress(dto.getDeliveryAddress())
-                .contactPhone(dto.getContactPhone())
-                .deliveryMethod(method)
-                .status(Order.Status.PENDING_PAYMENT) // TODO - Зачем, ести тут же меняется на "Ожидает оплаты"?
-                .build();
-        if (dto.getItems() != null) {
-            for (OrderItemRequestDto item : dto.getItems()) {
-                orderItemService.addItemToOrder(item);
-            }
-        }
-        orderRepository.save(order);
-        return orderConverter.toDto(order);
-    }
+//    @Transactional
+//    @Override
+//    public OrderResponseDto saveOrder(OrderRequestDto dto) {
+//        if (dto == null) {
+//            throw new BadRequestException("OrderRequestDto cannot be null");
+//        }
+//        // Throws: IllegalArgumentException – if this enum type has no constant with the specified name
+//        Order.DeliveryMethod method = Order.DeliveryMethod.valueOf(dto.getDeliveryMethod().toUpperCase());
+//        User currentUser = userService.getCurrentUser();
+//        Order order = Order.builder()
+//                .user(currentUser)
+//                .deliveryAddress(dto.getDeliveryAddress())
+//                .contactPhone(dto.getContactPhone())
+//                .deliveryMethod(method)
+//                .status(Order.Status.PENDING_PAYMENT)
+//                .build();
+//        if (dto.getItems() != null) {
+//            for (OrderItemRequestDto item : dto.getItems()) {
+//                orderItemService.addItemToOrder(item);
+//            }
+//        }
+//        orderRepository.save(order);
+//        return orderConverter.toDto(order);
+//    }
 
     /**
      * Retrieves an order by its ID.
@@ -74,8 +74,8 @@ public class OrderService implements OrderServiceInterface {
      * @param orderId the ID of the order to be retrieved - must not be null
      * @return an {@link OrderResponseDto} containing details of the retrieved order
      */
-    @Transactional
     @Override
+    @Transactional(readOnly = true)
     public OrderResponseDto getOrderById(Integer orderId) {
         if (!isAccessToOrderAllowed(orderId)) {
             throw new AccessDeniedException("Access denied");
@@ -95,8 +95,8 @@ public class OrderService implements OrderServiceInterface {
      * @throws IllegalArgumentException if the specified user ID is null
      */
 
-    @Transactional
     @Override
+    @Transactional
     public List<OrderResponseDto> getOrdersByUser(Integer userId) {
         if (userId == null) {
             throw new IllegalArgumentException("UserId cannot be null");
@@ -122,8 +122,8 @@ public class OrderService implements OrderServiceInterface {
      * @throws AccessDeniedException    if the current user is not authorized to update the order
      * @throws IllegalArgumentException if the specified order ID or new status is null or blank
      */
-    @Transactional
     @Override
+    @Transactional
     public OrderResponseDto updateOrderStatus(Integer orderId, String newStatus) {
         if (!isAccessToOrderAllowed(orderId)) {
             throw new AccessDeniedException("Access denied");
@@ -146,8 +146,8 @@ public class OrderService implements OrderServiceInterface {
      * @throws NotFoundException     if the order with the specified ID is not found
      * @throws AccessDeniedException if the current user is not authorized to cancel the order
      */
-    @Transactional
     @Override
+    @Transactional
     public void cancelOrder(Integer orderId) {
         if (!isAccessToOrderAllowed(orderId)) {
             throw new AccessDeniedException("Access denied");
@@ -155,6 +155,9 @@ public class OrderService implements OrderServiceInterface {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Order not found with ID: " + orderId));
 
+        if (!order.getStatus().equals(Order.Status.PENDING_PAYMENT)) {
+            throw new BadRequestException("You can't CANCEL order for an order that is not in PENDING_PAYMENT status");
+        }
         order.setStatus(Order.Status.CANCELLED);
         orderRepository.save(order);
     }
@@ -163,16 +166,16 @@ public class OrderService implements OrderServiceInterface {
      * Confirms the payment for a given order if valid and updates the order status to PAID.
      * Also, triggers the sending of a confirmation email with the order details.
      *
-     * @param orderId        the unique identifier of the order to confirm payment for
-     * @param paymentMethod  the payment method used to confirm the payment. Must not be null or blank
+     * @param orderId       the unique identifier of the order to confirm payment for
+     * @param paymentMethod the payment method used to confirm the payment. Must not be null or blank
      * @return an OrderResponseDto containing the details of the updated order
-     * @throws NotFoundException       if the order with the specified ID is not found
-     * @throws AccessDeniedException   if the current user does not have access to the specified order
-     * @throws BadRequestException     if the payment method is invalid or the order status is not PENDING_PAYMENT
-     * @throws MailSendingException    if an error occurs while trying to send the order confirmation email
+     * @throws NotFoundException     if the order with the specified ID is not found
+     * @throws AccessDeniedException if the current user does not have access to the specified order
+     * @throws BadRequestException   if the payment method is invalid or the order status is not PENDING_PAYMENT
+     * @throws MailSendingException  if an error occurs while trying to send the order confirmation email
      */
-    @Transactional
     @Override
+    @Transactional
     public OrderResponseDto confirmPayment(Integer orderId, String paymentMethod) {
         User currentUser = userService.getCurrentUser();
         Order order = orderRepository.findById(orderId)
@@ -188,6 +191,7 @@ public class OrderService implements OrderServiceInterface {
         }
         order.setStatus(Order.Status.PAID);
         orderRepository.save(order);
+        cartService.clearCart();
 
         byte[] pdfBytes = PdfOrderGenerator.generatePdfOrder(order);
         try {
@@ -210,8 +214,8 @@ public class OrderService implements OrderServiceInterface {
      *                                  are null or invalid
      * @throws RuntimeException         if the order is not found or the specified delivery method is invalid
      */
-    @Transactional
     @Override
+    @Transactional
     public OrderResponseDto updateOrderDelivery(Integer orderId, OrderRequestDto orderRequestDto) {
         if (!isAccessToOrderAllowed(orderId)) {
             throw new AccessDeniedException("Access denied");
@@ -253,8 +257,8 @@ public class OrderService implements OrderServiceInterface {
      * @throws AccessDeniedException if the user does not have access to the specified order
      * @throws NotFoundException     if the order with the given ID is not found
      */
-    @Transactional
     @Override
+    @Transactional(readOnly = true)
     public OrderStatusResponseDto getOrderStatusDto(Integer orderId) {
         if (!isAccessToOrderAllowed(orderId)) {
             throw new AccessDeniedException("Access denied");
@@ -272,6 +276,7 @@ public class OrderService implements OrderServiceInterface {
      * @throws NotFoundException   if the order with the given ID is not found
      * @throws BadRequestException if the specified order ID is null
      */
+    @Transactional(readOnly = true)
     public boolean isAccessToOrderAllowed(Integer orderId) {
         if (orderId == null) {
             throw new BadRequestException("OrderId cannot be null");
