@@ -1,17 +1,22 @@
 package org.onlineshop.service;
 
 import lombok.Data;
+import lombok.Generated;
 import lombok.RequiredArgsConstructor;
 import org.onlineshop.entity.ConfirmationCode;
 import org.onlineshop.entity.User;
+import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.repository.ConfirmationCodeRepository;
 import org.onlineshop.service.interfaces.ConfirmationCodeServiceInterface;
 import org.onlineshop.service.mail.MailUtil;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 @Data
@@ -22,12 +27,15 @@ public class ConfirmationCodeService implements ConfirmationCodeServiceInterface
     private final ConfirmationCodeRepository repository;
     private final MailUtil mailUtil;
 
-    private final int EXPIRATION_PERIOD = 180; // in days
-    private final String LINK_PATH = "http://localhost:8080/v1/users/confirmation?code=";
+    @Value("${confirmation.expiration-period}")
+    private int EXPIRATION_PERIOD; // in days
+
+    @Value("${confirmation.link-path}")
+    private String LINK_PATH;
 
     /**
      * Main service to generate and send a confirmation code for the given user.
-     *
+     * <p>
      * This method performs three actions:
      * <ol>
      *   <li>Generates a unique confirmation code</li>
@@ -56,19 +64,18 @@ public class ConfirmationCodeService implements ConfirmationCodeServiceInterface
     public void sendCodeByEmail(String code, User user) {
         String linkToSend = LINK_PATH + code;
         mailUtil.sendConfirmationEmail(user, linkToSend);
-        System.out.printf("Confirmation code: " + linkToSend);
     }
 
     /**
      * Saves a generated confirmation code for the specified user.
-     *
+     * <p>
      * This method creates a new {@code ConfirmationCode} entity with the given code,
      * associates it with the user provided, sets an expiration date for the code,
      * and marks it as unconfirmed. The new confirmation code is then saved
      * in the database.
      *
      * @param generatedCode the confirmation code that needs to be saved
-     * @param user the user to whom the confirmation code belongs
+     * @param user          the user to whom the confirmation code belongs
      */
     @Override
     public void saveConfirmationCode(String generatedCode, User user) {
@@ -97,7 +104,7 @@ public class ConfirmationCodeService implements ConfirmationCodeServiceInterface
 
     /**
      * Updates the confirmation status of a code and retrieves the associated user.
-     *
+     * <p>
      * This method finds a confirmation code in the repository using the provided code, marks it as confirmed,
      * saves the updated confirmation code, and then returns the user associated with the confirmation code.
      *
@@ -108,6 +115,7 @@ public class ConfirmationCodeService implements ConfirmationCodeServiceInterface
     @Transactional
     @Override
     public User changeConfirmationStatusByCode(String code) {
+        LocalDateTime now = LocalDateTime.now();
         ConfirmationCode confirmationCode = repository.findByCode(code)
                 .orElseThrow(() -> new NotFoundException("Confirmation code: " + code + " not found"));
         User user = confirmationCode.getUser();
@@ -118,14 +126,14 @@ public class ConfirmationCodeService implements ConfirmationCodeServiceInterface
 
     /**
      * Retrieves the confirmation code associated with the specified user.
-     *
+     * <p>
      * This method looks up the confirmation code for the given user in the repository. If the user
      * does not exist or has no associated confirmation code, an exception is thrown.
      *
      * @param user the user for whom the confirmation code is being retrieved
      * @return the confirmation code associated with the specified user
      * @throws IllegalArgumentException if the provided user is null
-     * @throws NotFoundException if no confirmation code is found for the specified user
+     * @throws NotFoundException        if no confirmation code is found for the specified user
      */
     @Override
     public ConfirmationCode findCodeByUser(User user) {
@@ -143,7 +151,7 @@ public class ConfirmationCodeService implements ConfirmationCodeServiceInterface
      *
      * @param user the user for whom the confirmation code is being deleted from the repository.
      * @throws IllegalArgumentException if the provided user is null
-     * @throws NotFoundException if no confirmation code is found for the specified user
+     * @throws NotFoundException        if no confirmation code is found for the specified user
      */
     @Override
     public void deleteConfirmationCodeByUser(User user) {
@@ -153,5 +161,43 @@ public class ConfirmationCodeService implements ConfirmationCodeServiceInterface
         ConfirmationCode confirmationCode = repository.findByUser(user)
                 .orElseThrow(() -> new NotFoundException("Confirmation code for user: " + user.getUsername() + " not found"));
         repository.delete(confirmationCode);
+    }
+
+    /**
+     * Checks if the confirmation code has expired.
+     *
+     * This method verifies whether the confirmation code associated with the
+     * provided code string has an expiration time that has already passed.
+     * If the confirmation code does not exist, a {@code BadCredentialsException}
+     * is thrown.
+     *
+     * @param code the confirmation code to be checked for expiration
+     * @return {@code true} if the confirmation code is expired, otherwise {@code false}
+     * @throws BadCredentialsException if the confirmation code is not found
+     */
+    @Generated
+    @Transactional
+    protected boolean isConfirmationCodeExpired(String code) {
+        Optional<ConfirmationCode> confirmationCodeOptional = repository.findByCode(code);
+        if (confirmationCodeOptional.isEmpty()) {
+            throw new BadCredentialsException("Confirmation code not found");
+        }
+        return confirmationCodeOptional.get().getExpireDataTime().isBefore(LocalDateTime.now());
+    }
+
+    /**
+     * Retrieves a confirmation code entity by its associated code value.
+     * Searches the repository for a matching confirmation code and throws
+     * a {@link BadRequestException} if no match is found.
+     *
+     * @param code the unique code used to find the corresponding ConfirmationCode entity
+     * @return the ConfirmationCode entity corresponding to the given code
+     * @throws BadRequestException if the confirmation code is not found in the repository
+     */
+    @Generated
+    @Transactional
+    protected ConfirmationCode getConfirmationCodeByCode(String code) {
+        return repository.findByCode(code)
+                .orElseThrow(() -> new BadRequestException("Confirmation code not found"));
     }
 }
