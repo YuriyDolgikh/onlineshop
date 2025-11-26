@@ -15,6 +15,10 @@ import org.onlineshop.dto.product.ProductResponseDto;
 import org.onlineshop.dto.product.ProductResponseForUserDto;
 import org.onlineshop.dto.product.ProductUpdateDto;
 import org.onlineshop.service.ProductService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,7 +31,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/v1/products")
 @Tag(name = "Product Management",
-        description = "APIs for product management operations including CRUD, discounts, and product filtering")
+        description = "APIs for product management operations including CRUD, discounts, and product filtering with pagination")
 public class ProductController {
 
     private final ProductService productService;
@@ -184,164 +188,142 @@ public class ProductController {
     }
 
     /**
-     * Retrieves a list of all products available in the system.
-     * Only users with roles 'MANAGER' or 'ADMIN' are authorized to perform this operation.
+     * Retrieves a paginated list of all products with full details for Admin or Manager roles.
+     * This method is secured and requires the user to have either MANAGER or ADMIN role.
      *
-     * @return a {@code ResponseEntity} containing a {@code List<ProductResponseDto>}
-     * that includes details of all products and a status of {@code HttpStatus.OK}.
+     * @param page the page number for pagination (0-based index, default is 0).
+     * @param size the size of each page for pagination (default is 20).
+     * @param sort the field to sort the results by (default is "name").
+     * @param direction in the direction of sorting, either "asc" for ascending or "desc" for descending (default is "asc").
+     * @return a ResponseEntity containing a Page of ProductResponseDto objects with the product details.
      */
-    @Operation(
-            summary = "Get all products (Admin/Manager)",
-            description = "Retrieves a list of all products with full details. Requires MANAGER or ADMIN role."
-    )
+    @Operation(summary = "Get all products (Admin/Manager)",
+            description = "Retrieves a list of all products with full details. Requires MANAGER or ADMIN role.")
     @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Products retrieved successfully",
-                    content = @Content(schema = @Schema(implementation = ProductResponseDto.class))
-            )
+            @ApiResponse(responseCode = "200", description = "Products retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = ProductResponseDto.class)))
     })
     @GetMapping
     @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
-    public ResponseEntity<List<ProductResponseDto>> getAllProductsForAdmin() {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(productService.getAllProducts());
+    public ResponseEntity<Page<ProductResponseDto>> getAllProductsForAdmin(
+            @Parameter(description = "Page number (0-based)", example = "0") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size", example = "20") @RequestParam(defaultValue = "20") int size,
+            @Parameter(description = "Sort field") @RequestParam(defaultValue = "name") String sort,
+            @Parameter(description = "Sort direction") @RequestParam(defaultValue = "asc") String direction) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), sort));
+        return ResponseEntity.ok(productService.getAllProducts(pageable));
     }
 
     /**
-     * Retrieves a list of products filtered and optionally sorted based on the specified criteria.
+     * Retrieves products filtered and sorted by specified criteria.
+     * Available criteria include price, discount, category, name, and createDate.
      *
-     * @param paramName     the name of the parameter to filter the products by (e.g., category, brand, etc.)
-     * @param paramValue    the value of the parameter to filter against
-     * @param sortDirection the direction of sorting, either "asc" for ascending or "desc" for descending
-     * @return a {@code ResponseEntity} containing a {@code List<ProductResponseDto>} with the filtered and sorted product details, and a status of {@code HttpStatus.OK}
+     * @param paramName the name of the filtering criteria (e.g., price, discount, category, name, createDate)
+     * @param paramValue the value of the filtering criteria. For price, use the format: minPrice-maxPrice (e.g., 100-300)
+     * @param sortDirection in the sort direction, either "asc" for ascending or "desc" for descending
+     * @param page the page number (0-based index)
+     * @param size the number of items per page
+     * @return a ResponseEntity containing a pageable list of ProductResponseDto objects that match the specified criteria
      */
-    @Operation(
-            summary = "Get products by criteria",
-            description = "Retrieves products filtered and sorted by various criteria. Available criteria: price, discount, category, name, createDate"
-    )
+    @Operation(summary = "Get products by criteria",
+            description = "Retrieves products filtered and sorted by various criteria. Available criteria: price, discount, category, name, createDate")
     @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
+            @ApiResponse(responseCode = "200",
                     description = "Products retrieved successfully",
-                    content = @Content(schema = @Schema(implementation = ProductResponseDto.class))
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Bad request - invalid criteria parameters"
-            )
+                    content = @Content(schema = @Schema(implementation = ProductResponseDto.class))),
+            @ApiResponse(responseCode = "400",
+                    description = "Bad request - invalid criteria parameters")
     })
     @GetMapping("/getProductsByCriteria")
-    public ResponseEntity<List<ProductResponseDto>> getProductsByCriteria(
-            @Parameter(
-                    description = "Criteria name: price, discount, category, name, createDate",
-                    required = true,
-                    examples = {
-                            @ExampleObject(
-                                    name = "Price range",
-                                    value = "price"
-                            ),
-                            @ExampleObject(
-                                    name = "Discount",
-                                    value = "discount"
-                            ),
-                            @ExampleObject(
-                                    name = "Category",
-                                    value = "category"
-                            )
-                    }
-            )
+    public ResponseEntity<Page<ProductResponseDto>> getProductsByCriteria(
+            @Parameter(description = "Criteria name: price, discount, category, name, createDate", required = true, examples = {
+                    @ExampleObject(name = "Price range", value = "price"),
+                    @ExampleObject(name = "Discount", value = "discount"),
+                    @ExampleObject(name = "Category", value = "category")
+            })
             @Valid @RequestParam String paramName,
-            @Parameter(
-                    description = "Criteria value (for price use format: minPrice-maxPrice, e.g., 100-300)",
-                    required = true,
-                    examples = {
-                            @ExampleObject(
-                                    name = "Price range",
-                                    value = "100-300"
-                            ),
-                            @ExampleObject(
-                                    name = "Category name",
-                                    value = "electronics"
-                            ),
-                            @ExampleObject(
-                                    name = "Product name part",
-                                    value = "phone"
-                            )
-                    }
-            )
+            @Parameter(description = "Criteria value (for price use format: minPrice-maxPrice, e.g., 100-300)", required = true, examples = {
+                    @ExampleObject(name = "Price range", value = "100-300"),
+                    @ExampleObject(name = "Category name", value = "electronics"),
+                    @ExampleObject(name = "Product name part", value = "phone")
+            })
             @Valid @RequestParam String paramValue,
-            @Parameter(
-                    description = "Sort direction: asc (ascending) or desc (descending)",
-                    required = true,
-                    examples = {
-                            @ExampleObject(
-                                    name = "Ascending",
-                                    value = "asc"
-                            ),
-                            @ExampleObject(
-                                    name = "Descending",
-                                    value = "desc"
-                            )
-                    }
-            )
-            @Valid @RequestParam String sortDirection) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(productService.getProductsByCriteria(paramName, paramValue, sortDirection));
+            @Parameter(description = "Sort direction: asc (ascending) or desc (descending)", required = true, examples = {
+                    @ExampleObject(name = "Ascending", value = "asc"),
+                    @ExampleObject(name = "Descending", value = "desc")
+            })
+            @Valid @RequestParam String sortDirection,
+            @Parameter(description = "Page number (0-based)", example = "0") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size", example = "20") @RequestParam(defaultValue = "20") int size) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(sortDirection), getSortProperty(paramName)));
+        return ResponseEntity.ok(productService.getProductsByCriteria(paramName, paramValue, pageable));
     }
 
     /**
-     * Retrieves a list of all products available in the system for the current logged-in user.
+     * Retrieves a paginated list of all products with user-friendly details,
+     * excluding internal IDs and timestamps.
      *
-     * @return a {@code ResponseEntity} containing a {@code List<ProductResponseForUserDto>}
+     * @param page the page number (0-based) to retrieve, default is 0
+     * @param size the number of products per page, default is 20
+     * @param sort in the field by which the result will be sorted, the default is "name"
+     * @param direction in the direction of sorting, either "asc" for ascending or "desc" for descending, default is "asc"
+     * @return a ResponseEntity containing a Page of ProductResponseForUserDto instances
      */
-    @Operation(
-            summary = "Get all products for users",
-            description = "Retrieves a list of all products with user-friendly details (without internal IDs and timestamps)."
-    )
+    @Operation(summary = "Get all products for users",
+            description = "Retrieves a list of all products with user-friendly details (without internal IDs and timestamps).")
     @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
+            @ApiResponse(responseCode = "200",
                     description = "Products retrieved successfully",
-                    content = @Content(schema = @Schema(implementation = ProductResponseForUserDto.class))
-            )
+                    content = @Content(schema = @Schema(implementation = ProductResponseForUserDto.class)))
     })
     @GetMapping("/getAllProductForUser")
-    public ResponseEntity<List<ProductResponseForUserDto>> getAllProductForUser() {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(productService.getAllProductsForUser());
+    public ResponseEntity<Page<ProductResponseForUserDto>> getAllProductForUser(
+            @Parameter(description = "Page number (0-based)", example = "0") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size", example = "20") @RequestParam(defaultValue = "20") int size,
+            @Parameter(description = "Sort field") @RequestParam(defaultValue = "name") String sort,
+            @Parameter(description = "Sort direction") @RequestParam(defaultValue = "asc") String direction) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), sort));
+        return ResponseEntity.ok(productService.getProductsForUser(pageable));
     }
 
     /**
      * Retrieves the top five products with the highest discounts available for the current day.
-     * The products are sorted in descending order based on their discount percentages.
      *
-     * @return a {@code ResponseEntity} containing a {@code List<ProductResponseForUserDto>}
-     * that includes the details of the top five discounted products and
-     * a status of {@code HttpStatus.FOUND}.
+     * @return a ResponseEntity containing a list of ProductResponseForUserDto objects representing
+     *         the top five discounted products of the day, or an empty list if no discounted products are available.
      */
-    @Operation(
-            summary = "Get top five discounted products",
-            description = "Retrieves the top five products with the highest discounts available for the current day."
-    )
+    @Operation(summary = "Get top five discounted products",
+            description = "Retrieves the top five products with the highest discounts available for the current day.")
     @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
+            @ApiResponse(responseCode = "200",
                     description = "Products retrieved successfully",
-                    content = @Content(schema = @Schema(implementation = ProductResponseForUserDto.class))
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "No discounted products found"
-            )
+                    content = @Content(schema = @Schema(implementation = ProductResponseForUserDto.class))),
+            @ApiResponse(responseCode = "404",
+                    description = "No discounted products found")
     })
     @GetMapping("/getTopFiveProducts")
     public ResponseEntity<List<ProductResponseForUserDto>> getTopFiveDiscountedProductsOfTheDay() {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(productService.getTopFiveDiscountedProductsOfTheDay());
+        return ResponseEntity.ok(productService.getTopFiveDiscountedProductsOfTheDay());
+    }
+
+    /**
+     * Determines the sort property based on the given parameter name.
+     * Maps specific parameter names to their corresponding properties to be used for sorting.
+     *
+     * @param paramName the name of the parameter based on which the sort property is to be determined
+     * @return the corresponding sort property as a string; defaults to "id" if no match is found
+     */
+    private String getSortProperty(String paramName) {
+        switch (paramName) {
+            case "price": return "price";
+            case "discount": return "discountPrice";
+            case "category": return "category.categoryName";
+            case "name": return "name";
+            case "createDate": return "createdAt";
+            default: return "id";
+        }
     }
 }

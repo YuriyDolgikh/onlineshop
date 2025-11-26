@@ -4,8 +4,8 @@ import org.onlineshop.dto.category.CategoryRequestDto;
 import org.onlineshop.dto.category.CategoryResponseDto;
 import org.onlineshop.dto.category.CategoryUpdateDto;
 import org.onlineshop.entity.Category;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface CategoryServiceInterface {
 
@@ -15,7 +15,7 @@ public interface CategoryServiceInterface {
 
     CategoryResponseDto deleteCategory(Integer categoryId);
 
-    List<CategoryResponseDto> getAllCategories();
+    Page<CategoryResponseDto> getAllCategories(Pageable pageable);
 
     Category getCategoryById(Integer categoryId);
 

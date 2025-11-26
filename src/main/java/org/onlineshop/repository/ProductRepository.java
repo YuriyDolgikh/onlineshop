@@ -2,19 +2,19 @@ package org.onlineshop.repository;
 
 import org.onlineshop.entity.Category;
 import org.onlineshop.entity.Product;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 public interface ProductRepository extends JpaRepository<Product, Integer> {
 
-    List<Product> findByNameContainingIgnoreCase(String partOfName, Sort sort);
+    Page<Product> findByNameContainingIgnoreCase(String partOfName, Pageable pageable);
 
-    List<Product> findByPriceBetween(BigDecimal startPrice, BigDecimal endPrice, Sort sort);
+    Page<Product> findByPriceBetween(BigDecimal startPrice, BigDecimal endPrice, Pageable pageable);
 
-    List<Product> findByDiscountPriceGreaterThan(BigDecimal discountPrice, Sort sort);
+    Page<Product> findByDiscountPriceGreaterThan(BigDecimal discountPrice, Pageable pageable);
 
-    List<Product> findByCategory(Category category, Sort sort);
+    Page<Product> findByCategory(Category category, Pageable pageable);
 }

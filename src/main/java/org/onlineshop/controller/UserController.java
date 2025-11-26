@@ -1,6 +1,7 @@
 package org.onlineshop.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -16,6 +17,9 @@ import org.onlineshop.security.dto.AuthRequestDto;
 import org.onlineshop.security.dto.AuthResponseDto;
 import org.onlineshop.security.service.AuthService;
 import org.onlineshop.service.UserService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -209,5 +213,39 @@ public class UserController {
     @GetMapping("/renew/{email}")
     public ResponseEntity<UserResponseDto> renewUser(@Email @PathVariable String email) {
         return ResponseEntity.ok(userService.renewUser(email));
+    }
+
+    /**
+     * Retrieves a paginated list of all users (Admin only).
+     *
+     * @param page the page number (0-based)
+     * @param size the page size
+     * @return a ResponseEntity containing a Page of UserResponseDto
+     */
+    @Operation(
+            summary = "Get all users (Admin only)",
+            description = "Retrieves a paginated list of all users in the system. Requires ADMIN role."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Users retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = Page.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Forbidden - insufficient permissions"
+            )
+    })
+    @GetMapping("/admin/all")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Page<UserResponseDto>> getAllUsers(
+            @Parameter(description = "Page number (0-based)", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size", example = "20")
+            @RequestParam(defaultValue = "20") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(userService.getAllUsers(pageable));
     }
 }
