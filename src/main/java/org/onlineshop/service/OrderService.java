@@ -5,6 +5,8 @@ import org.onlineshop.dto.order.OrderRequestDto;
 import org.onlineshop.dto.order.OrderResponseDto;
 import org.onlineshop.dto.order.OrderStatusResponseDto;
 import org.onlineshop.entity.Order;
+import org.onlineshop.entity.OrderItem;
+import org.onlineshop.entity.Product;
 import org.onlineshop.entity.User;
 import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.exception.MailSendingException;
@@ -19,6 +21,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 @Service
@@ -180,6 +184,7 @@ public class OrderService implements OrderServiceInterface {
         User currentUser = userService.getCurrentUser();
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Order not found with ID: " + orderId));
+        recalculateOrderPrice(order);
         if (!order.getUser().getUserId().equals(currentUser.getUserId())) {
             throw new AccessDeniedException("Access denied");
         }
@@ -289,5 +294,28 @@ public class OrderService implements OrderServiceInterface {
         return orderRepository.findById(orderId)
                 .map(o -> o.getUser() != null && o.getUser().getUserId().equals(currentUser.getUserId()))
                 .orElseThrow(() -> new NotFoundException("Order not found with ID: " + orderId));
+    }
+
+    @Transactional(readOnly = true)
+    public void recalculateOrderPrice(Order order) {
+        if (order == null) {
+            throw new BadRequestException("Order cannot be null");
+        }
+        if (order.getStatus() != Order.Status.PENDING_PAYMENT) {
+            throw new BadRequestException("The price can't be recalculated for this order");
+        }
+        List<OrderItem> orderItemList = order.getOrderItems();
+        if (orderItemList == null || orderItemList.isEmpty()) {
+            throw new NotFoundException("Order Items cannot be null or empty");
+        }
+        for (OrderItem oi : orderItemList) {
+            Product product = oi.getProduct();
+            BigDecimal price = product.getPrice();
+            BigDecimal discont = product.getDiscountPrice();
+            BigDecimal priceAtPurchase = price.subtract(price.multiply(discont.divide(new BigDecimal(100)))).setScale(2, RoundingMode.CEILING);
+            oi.setPriceAtPurchase(priceAtPurchase);
+        }
+        orderRepository.save(order);
+
     }
 }
