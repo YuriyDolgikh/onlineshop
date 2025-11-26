@@ -139,6 +139,15 @@ public class ProductService implements ProductServiceInterface {
      */
     @Transactional
     public ProductResponseDto setDiscountPrice(Integer productId, BigDecimal newDiscountPrice) {
+        if (productId == null) {
+            throw new IllegalArgumentException("Product id cannot be null");
+        }
+        if (newDiscountPrice == null) {
+            throw new IllegalArgumentException("New discount price cannot be null");
+        }
+        if (newDiscountPrice.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("New discount price cannot be less than 0");
+        }
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Product with id = " + productId + " not found"));
         product.setDiscountPrice(newDiscountPrice);

@@ -56,6 +56,9 @@ public class CartService implements CartServiceInterface {
         List<OrderItem> orderItems = new ArrayList<>();
 
         for (CartItem cartItem : cartItems) {
+            if (cartItem.getProduct().getDiscountPrice() == null) {
+                throw  new BadRequestException("Product discount cannot be null.");
+            }
             OrderItem orderItem = cartItemConverter.cartItemToOrderItem(cartItem);
             orderItems.add(orderItem);
         }
