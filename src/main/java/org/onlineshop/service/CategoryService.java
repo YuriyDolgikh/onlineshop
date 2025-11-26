@@ -11,9 +11,10 @@ import org.onlineshop.repository.CategoryRepository;
 import org.onlineshop.service.converter.CategoryConverter;
 import org.onlineshop.service.interfaces.CategoryServiceInterface;
 import org.onlineshop.service.util.CategoryServiceHelper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -117,13 +118,15 @@ public class CategoryService implements CategoryServiceInterface {
     }
 
     /**
-     * Retrieves a list of all categories from the database.
+     * Retrieves a page of all categories from the database.
      *
-     * @return a list of CategoryResponseDto objects, each containing details of a category
+     * @param pageable the pagination information
+     * @return a page of CategoryResponseDto objects, each containing details of a category
      */
     @Override
-    public List<CategoryResponseDto> getAllCategories() {
-        return categoryConverter.toDtos(categoryRepository.findAll());
+    public Page<CategoryResponseDto> getAllCategories(Pageable pageable) {
+        return categoryRepository.findAll(pageable)
+                .map(categoryConverter::toDto);
     }
 
     /**

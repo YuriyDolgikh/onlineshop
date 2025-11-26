@@ -12,6 +12,9 @@ import org.onlineshop.repository.ProductRepository;
 import org.onlineshop.service.converter.ProductConverter;
 import org.onlineshop.service.interfaces.ProductServiceInterface;
 import org.onlineshop.service.util.ProductServiceHelper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -197,94 +200,86 @@ public class ProductService implements ProductServiceInterface {
         return productConverter.toDto(productToDelete);
     }
 
-    // localhost:8080/v1/products/getProductsByCriteria?paramName=price&paramValue=100-300&sortDirection=asc
-    // localhost:8080/v1/products/getProductsByCriteria?paramName=price&paramValue=100-300&sort=asc
-    // localhost:8080/v1/products/getProductsByCriteria?paramName=discount&paramValue=35&sortDirection=desc
-    // localhost:8080/v1/products/getProductsByCriteria?paramName=category&paramValue=categoryName&sortDirection=desc
-    // localhost:8080/v1/products/getProductsByCriteria?paramName=name&paramValue=partName&sortDirection=desc
-    // localhost:8080/v1/products/getProductsByCriteria?paramName=createDate&sortDirection=desc
-    // localhost:8080/v1/products
+//    GET /v1/products?page=0&size=10&sort=price&direction=desc
+//    GET /v1/products/search?name=phone&page=0&size=5
+//    GET /v1/products/category/electronics?page=1&size=20
+//    GET /v1/products/price-range?minPrice=100&maxPrice=500&page=0&size=15
+//    GET /v1/products/discounted?page=0&size=10&sort=discountPrice&direction=desc
+//    GET /v1/products/user?page=0&size=12
+//    GET /v1/products/top-discounted?count=5
 
     /**
-     * Retrieves a list of products based on the specified criteria.
+     * Retrieves a paginated list of products based on the specified search criteria.
      *
-     * @param paramName     the name of the parameter to filter the products by (e.g., "price", "discount", "category", "name", "createDate")
-     * @param paramValue    the value of the parameter used for filtering. For "price", this should be a range in the format "min-max". For other parameters,
-     *                      it should be a specific value or partial value as applicable.
-     * @param sortDirection the sorting direction for the results ("asc" for ascending or "desc" for descending)
-     * @return a list of products that match the given criteria
+     * @param paramName the name of the search parameter to filter products, such as "price", "discount", "category", "name", or "createDate"
+     * @param paramValue the value of the search parameter to apply, such as a price range for "price" or a category name for "category"
+     * @param pageable the pagination information, including page number and size
+     * @return a paginated list of products that match the specified search criteria
      */
     @Transactional(readOnly = true)
     @Override
-    public List<ProductResponseDto> getProductsByCriteria(String paramName, String paramValue, String sortDirection) {
+    public Page<ProductResponseDto> getProductsByCriteria(String paramName, String paramValue, Pageable pageable) {
         switch (paramName) {
             case "price":
                 String[] priceRange = paramValue.split("-");
                 BigDecimal minPrice = new BigDecimal(priceRange[0]);
                 BigDecimal maxPrice = new BigDecimal(priceRange[1]);
-                return getProductsByPriceRange(minPrice, maxPrice, sortDirection);
+                return getProductsByPriceRange(minPrice, maxPrice, pageable);
             case "discount":
-                return getProductsByDiscount(sortDirection);
+                return getProductsByDiscount(pageable);
             case "category":
-                return getProductsByCategory(paramValue, sortDirection);
+                return getProductsByCategory(paramValue, pageable);
             case "name":
-                return getProductsByPartOfNameIgnoreCase(paramValue, sortDirection);
+                return getProductsByPartOfNameIgnoreCase(paramValue, pageable);
             case "createDate":
-                return getProductsByCreateDate(sortDirection);
+                return getProductsByCreateDate(pageable);
             default:
-                return getAllProducts();
+                return getAllProducts(pageable);
         }
     }
 
     /**
-     * Retrieves a list of product response DTOs where the product name contains the specified
-     * part of the name, ignoring case. The resulting list is sorted based on the provided sort
-     * direction.
+     * Retrieves a pageable list of products whose names contain the specified part
+     * of a name, ignoring case.
      *
-     * @param partOfName    the part of the product name to search for, case-insensitively
-     * @param sortDirection the direction to sort the results, either "ASC" for ascending
-     *                      or "DESC" for descending
-     * @return a list of {@code ProductResponseDto} objects matching the search criteria
+     * @param partOfName the partial name used to search products
+     * @param pageable the pagination information including page size and page number
+     * @return a paginated list of ProductResponseDto containing the matching products
      */
     @Transactional(readOnly = true)
     @Override
-    public List<ProductResponseDto> getProductsByPartOfNameIgnoreCase(String partOfName, String sortDirection) {
-        Sort sort = Sort.by(getSortDirection(sortDirection), "name");
-        List<Product> products = productRepository.findByNameContainingIgnoreCase(partOfName, sort);
-        return productConverter.toDtos(products);
+    public Page<ProductResponseDto> getProductsByPartOfNameIgnoreCase(String partOfName, Pageable pageable) {
+        return productRepository.findByNameContainingIgnoreCase(partOfName, pageable)
+                .map(productConverter::toDto);
     }
 
     /**
-     * Retrieves a list of products belonging to a specific category and sorts them
-     * in the specified direction.
+     * Retrieves a paginated list of products that belong to the specified category.
      *
-     * @param categoryName  the name of the category for which products are to be retrieved
-     * @param sortDirection the sorting direction, either "ASC" for ascending or "DESC" for descending
-     * @return a list of product response DTOs corresponding to the products in the specified category,
-     * sorted accordingly
+     * @param categoryName the name of the category whose products are to be retrieved
+     * @param pageable the pagination and sorting information
+     * @return a paginated list of product response DTOs belonging to the specified category
      */
     @Transactional(readOnly = true)
     @Override
-    public List<ProductResponseDto> getProductsByCategory(String categoryName, String sortDirection) {
+    public Page<ProductResponseDto> getProductsByCategory(String categoryName, Pageable pageable) {
         Category category = categoryService.getCategoryByName(categoryName);
-        Sort sort = Sort.by(getSortDirection(sortDirection), "category.categoryName");
-        List<Product> products = productRepository.findByCategory(category, sort);
-        return productConverter.toDtos(products);
+        return productRepository.findByCategory(category, pageable)
+                .map(productConverter::toDto);
     }
 
     /**
-     * Retrieves a list of products within the specified price range and sorts the results
-     * based on the provided sort direction.
+     * Retrieves a paginated list of products within the specified price range.
      *
-     * @param minPrice      the minimum price for the price range, must not be null
-     * @param maxPrice      the maximum price for the price range, must not be null
-     * @param sortDirection in the direction to sort the results, can be "asc" or "desc"
-     * @return a list of products matching the price range criteria, sorted by the specified direction
-     * @throws IllegalArgumentException if minPrice or maxPrice is null
+     * @param minPrice the minimum price of the products to be retrieved; must not be null
+     * @param maxPrice the maximum price of the products to be retrieved; must not be null
+     * @param pageable the pagination and sorting information for retrieving the products
+     * @return a paginated list of products as ProductResponseDto objects within the specified price range
+     * @throws IllegalArgumentException if either minPrice or maxPrice is null
      */
     @Transactional(readOnly = true)
     @Override
-    public List<ProductResponseDto> getProductsByPriceRange(BigDecimal minPrice, BigDecimal maxPrice, String sortDirection) {
+    public Page<ProductResponseDto> getProductsByPriceRange(BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable) {
         if (minPrice == null || maxPrice == null) {
             throw new IllegalArgumentException("Min price and max price must be provided");
         }
@@ -293,61 +288,62 @@ public class ProductService implements ProductServiceInterface {
             minPrice = maxPrice;
             maxPrice = temp;
         }
-        Sort sort = Sort.by(getSortDirection(sortDirection), "price");
-        List<Product> products = productRepository.findByPriceBetween(minPrice, maxPrice, sort);
-        return productConverter.toDtos(products);
+        return productRepository.findByPriceBetween(minPrice, maxPrice, pageable)
+                .map(productConverter::toDto);
     }
 
     /**
-     * Retrieves a list of products that have a discount.
-     * The products are sorted by their discount price based on the specified sort direction.
+     * Retrieves a paginated list of products that have a discount price greater than zero.
      *
-     * @param sortDirection the direction to sort the products by discount price.
-     *                      It can be "asc" for ascending order or "desc" for descending order.
-     * @return a list of ProductResponseDto containing the details of the products with a discount.
+     * @param pageable the pagination and sorting information
+     * @return a Page containing ProductResponseDto objects representing products with discounts
      */
     @Transactional(readOnly = true)
     @Override
-    public List<ProductResponseDto> getProductsByDiscount(String sortDirection) {
-        Sort sort = Sort.by(getSortDirection(sortDirection), "discountPrice");
-        List<Product> products = productRepository.findByDiscountPriceGreaterThan(BigDecimal.valueOf(0), sort);
-        return productConverter.toDtos(products);
+    public Page<ProductResponseDto> getProductsByDiscount(Pageable pageable) {
+        return productRepository.findByDiscountPriceGreaterThan(BigDecimal.ZERO, pageable)
+                .map(productConverter::toDto);
     }
 
     /**
-     * Retrieves a list of products sorted by their creation date.
+     * Retrieves a paginated list of products sorted by their creation date.
+     * The sorting should be specified in the provided pageable parameter.
      *
-     * @param sortDirection the direction to sort the products by creation date,
-     *                      either "asc" for ascending or "desc" for descending
-     * @return a list of ProductResponseDto objects sorted by creation date
+     * @param pageable the pagination and sorting information
+     * @return a page of ProductResponseDto containing the product details
      */
     @Transactional(readOnly = true)
     @Override
-    public List<ProductResponseDto> getProductsByCreateDate(String sortDirection) {
-        Sort sort = Sort.by(getSortDirection(sortDirection), "createdAt");
-        List<Product> products = productRepository.findAll(sort);
-        return productConverter.toDtos(products);
+    public Page<ProductResponseDto> getProductsByCreateDate(Pageable pageable) {
+        // Используем стандартный findAll с переданным pageable
+        // Сортировка должна быть указана в pageable
+        return productRepository.findAll(pageable)
+                .map(productConverter::toDto);
     }
 
     /**
-     * Retrieves a list of all products in the database.
+     * Retrieves a paginated list of all products.
      *
-     * @return a list of ProductResponseDto objects containing the details of all products in the database
+     * @param pageable the pagination and sorting information
+     * @return a page containing a list of product response DTOs
      */
     @Transactional(readOnly = true)
     @Override
-    public List<ProductResponseDto> getAllProducts() {
-        return productConverter.toDtos(productRepository.findAll());
+    public Page<ProductResponseDto> getAllProducts(Pageable pageable) {
+        return productRepository.findAll(pageable)
+                .map(productConverter::toDto);
     }
 
     /**
-     * Retrieves a list of products for the current user.
+     * Retrieves a paginated list of products specifically formatted for user consumption.
      *
-     * @return a list of ProductResponseForUserDto objects containing the details of the products for the current user
+     * @param pageable the pagination information including page number, size, and sorting options
+     * @return a paginated list of ProductResponseForUserDto objects representing the products available for the user
      */
     @Transactional(readOnly = true)
-    public List<ProductResponseForUserDto> getAllProductsForUser() {
-        return productConverter.toUserDtos(getAllProducts());
+    public Page<ProductResponseForUserDto> getProductsForUser(Pageable pageable) {
+        return productRepository.findAll(pageable)
+                .map(product -> productConverter.toUserDto(productConverter.toDto(product)));
     }
 
     /**
@@ -359,34 +355,15 @@ public class ProductService implements ProductServiceInterface {
      */
     @Transactional(readOnly = true)
     public List<ProductResponseForUserDto> getTopFiveDiscountedProductsOfTheDay() {
-        List<ProductResponseForUserDto> result = productConverter.toUserDtos(getProductsByDiscount("desc").stream().limit(5).toList());
+        Pageable pageable = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "discountPrice"));
+        Page<Product> products = productRepository.findByDiscountPriceGreaterThan(BigDecimal.ZERO, pageable);
+        List<ProductResponseDto> productDtos = products.map(productConverter::toDto).getContent();
+        List<ProductResponseForUserDto> result = productConverter.toUserDtos(productDtos);
+
         if (result.isEmpty()) {
             throw new NotFoundException("No discounted products found");
         }
         return result;
-    }
-
-    /**
-     * Determines the sort direction based on the provided string representation.
-     *
-     * @param sortDirection the string representation of the sort direction;
-     *                      can be "asc" for ascending or "desc" for descending.
-     *                      If null or blank, defaults to ascending.
-     * @return the corresponding {@code Sort.Direction} value;
-     * returns {@code Sort.Direction.ASC} for ascending or {@code Sort.Direction.DESC} for descending.
-     * @throws IllegalArgumentException if the provided sort direction is invalid or unsupported.
-     */
-    private Sort.Direction getSortDirection(String sortDirection) {
-        if (sortDirection == null || sortDirection.isBlank()) {
-            return Sort.Direction.ASC;
-        }
-        if (sortDirection.equalsIgnoreCase("asc")) {
-            return Sort.Direction.ASC;
-        }
-        if (sortDirection.equalsIgnoreCase("desc")) {
-            return Sort.Direction.DESC;
-        }
-        throw new IllegalArgumentException("Invalid sort direction: " + sortDirection);
     }
 
     /**
