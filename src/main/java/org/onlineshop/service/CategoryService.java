@@ -117,9 +117,9 @@ public class CategoryService implements CategoryServiceInterface {
     }
 
     /**
-     * Retrieves all categories from the database.
+     * Retrieves a list of all categories from the database.
      *
-     * @return a list of CategoryResponseDto objects containing the details of all categories in the database
+     * @return a list of CategoryResponseDto objects, each containing details of a category
      */
     @Override
     public List<CategoryResponseDto> getAllCategories() {
@@ -127,11 +127,11 @@ public class CategoryService implements CategoryServiceInterface {
     }
 
     /**
-     * Retrieves a specific category based on the provided category ID.
+     * Retrieves a category from the database based on the provided category ID.
      *
-     * @param categoryId the ID of the category to be retrieved from the database
-     * @return a CategoryResponseDto containing the details of the retrieved category
-     * @throws BadRequestException if the provided category ID is not found in the database
+     * @param categoryId the ID of the category to be retrieved
+     * @return the Category object corresponding to the specified ID
+     * @throws BadRequestException if a category with the specified ID is not found in the database
      */
     @Override
     public Category getCategoryById(Integer categoryId) {
@@ -143,8 +143,8 @@ public class CategoryService implements CategoryServiceInterface {
      * Retrieves a specific category based on the provided category name.
      *
      * @param categoryName the name of the category to be retrieved from the database
-     * @return a CategoryResponseDto containing the details of the retrieved category
-     * @throws BadRequestException if the provided category name is not found in the database
+     * @return the Category object corresponding to the specified name
+     * @throws BadRequestException if a category with the specified name is not found in the database
      */
     public Category getCategoryByName(String categoryName) {
         return categoryRepository.findByCategoryName(categoryName)

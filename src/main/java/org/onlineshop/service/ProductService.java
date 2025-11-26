@@ -1,6 +1,5 @@
 package org.onlineshop.service;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.product.ProductRequestDto;
 import org.onlineshop.dto.product.ProductResponseDto;
@@ -15,6 +14,7 @@ import org.onlineshop.service.interfaces.ProductServiceInterface;
 import org.onlineshop.service.util.ProductServiceHelper;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -69,44 +69,70 @@ public class ProductService implements ProductServiceInterface {
     }
 
     /**
-     * Updates an existing product with provided details. The method validates the input data,
-     * ensures the product ID exists, checks for unique constraints in the specified category,
-     * and updates the product's properties accordingly. If the update is successful, the updated
-     * product details are returned.
+     * Updates an existing product with the details provided in the given ProductUpdateDto.
+     * Validates and handles updates for product name, category, description, price, discount price, and image.
+     * Ensures constraints such as unique product name within a category and valid price values.
      *
-     * @param productId the ID of the product to be updated
-     * @param productUpdateDto the details to update the product, including name, price, category,
-     *                         description, discount price, and image
-     * @return a {@code ProductResponseDto} containing the updated product details
-     * @throws IllegalArgumentException if the product ID does not exist, if the product name already
-     *                                  exists in the specified category, if the product name length
-     *                                  violates constraints, or if the product price is non-positive
+     * @param productId        the ID of the product to be updated
+     * @param productUpdateDto the details of the product to be updated, including optional fields such as name, category, description, price, discount, and image
+     * @return a ProductResponseDto representing the updated product
+     * @throws IllegalArgumentException if the product ID does not exist, if there is a duplicate product name within the updated category,
+     *                                  if the new product name is invalid, or if product price values are not valid.
      */
     @Transactional
     @Override
     public ProductResponseDto updateProduct(Integer productId, ProductUpdateDto productUpdateDto) {
         Product productToUpdate = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Product with id = " + productId + " not found"));
-        Category category = productToUpdate.getCategory();
+        Category currentCategory = productToUpdate.getCategory();
+
+        Category categoryAfterUpdate;
         if (productUpdateDto.getProductCategory() != null && !productUpdateDto.getProductCategory().isBlank()) {
-            Category categoryAfterUpdate = categoryService.getCategoryByName(productUpdateDto.getProductCategory().trim());
-            category = category.equals(categoryAfterUpdate) ? category : categoryAfterUpdate;
-            productToUpdate.setCategory(category);
+            categoryAfterUpdate = categoryService.getCategoryByName(productUpdateDto.getProductCategory().trim());
+        } else {
+            categoryAfterUpdate = currentCategory;
         }
-        List<Product> productListFromCategory = category.getProducts();
-        productListFromCategory.stream().map(Product::getName)
-                .filter(productName -> productName.equalsIgnoreCase(productUpdateDto.getProductName()))
-                .findFirst()
-                .ifPresent(productName -> {
-                    throw new IllegalArgumentException("Product with name: " + productName
-                            + " already exist in category.");
-                });
-        if (productUpdateDto.getProductName() != null && !productUpdateDto.getProductName().isBlank()) {
-            if (productUpdateDto.getProductName().length() < 3 || productUpdateDto.getProductName().length() > 20) {
-                throw new IllegalArgumentException("Product title must be between 3 and 20 characters");
+
+        if (currentCategory.equals(categoryAfterUpdate)) {  // если категория не меняется
+            if (productUpdateDto.getProductName() != null && !productUpdateDto.getProductName().isBlank()) {
+                // если имя для замены есть, проверить, что в этой категории нет товара с таким же именем,
+                // если это тот же самый товар, ничего не меняем, если нет, то бросаем исключение
+                List<Product> productListFromCurrentCategory = currentCategory.getProducts();
+                Optional<Product> productInCategory = productListFromCurrentCategory.stream()
+                        .filter(product -> product.getName().equalsIgnoreCase(productToUpdate.getName()))
+                        .findFirst();
+                if (productInCategory.isPresent()) {
+                    if (!productInCategory.get().getId().equals(productId)) {
+                        throw new IllegalArgumentException("Another product with the same name already exists in the category: "
+                                + currentCategory.getCategoryName() + ".");
+                    }
+                }
             }
-            productToUpdate.setName(productUpdateDto.getProductName().trim());
+        } else {    // если категория меняется
+            String newProductName;
+            if (productUpdateDto.getProductName() != null && !productUpdateDto.getProductName().isBlank()) {
+                newProductName = productUpdateDto.getProductName().trim();
+                if (newProductName.length() < 3 || newProductName.length() > 20) {
+                    throw new IllegalArgumentException("Product title must be between 3 and 20 characters");
+                }
+            } else {
+                newProductName = productToUpdate.getName();
+            }
+            // если имя для замены есть, проверить, что в этой категории нет товара с таким же именем,
+            // если товар есть, то бросаем исключение, если товара нет, то меняем категорию и имя товара
+            List<Product> productListFromNewCategory = categoryAfterUpdate.getProducts();
+            Optional<Product> productInNewCategory = productListFromNewCategory.stream()
+                    .filter(product -> product.getName().equalsIgnoreCase(newProductName))
+                    .findFirst();
+            if (productInNewCategory.isPresent()) {
+                throw new IllegalArgumentException("Another product with the same name already exists in the category: "
+                        + categoryAfterUpdate.getCategoryName() + ".");
+            } else {
+                productToUpdate.setCategory(categoryAfterUpdate);
+                productToUpdate.setName(newProductName);
+            }
         }
+
         if (productUpdateDto.getProductDescription() != null && !productUpdateDto.getProductDescription().isBlank()) {
             productToUpdate.setDescription(productUpdateDto.getProductDescription());
         }
@@ -132,7 +158,7 @@ public class ProductService implements ProductServiceInterface {
     /**
      * Sets the discount price for a product with the specified ID.
      *
-     * @param productId the ID of the product to set the discount price for
+     * @param productId        the ID of the product to set the discount price for
      * @param newDiscountPrice the new discount price to set
      * @return a {@code ProductResponseDto} containing the updated product details
      * @throws IllegalArgumentException if the product ID does not exist
@@ -182,13 +208,13 @@ public class ProductService implements ProductServiceInterface {
     /**
      * Retrieves a list of products based on the specified criteria.
      *
-     * @param paramName the name of the parameter to filter the products by (e.g., "price", "discount", "category", "name", "createDate")
-     * @param paramValue the value of the parameter used for filtering. For "price", this should be a range in the format "min-max". For other parameters,
-     *                   it should be a specific value or partial value as applicable.
+     * @param paramName     the name of the parameter to filter the products by (e.g., "price", "discount", "category", "name", "createDate")
+     * @param paramValue    the value of the parameter used for filtering. For "price", this should be a range in the format "min-max". For other parameters,
+     *                      it should be a specific value or partial value as applicable.
      * @param sortDirection the sorting direction for the results ("asc" for ascending or "desc" for descending)
      * @return a list of products that match the given criteria
      */
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public List<ProductResponseDto> getProductsByCriteria(String paramName, String paramValue, String sortDirection) {
         switch (paramName) {
@@ -215,12 +241,12 @@ public class ProductService implements ProductServiceInterface {
      * part of the name, ignoring case. The resulting list is sorted based on the provided sort
      * direction.
      *
-     * @param partOfName the part of the product name to search for, case-insensitively
+     * @param partOfName    the part of the product name to search for, case-insensitively
      * @param sortDirection the direction to sort the results, either "ASC" for ascending
      *                      or "DESC" for descending
      * @return a list of {@code ProductResponseDto} objects matching the search criteria
      */
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public List<ProductResponseDto> getProductsByPartOfNameIgnoreCase(String partOfName, String sortDirection) {
         Sort sort = Sort.by(getSortDirection(sortDirection), "name");
@@ -232,12 +258,12 @@ public class ProductService implements ProductServiceInterface {
      * Retrieves a list of products belonging to a specific category and sorts them
      * in the specified direction.
      *
-     * @param categoryName the name of the category for which products are to be retrieved
+     * @param categoryName  the name of the category for which products are to be retrieved
      * @param sortDirection the sorting direction, either "ASC" for ascending or "DESC" for descending
      * @return a list of product response DTOs corresponding to the products in the specified category,
-     *         sorted accordingly
+     * sorted accordingly
      */
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public List<ProductResponseDto> getProductsByCategory(String categoryName, String sortDirection) {
         Category category = categoryService.getCategoryByName(categoryName);
@@ -250,13 +276,13 @@ public class ProductService implements ProductServiceInterface {
      * Retrieves a list of products within the specified price range and sorts the results
      * based on the provided sort direction.
      *
-     * @param minPrice the minimum price for the price range, must not be null
-     * @param maxPrice the maximum price for the price range, must not be null
+     * @param minPrice      the minimum price for the price range, must not be null
+     * @param maxPrice      the maximum price for the price range, must not be null
      * @param sortDirection in the direction to sort the results, can be "asc" or "desc"
      * @return a list of products matching the price range criteria, sorted by the specified direction
      * @throws IllegalArgumentException if minPrice or maxPrice is null
      */
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public List<ProductResponseDto> getProductsByPriceRange(BigDecimal minPrice, BigDecimal maxPrice, String sortDirection) {
         if (minPrice == null || maxPrice == null) {
@@ -277,10 +303,10 @@ public class ProductService implements ProductServiceInterface {
      * The products are sorted by their discount price based on the specified sort direction.
      *
      * @param sortDirection the direction to sort the products by discount price.
-     *                       It can be "asc" for ascending order or "desc" for descending order.
+     *                      It can be "asc" for ascending order or "desc" for descending order.
      * @return a list of ProductResponseDto containing the details of the products with a discount.
      */
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public List<ProductResponseDto> getProductsByDiscount(String sortDirection) {
         Sort sort = Sort.by(getSortDirection(sortDirection), "discountPrice");
@@ -295,7 +321,7 @@ public class ProductService implements ProductServiceInterface {
      *                      either "asc" for ascending or "desc" for descending
      * @return a list of ProductResponseDto objects sorted by creation date
      */
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public List<ProductResponseDto> getProductsByCreateDate(String sortDirection) {
         Sort sort = Sort.by(getSortDirection(sortDirection), "createdAt");
@@ -308,7 +334,7 @@ public class ProductService implements ProductServiceInterface {
      *
      * @return a list of ProductResponseDto objects containing the details of all products in the database
      */
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public List<ProductResponseDto> getAllProducts() {
         return productConverter.toDtos(productRepository.findAll());
@@ -316,9 +342,10 @@ public class ProductService implements ProductServiceInterface {
 
     /**
      * Retrieves a list of products for the current user.
+     *
      * @return a list of ProductResponseForUserDto objects containing the details of the products for the current user
      */
-    @Transactional
+    @Transactional(readOnly = true)
     public List<ProductResponseForUserDto> getAllProductsForUser() {
         return productConverter.toUserDtos(getAllProducts());
     }
@@ -330,7 +357,7 @@ public class ProductService implements ProductServiceInterface {
      * @return a list of ProductResponseForUserDto containing information about the top five discounted products.
      * @throws NotFoundException if no discounted products are found.
      */
-    @Transactional
+    @Transactional(readOnly = true)
     public List<ProductResponseForUserDto> getTopFiveDiscountedProductsOfTheDay() {
         List<ProductResponseForUserDto> result = productConverter.toUserDtos(getProductsByDiscount("desc").stream().limit(5).toList());
         if (result.isEmpty()) {
@@ -346,7 +373,7 @@ public class ProductService implements ProductServiceInterface {
      *                      can be "asc" for ascending or "desc" for descending.
      *                      If null or blank, defaults to ascending.
      * @return the corresponding {@code Sort.Direction} value;
-     *         returns {@code Sort.Direction.ASC} for ascending or {@code Sort.Direction.DESC} for descending.
+     * returns {@code Sort.Direction.ASC} for ascending or {@code Sort.Direction.DESC} for descending.
      * @throws IllegalArgumentException if the provided sort direction is invalid or unsupported.
      */
     private Sort.Direction getSortDirection(String sortDirection) {
@@ -368,7 +395,7 @@ public class ProductService implements ProductServiceInterface {
      * @param productId the ID of the product to retrieve from the database
      * @return an Optional containing the Product if found; otherwise, an empty Optional
      */
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public Optional<Product> getProductById(Integer productId) {
         return productRepository.findById(productId);
@@ -401,13 +428,13 @@ public class ProductService implements ProductServiceInterface {
         if (productCategory == null || productCategory.isBlank()) {
             throw new IllegalArgumentException("Product category cannot be null or empty");
         }
-        if (productPrice == null){
+        if (productPrice == null) {
             throw new IllegalArgumentException("Product price cannot be null");
         }
         if (productPrice.compareTo(BigDecimal.valueOf(0.01)) <= 0) {
             throw new IllegalArgumentException("Product price must be greater than 0. Minimum price is 0.01");
         }
-        if (productDiscountPrice == null){
+        if (productDiscountPrice == null) {
             throw new IllegalArgumentException("Product discount price cannot be null");
         }
         if (productDiscountPrice.compareTo(BigDecimal.ZERO) < 0) {
