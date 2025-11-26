@@ -17,8 +17,10 @@ import org.onlineshop.service.converter.OrderConverter;
 import org.onlineshop.service.interfaces.OrderServiceInterface;
 import org.onlineshop.service.mail.MailUtil;
 import org.onlineshop.service.util.PdfOrderGenerator;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -32,45 +34,8 @@ public class OrderService implements OrderServiceInterface {
     private final UserService userService;
     private final UserRepository userRepository;
     private final OrderConverter orderConverter;
-    private final OrderItemService orderItemService;
     private final MailUtil mailUtil;
     private final CartService cartService;
-
-    /**
-     * Saves an order based on the provided order request data.
-     *
-     * @param dto the {@link OrderRequestDto} containing order request information such as
-     *            delivery address, contact phone, delivery method, and order items.
-     *            Must not be null.
-     * @return an {@link OrderResponseDto} containing details of the saved order.
-     * @throws BadRequestException      if the provided {@code dto} is null.
-     * @throws IllegalArgumentException if the specified delivery method in {@code dto}
-     *                                  does not match any {@code Order.DeliveryMethod} constants.
-     */
-//    @Transactional
-//    @Override
-//    public OrderResponseDto saveOrder(OrderRequestDto dto) {
-//        if (dto == null) {
-//            throw new BadRequestException("OrderRequestDto cannot be null");
-//        }
-//        // Throws: IllegalArgumentException – if this enum type has no constant with the specified name
-//        Order.DeliveryMethod method = Order.DeliveryMethod.valueOf(dto.getDeliveryMethod().toUpperCase());
-//        User currentUser = userService.getCurrentUser();
-//        Order order = Order.builder()
-//                .user(currentUser)
-//                .deliveryAddress(dto.getDeliveryAddress())
-//                .contactPhone(dto.getContactPhone())
-//                .deliveryMethod(method)
-//                .status(Order.Status.PENDING_PAYMENT)
-//                .build();
-//        if (dto.getItems() != null) {
-//            for (OrderItemRequestDto item : dto.getItems()) {
-//                orderItemService.addItemToOrder(item);
-//            }
-//        }
-//        orderRepository.save(order);
-//        return orderConverter.toDto(order);
-//    }
 
     /**
      * Retrieves an order by its ID.
@@ -198,12 +163,6 @@ public class OrderService implements OrderServiceInterface {
         orderRepository.save(order);
         cartService.clearCart();
 
-        byte[] pdfBytes = PdfOrderGenerator.generatePdfOrder(order);
-        try {
-            mailUtil.sendOrderPaidEmail(order.getUser(), order, pdfBytes);
-        } catch (Exception e) {
-            throw new MailSendingException("Failed to send order confirmation email: " + e.getMessage());
-        }
         return orderConverter.toDto(order);
     }
 
@@ -296,6 +255,15 @@ public class OrderService implements OrderServiceInterface {
                 .orElseThrow(() -> new NotFoundException("Order not found with ID: " + orderId));
     }
 
+    /**
+     * Recalculates the total price for an order based on the current product prices and discounts.
+     * Updates each order item's price at the time of purchase.
+     *
+     * @param order the order for which the price needs to be recalculated.
+     *              Must not be null, must have a status of PENDING_PAYMENT, and must include at least one order item.
+     * @throws BadRequestException if the provided order is null, or if the order status is not PENDING_PAYMENT.
+     * @throws NotFoundException   if the order does not contain any order items.
+     */
     @Transactional(readOnly = true)
     public void recalculateOrderPrice(Order order) {
         if (order == null) {
@@ -316,6 +284,32 @@ public class OrderService implements OrderServiceInterface {
             oi.setPriceAtPurchase(priceAtPurchase);
         }
         orderRepository.save(order);
+    }
 
+    /**
+     * Sends an order confirmation email to the user associated with the specified order.
+     * The email includes the order details and a PDF attachment of the order summary.
+     * This method is executed asynchronously in a new transactional context.
+     *
+     * @param orderId the unique identifier of the order for which the confirmation email should be sent.
+     *                The method retrieves the order details based on this ID.
+     * @throws BadRequestException  if the specified order is not found in the database.
+     * @throws MailSendingException if an error occurs while generating or sending the email.
+     */
+    @Async
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void sendOrderConfirmationEmail(Integer orderId) {
+        try {
+            Order order = orderRepository.findById(orderId)
+                    .orElseThrow(() -> new NotFoundException("Order not found for email sending: " + orderId));
+
+            byte[] pdfBytes = PdfOrderGenerator.generatePdfOrder(order);
+            mailUtil.sendOrderPaidEmail(order.getUser(), order, pdfBytes);
+
+        } catch (NotFoundException e) {
+            throw new BadRequestException("Order not found for email sending: " + orderId);
+        } catch (Exception e) {
+            throw new MailSendingException("Error sending order confirmation email: " + e.getMessage()); // TODO Resend Email
+        }
     }
 }

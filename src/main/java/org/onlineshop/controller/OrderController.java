@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.onlineshop.dto.order.OrderRequestDto;
 import org.onlineshop.dto.order.OrderResponseDto;
 import org.onlineshop.service.OrderService;
 import org.springframework.http.HttpStatus;
@@ -26,38 +25,6 @@ import java.util.List;
 public class OrderController {
 
     private final OrderService orderService;
-
-    /**
-     * Creates a new order based on the provided order details.
-     *
-     * @param orderRequestDto the details of the order to be created, including delivery address,
-     *                        delivery method, contact phone, and list of items, must not be null
-     * @return a response entity containing the created order details as {@link OrderResponseDto},
-     * with an HTTP status of 201 (Created)
-     */
-//    @Operation(
-//            summary = "Create new order",
-//            description = "Creates a new order for the current user with the provided order details including delivery information and items."
-//    )
-//    @ApiResponses({
-//            @ApiResponse(
-//                    responseCode = "201",
-//                    description = "Order successfully created",
-//                    content = @Content(schema = @Schema(implementation = OrderResponseDto.class))
-//            ),
-//            @ApiResponse(
-//                    responseCode = "400",
-//                    description = "Bad request - invalid order data"
-//            )
-//    })
-//    @PostMapping
-//    public ResponseEntity<OrderResponseDto> saveOrder(
-//            @Parameter(description = "Order creation data", required = true)
-//            @Valid @RequestBody OrderRequestDto orderRequestDto) {
-//        return ResponseEntity
-//                .status(HttpStatus.CREATED)
-//                .body(orderService.saveOrder(orderRequestDto));
-//    }
 
     /**
      * Retrieves an order by its ID.
@@ -174,12 +141,13 @@ public class OrderController {
     }
 
     /**
-     * Confirms the payment for an order with the specified ID using the given payment method.
+     * Confirms payment for an order and sends a confirmation email with a PDF invoice to the user.
+     * Users can only confirm payment for orders they own.
+     * Different payment methods can be used, such as Credit Card, PayPal, or Bank Transfer.
      *
-     * @param orderId   the ID of the order to confirm the payment for, must not be null
-     * @param payMethod the payment method to be used must not be null
-     * @return a response entity containing the updated order details as {@link OrderResponseDto},
-     * with an HTTP status of 200 (OK)
+     * @param orderId the unique identifier of the order for which payment is to be confirmed
+     * @param payMethod the payment method used for the transaction, e.g., CREDIT_CARD, PAYPAL, or BANK_TRANSFER
+     * @return a ResponseEntity containing an OrderResponseDto with order details upon successful confirmation
      */
     @Operation(
             summary = "Confirm order payment",
@@ -235,8 +203,12 @@ public class OrderController {
                     }
             )
             @Valid @PathVariable String payMethod) {
+
+        OrderResponseDto orderResponse = orderService.confirmPayment(orderId, payMethod);
+        orderService.sendOrderConfirmationEmail(orderId);
+
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(orderService.confirmPayment(orderId, payMethod));
+                .body(orderResponse);
     }
 }
