@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,7 +26,7 @@ public class FavouriteService implements FavouriteServiceInterface {
     private final FavouriteConverter favouriteConverter;
 
     /**
-     * Adds a product to the user's favourites list.
+     * Adds a product to the user's favourite list.
      *
      * @param productId the ID of the product to be added to the favourites. Must not be null.
      * @return a FavouriteResponseDto containing details about the newly added favourite.
@@ -39,25 +40,29 @@ public class FavouriteService implements FavouriteServiceInterface {
         if (productId == null) {
             throw new IllegalArgumentException("Product Id cannot be null");
         }
+
         User user = userService.getCurrentUser();
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new NotFoundException("Product not found with ID: " + productId));
-        boolean exist = favouriteRepository.findByUser(user).stream()
-                .anyMatch(f -> f.getProduct().getId().equals(product.getId()));
-        if (exist) {
+
+        Optional<Favourite> existingFavourite = favouriteRepository
+                .findByUserAndProduct(user, product);
+
+        if (existingFavourite.isPresent()) {
             throw new BadRequestException("Product is already in favourites");
         }
 
-        Favourite favourite = new Favourite();
-        favourite.setUser(user);
-        favourite.setProduct(product);
-        Favourite savedFavourite = favouriteRepository.save(favourite);
+        Favourite favourite = Favourite.builder()
+                .user(user)
+                .product(product)
+                .build();
 
+        Favourite savedFavourite = favouriteRepository.save(favourite);
         return favouriteConverter.toDto(savedFavourite);
     }
 
     /**
-     * Deletes a product from the user's favourites list.
+     * Deletes a product from the user's favourite list.
      * If the product is not found in the user's favourites, an exception is thrown.
      *
      * @param productId the ID of the product to be deleted from the favourites. Must not be null.
@@ -73,12 +78,13 @@ public class FavouriteService implements FavouriteServiceInterface {
         }
 
         User user = userService.getCurrentUser();
-        Favourite favourite = favouriteRepository.findByUser(user).stream()
-                .filter(f -> f.getProduct().getId().equals(productId))
-                .findFirst()
-                .orElseThrow(() -> new NotFoundException("Product not found in favourites"));
-        favouriteRepository.delete(favourite);
 
+        Favourite favourite = favouriteRepository
+                .findByUserAndProduct(user, productRepository.findById(productId)
+                        .orElseThrow(() -> new NotFoundException("Product not found")))
+                .orElseThrow(() -> new NotFoundException("Product not found in favourites"));
+
+        favouriteRepository.delete(favourite);
         return favouriteConverter.toDto(favourite);
     }
 
