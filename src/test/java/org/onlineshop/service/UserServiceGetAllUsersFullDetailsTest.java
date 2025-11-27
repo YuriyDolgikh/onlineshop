@@ -9,11 +9,12 @@ import org.onlineshop.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -78,13 +79,13 @@ class UserServiceGetAllUsersFullDetailsTest {
 
         confirmationCodeRepository.save(confirmationCodeAdmin);
 
-        List<User> result = userService.getAllUsersFullDetails();
+        Page<User> result = userService.getAllUsersFullDetails(PageRequest.of(0, 10));
 
         assertNotNull(result);
-        assertEquals(2, result.size());
+        assertEquals(2, result.getTotalElements());
 
-        User savedUser1 = result.get(0);
-        User savedUser2 = result.get(1);
+        User savedUser1 = result.getContent().get(0);
+        User savedUser2 = result.getContent().get(1);
 
         assertTrue(result.stream().anyMatch(u -> u.getEmail().equals("testUser@email.com")));
         assertTrue(result.stream().anyMatch(u -> u.getEmail().equals("admin@email.com")));
@@ -98,7 +99,7 @@ class UserServiceGetAllUsersFullDetailsTest {
 
     @Test
     void testGetAllUsersFullDetailsWhenUsersNotExists() {
-        List<User> result = userService.getAllUsersFullDetails();
+        Page<User> result = userService.getAllUsersFullDetails(PageRequest.of(0, 10));
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -125,9 +126,9 @@ class UserServiceGetAllUsersFullDetailsTest {
 
         confirmationCodeRepository.save(confirmationCode);
 
-        List<User> result = userService.getAllUsersFullDetails();
+        Page<User> result = userService.getAllUsersFullDetails(PageRequest.of(0, 10));
 
-        User userFromResult = result.get(0);
+        User userFromResult = result.getContent().get(0);
         assertEquals("newTestUser", userFromResult.getUsername());
         assertEquals("testUser@email.com", userFromResult.getEmail());
         assertEquals("$2a$10$WiAt7dmC1vLIxjY9/9n7P.I5RQU1MKKSOI1Dy1pNLPPIts7K5RJR2", userFromResult.getHashPassword());

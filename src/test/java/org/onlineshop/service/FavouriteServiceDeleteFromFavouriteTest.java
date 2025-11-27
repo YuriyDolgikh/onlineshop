@@ -18,11 +18,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
@@ -92,6 +90,6 @@ class FavouriteServiceDeleteFromFavouriteTest {
         when(userService.getCurrentUser()).thenReturn(user);
         when(favouriteRepository.findByUser(user)).thenReturn(List.of());
 
-        assertEquals("Product not found in favourites", assertThrows(NotFoundException.class, () -> favouriteService.deleteFavourite(10)).getMessage());
+        assertEquals("Product not found", assertThrows(NotFoundException.class, () -> favouriteService.deleteFavourite(10)).getMessage());
     }
 }
