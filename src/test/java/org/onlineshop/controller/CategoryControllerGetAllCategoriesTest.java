@@ -1,6 +1,7 @@
 package org.onlineshop.controller;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.onlineshop.dto.category.CategoryResponseDto;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -20,7 +22,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -86,28 +87,30 @@ class CategoryControllerGetAllCategoriesTest {
 
         categoryRepository.save(categoryTwo);
 
-        ResponseEntity<List<CategoryResponseDto>> result = categoryController.getAllCategories();
+        ResponseEntity<Page<CategoryResponseDto>> result = categoryController.getAllCategories(0, 2);
 
-        assertEquals(2, result.getBody().size());
+        Assertions.assertNotNull(result.getBody());
+        assertEquals(2, result.getBody().getTotalElements());
     }
 
     @Test
     @WithMockUser(username = "testUser@email.com",
             roles = {"ADMIN", "MANAGER"})
     void testGetAllCategoriesIfRoleAdminAndManagerIfDateBaseEmpty() {
-        ResponseEntity<List<CategoryResponseDto>> result = categoryController.getAllCategories();
-        assertEquals(0, result.getBody().size());
+        ResponseEntity<Page<CategoryResponseDto>> result = categoryController.getAllCategories(0, 2);
+        Assertions.assertNotNull(result.getBody());
+        assertEquals(0, result.getBody().getTotalElements());
     }
 
     @Test
     @WithMockUser(username = "testUser@email.com",
             roles = "USER")
-    void testGetAllCategoriesIfRoleUser() throws Exception{
+    void testGetAllCategoriesIfRoleUser() throws Exception {
         mockMvc.perform(get("/v1/categories/")).andExpect(status().isForbidden());
     }
 
     @Test
-    void testGetAllCategoriesIfUserNotRegistered() throws Exception{
+    void testGetAllCategoriesIfUserNotRegistered() throws Exception {
         mockMvc.perform(get("/v1/categories/")).andExpect(status().isUnauthorized());
     }
 

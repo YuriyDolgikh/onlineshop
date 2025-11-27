@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.onlineshop.entity.*;
+import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.repository.CartRepository;
 import org.onlineshop.repository.OrderRepository;
 import org.onlineshop.service.converter.CartItemConverter;
@@ -41,7 +42,6 @@ class CartServiceTransferCartToOrderTest {
 
     private User userTest;
     private Cart cartTest;
-    private Product productTest;
     private CartItem cartItemTest;
     private OrderItem orderItemTest;
 
@@ -65,7 +65,7 @@ class CartServiceTransferCartToOrderTest {
 
         userTest.setCart(cartTest);
 
-        productTest = Product.builder()
+        Product productTest = Product.builder()
                 .id(100)
                 .name("Test Product")
                 .price(BigDecimal.valueOf(10))
@@ -180,17 +180,7 @@ class CartServiceTransferCartToOrderTest {
         when(userService.getCurrentUser()).thenReturn(userTest);
         when(cartRepository.findByUser(userTest)).thenReturn(Optional.of(cartTest));
 
-        Order savedOrder = Order.builder()
-                .orderId(200)
-                .user(userTest)
-                .status(Order.Status.PENDING_PAYMENT)
-                .deliveryMethod(Order.DeliveryMethod.PICKUP)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .orderItems(new ArrayList<>())
-                .build();
-
-        when(orderRepository.save(any(Order.class))).thenReturn(savedOrder);
+        when(orderRepository.save(any(Order.class))).thenThrow(new BadRequestException("User's cart is empty. Nothing to transfer."));
 
         cartService.transferCartToOrder();
 

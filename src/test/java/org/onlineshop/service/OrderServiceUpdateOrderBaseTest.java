@@ -215,7 +215,10 @@ class OrderServiceUpdateOrderBaseTest extends OrderServiceBaseTest {
                 .deliveryMethod("COURIER")
                 .build();
 
-        Order order = Order.builder().orderId(orderId).build();
+        Order order = Order.builder()
+                .orderId(orderId)
+                .status(Order.Status.PENDING_PAYMENT)
+                .build();
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
 
         OrderResponseDto responseDto = new OrderResponseDto();

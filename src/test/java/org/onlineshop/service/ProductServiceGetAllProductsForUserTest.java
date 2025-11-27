@@ -11,13 +11,14 @@ import org.onlineshop.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -82,10 +83,10 @@ class ProductServiceGetAllProductsForUserTest {
 
     @Test
     void testGetAllProductsForUser() {
-        List<ProductResponseForUserDto> products = productService.getAllProductsForUser();
-        ProductResponseForUserDto firstProduct = products.get(0);
+        Page<ProductResponseForUserDto> products = productService.getProductsForUser(PageRequest.of(0, 2));
+        ProductResponseForUserDto firstProduct = products.getContent().get(0);
 
-        assertEquals(2, products.size());
+        assertEquals(2, products.getTotalElements());
         assertEquals(ProductResponseForUserDto.class, firstProduct.getClass());
     }
 }
