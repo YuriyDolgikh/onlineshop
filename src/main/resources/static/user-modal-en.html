@@ -11,7 +11,7 @@
             <p>
                 UserService is responsible for managing users, including registration,
                 email confirmation, data updates, deletion, user recovery and password encryption,
-                as well as obtaining information about the current user.
+                as well as obtaining information about the current user. Integrated with Spring Security and ConfirmationCodeService.
             </p>
         </div>
 
@@ -26,6 +26,8 @@
                     <div>• Checks if a user with this email already exists</div>
                     <div>• Validates required fields (name and hashPassword)</div>
                     <div>• Creates a new user with USER role and NOT_CONFIRMED status</div>
+                    <div>• Initializes orders and favorites collections</div>
+                    <div>• Creates shopping cart for the user</div>
                     <div>• Saves the user to the database</div>
                     <div>• Generates and sends confirmation code via confirmationCodeService</div>
                     <div>• Returns UserResponseDto</div>
@@ -36,6 +38,9 @@
                 <h4>confirmationEmail(String code)</h4>
                 <p>Confirms user email using the code.</p>
                 <div class="method-steps">
+                    <div>• Validates confirmation code</div>
+                    <div>• Checks confirmation code expiration</div>
+                    <div>• If code expired - generates new one and sends to user</div>
                     <div>• Changes user status to CONFIRMED</div>
                     <div>• Saves the user</div>
                     <div>• Returns success confirmation message</div>
@@ -49,6 +54,7 @@
                     <div>• Checks if the user exists</div>
                     <div>• Verifies that update is performed by the current user</div>
                     <div>• Updates provided fields (username, phoneNumber, hashPassword)</div>
+                    <div>• Encrypts password via PasswordEncoder when updating</div>
                     <div>• Saves changes</div>
                     <div>• Returns UserResponseDto</div>
                 </div>
@@ -61,7 +67,7 @@
                     <div>• Checks if the user exists</div>
                     <div>• Prevents ADMIN user deletion</div>
                     <div>• Verifies current user permissions</div>
-                    <div>• Deletes user confirmation codes</div>
+                    <div>• Deletes user confirmation codes via confirmationCodeService</div>
                     <div>• Changes status to DELETED</div>
                     <div>• Saves the user</div>
                     <div>• Returns UserResponseDto</div>
@@ -73,11 +79,20 @@
                 <p>Restores a deleted user.</p>
                 <div class="method-steps">
                     <div>• Validates email</div>
-                    <div>• Checks that the user is deleted</div>
+                    <div>• Checks that the user is deleted (DELETED status)</div>
                     <div>• Generates new confirmation code</div>
                     <div>• Changes status to NOT_CONFIRMED</div>
                     <div>• Saves the user</div>
                     <div>• Returns UserResponseDto</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>getAllUsers(Pageable pageable)</h4>
+                <p>Gets paginated list of users.</p>
+                <div class="method-steps">
+                    <div>• Returns page with UserResponseDto</div>
+                    <div>• Uses pagination via Pageable</div>
                 </div>
             </div>
 
@@ -87,6 +102,15 @@
                 <div class="method-steps">
                     <div>• Uses Spring Security mechanisms to get current user</div>
                     <div>• Returns current user data</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>getUserByEmail(String email)</h4>
+                <p>Gets user by email address.</p>
+                <div class="method-steps">
+                    <div>• Searches user by email</div>
+                    <div>• Returns UserResponseDto</div>
                 </div>
             </div>
         </div>
@@ -119,34 +143,46 @@
                     <span class="endpoint-path">/v1/users/confirmation?code={code}</span>
                     <span class="role-badge role-public">PUBLIC</span>
                 </div>
-                <p>Email address confirmation using confirmation code.</p>
+                <p>Email address confirmation using confirmation code. Automatically generates new code when expired.</p>
             </div>
 
             <div class="endpoint-detail">
                 <div class="endpoint-header">
                     <span class="http-method put">PUT</span>
                     <span class="endpoint-path">/v1/users/{userId}</span>
-                    <span class="role-badge role-user">USER</span>
+                    <span class="role-badge role-user">USER, MANAGER, ADMIN</span>
                 </div>
-                <p>Update user information. Users can only update their own profile.</p>
+                <p>Update user information. Users can only update their own profile. Password automatically encrypted.</p>
             </div>
 
             <div class="endpoint-detail">
                 <div class="endpoint-header">
                     <span class="http-method delete">DELETE</span>
                     <span class="endpoint-path">/v1/users/{userId}</span>
-                    <span class="role-badge role-user">USER</span>
+                    <span class="role-badge role-user">USER, MANAGER, ADMIN</span>
                 </div>
-                <p>Delete user account. ADMIN can delete any user.</p>
+                <p>Delete user account logically. ADMIN can delete any user except other ADMINS. Deletes related confirmation codes.</p>
             </div>
 
             <div class="endpoint-detail">
                 <div class="endpoint-header">
                     <span class="http-method get">GET</span>
                     <span class="endpoint-path">/v1/users/renew/{email}</span>
-                    <span class="role-badge role-user">USER</span>
+                    <span class="role-badge role-user">USER, MANAGER, ADMIN</span>
                 </div>
-                <p>Restore deleted user account.</p>
+                <p>Restore deleted user account. Generates new confirmation code.</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/users/admin/all?page=0&size=20</span>
+                    <span class="role-badge role-admin">ADMIN</span>
+                </div>
+                <p>Get paginated list of all users. Admin only.</p>
+                <div class="method-steps">
+                    <div>• Parameters: page (default 0), size (default 20)</div>
+                </div>
             </div>
         </div>
 
@@ -161,6 +197,9 @@
                     <div>• <strong>Logical Deletion:</strong> Users marked as DELETED instead of physical deletion</div>
                     <div>• <strong>Account Recovery:</strong> Ability to restore deleted accounts</div>
                     <div>• <strong>Spring Security:</strong> Integration with Spring Security for authentication and authorization</div>
+                    <div>• <strong>Pagination:</strong> Pagination support for user lists</div>
+                    <div>• <strong>Code Validation:</strong> Automatic confirmation code expiration check</div>
+                    <div>• <strong>Cart Integration:</strong> Automatic cart creation during registration</div>
                 </div>
             </div>
         </div>
@@ -175,6 +214,8 @@
                     <div>• <strong>Profile Management:</strong> Users can update their data</div>
                     <div>• <strong>Access Control:</strong> Different roles with different permission levels</div>
                     <div>• <strong>Recovery:</strong> Mechanism for restoring deleted accounts</div>
+                    <div>• <strong>Administration:</strong> Separate methods for administrative management</div>
+                    <div>• <strong>User Statuses:</strong> NOT_CONFIRMED → CONFIRMED → DELETED → NOT_CONFIRMED</div>
                 </div>
             </div>
         </div>

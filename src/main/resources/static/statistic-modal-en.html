@@ -21,7 +21,7 @@
 
             <div class="method-card">
                 <h4>getTopTenPurchasedProducts()</h4>
-                <p>Gets list of 10 most purchased products with PAID status.</p>
+                <p>Gets list of 10 most purchased products from paid orders (PAID status).</p>
                 <div class="method-steps">
                     <div>• Calls private method getTopTenProducts(Order.Status.PAID)</div>
                     <div>• Returns list of ProductStatisticResponseDto</div>
@@ -30,7 +30,7 @@
 
             <div class="method-card">
                 <h4>getTenCanceledProducts()</h4>
-                <p>Gets list of 10 products with cancelled orders.</p>
+                <p>Gets list of 10 products with cancelled orders (CANCELLED status).</p>
                 <div class="method-steps">
                     <div>• Calls private method getTopTenProducts(Order.Status.CANCELLED)</div>
                     <div>• Returns list of ProductStatisticResponseDto</div>
@@ -41,6 +41,7 @@
                 <h4>getProductsInPendingPaymentStatus(Integer days)</h4>
                 <p>Gets products with orders in PENDING_PAYMENT status for last N days.</p>
                 <div class="method-steps">
+                    <div>• Validates days parameter (cannot be null or ≤ 0)</div>
                     <div>• Calculates period start date</div>
                     <div>• Creates productQuantityMap for counting each product quantity</div>
                     <div>• Gets orders with PENDING_PAYMENT status created after startDate</div>
@@ -53,11 +54,12 @@
                 <h4>getProfitStatistics(ProfitStatisticRequestDto request)</h4>
                 <p>Gets profit statistics for period with grouping by hour, day, week or month.</p>
                 <div class="method-steps">
+                    <div>• Validates periodCount (must be > 0)</div>
                     <div>• Validates period unit (DAYS, WEEKS, MONTHS, YEARS) and groupBy (HOUR, DAY, WEEK, MONTH)</div>
                     <div>• Determines startDate and endDate</div>
-                    <div>• Gets orders with PAID status after startDate</div>
+                    <div>• Gets orders with PAID, IN_TRANSIT, DELIVERED statuses after startDate</div>
                     <div>• Groups profit by key depending on groupBy</div>
-                    <div>• Calculates totalProfit</div>
+                    <div>• Calculates totalProfit as sum of all orders</div>
                     <div>• Returns ProfitStatisticsResponseDto with profit data</div>
                 </div>
             </div>
@@ -85,7 +87,7 @@
                     <span class="endpoint-path">/v1/statistics/topSold</span>
                     <span class="role-badge role-admin">ADMIN</span>
                 </div>
-                <p>Get top-10 most sold products</p>
+                <p>Get top-10 most sold products from paid orders</p>
             </div>
 
             <div class="endpoint-detail">
@@ -104,6 +106,9 @@
                     <span class="role-badge role-admin">ADMIN</span>
                 </div>
                 <p>Get products with pending payments for last N days</p>
+                <div class="parameter-info">
+                    <strong>Parameter:</strong> days - number of days to check (required, example: 7)
+                </div>
             </div>
 
             <div class="endpoint-detail">
@@ -113,6 +118,9 @@
                     <span class="role-badge role-admin">ADMIN</span>
                 </div>
                 <p>Get profit statistics for specified period with grouping</p>
+                <div class="parameter-info">
+                    <strong>Request Body:</strong> ProfitStatisticRequestDto (periodCount, periodUnit, groupBy)
+                </div>
             </div>
         </div>
 
@@ -122,7 +130,7 @@
             <div class="method-card">
                 <div class="method-steps">
                     <div>• <strong>Flexible Grouping:</strong> Support for various grouping periods (hour, day, week, month)</div>
-                    <div>• <strong>Efficient Queries:</strong> Optimized SQL queries for working with large data volumes</div>
+                    <div>• <strong>Extended Profit Statistics:</strong> Consideration of orders with PAID, IN_TRANSIT, DELIVERED statuses</div>
                     <div>• <strong>Parameter Validation:</strong> Checking period and grouping criteria correctness</div>
                     <div>• <strong>Real-time Statistics:</strong> Current data based on actual orders</div>
                     <div>• <strong>Scalability:</strong> Ability to process large volumes of historical data</div>
@@ -138,8 +146,8 @@
                 <div class="method-steps">
                     <div>• <strong>Sales Analysis:</strong> Identifying most popular and problematic products</div>
                     <div>• <strong>Inventory Management:</strong> Data for optimizing warehouse stocks</div>
-                    <div>• <strong>Financial Analysis:</strong> Detailed profit statistics by periods</div>
-                    <div>• <strong>Problem Identification:</strong> Analysis of cancelled orders for service improvement</div>
+                    <div>• <strong>Financial Analysis:</strong> Detailed profit statistics for completed and active orders</div>
+                    <div>• <strong>Problem Identification:</strong> Analysis of cancelled orders and pending payments for service improvement</div>
                     <div>• <strong>Planning:</strong> Data for sales forecasting and procurement</div>
                 </div>
             </div>
@@ -150,11 +158,11 @@
             <h3>📈 Key Metrics</h3>
             <div class="method-card">
                 <div class="method-steps">
-                    <div>• <strong>Top Sales:</strong> 10 most sold products</div>
+                    <div>• <strong>Top Sales:</strong> 10 most sold products from paid orders</div>
                     <div>• <strong>Top Cancellations:</strong> 10 most cancelled products</div>
                     <div>• <strong>Pending Payments:</strong> Products in orders with PENDING_PAYMENT status</div>
                     <div>• <strong>Profit by Periods:</strong> Profit grouping by hours, days, weeks, months</div>
-                    <div>• <strong>Total Profit:</strong> Total profit for selected period</div>
+                    <div>• <strong>Total Profit:</strong> Total profit for selected period for completed and active orders</div>
                 </div>
             </div>
         </div>

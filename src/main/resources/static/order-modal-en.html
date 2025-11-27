@@ -10,7 +10,7 @@
             <h3>General Description</h3>
             <p>
                 OrderService is responsible for managing user orders.
-                Performs operations for saving, retrieving, updating status, canceling and confirming order payments.
+                Performs operations for retrieving, updating status, canceling and confirming order payments.
                 Provides full order lifecycle from creation to completion.
             </p>
         </div>
@@ -18,20 +18,6 @@
         <!-- Main Service Methods -->
         <div class="methods-section">
             <h3>Main Service Methods</h3>
-
-            <div class="method-card">
-                <h4>saveOrder(OrderRequestDto dto)</h4>
-                <p>Saves new order for current user.</p>
-                <div class="method-steps">
-                    <div>• Checks that dto is not null, otherwise throws BadRequestException</div>
-                    <div>• Converts delivery method to enum Order.DeliveryMethod</div>
-                    <div>• Gets current user</div>
-                    <div>• Creates Order object with data from dto and PENDING_PAYMENT status</div>
-                    <div>• If order items specified, adds them via OrderItemService</div>
-                    <div>• Saves order via OrderRepository</div>
-                    <div>• Returns OrderResponseDto via OrderConverter</div>
-                </div>
-            </div>
 
             <div class="method-card">
                 <h4>getOrderById(Integer orderId)</h4>
@@ -56,11 +42,25 @@
             </div>
 
             <div class="method-card">
+                <h4>updateOrderStatus(Integer orderId, String newStatus)</h4>
+                <p>Updates order status.</p>
+                <div class="method-steps">
+                    <div>• Checks access to order via isAccessToOrderAllowed()</div>
+                    <div>• Validates newStatus is not null or blank</div>
+                    <div>• Finds order by ID, if not found - throws NotFoundException</div>
+                    <div>• Converts string status to Order.Status enum</div>
+                    <div>• Updates status and saves order</div>
+                    <div>• Returns updated OrderResponseDto</div>
+                </div>
+            </div>
+
+            <div class="method-card">
                 <h4>cancelOrder(Integer orderId)</h4>
                 <p>Cancels order.</p>
                 <div class="method-steps">
-                    <div>• Checks access to order</div>
+                    <div>• Checks access to order via isAccessToOrderAllowed()</div>
                     <div>• Finds order by ID, if not found - throws NotFoundException</div>
+                    <div>• Validates order is in PENDING_PAYMENT status</div>
                     <div>• Sets status to CANCELLED and saves</div>
                 </div>
             </div>
@@ -71,9 +71,34 @@
                 <div class="method-steps">
                     <div>• Gets current user</div>
                     <div>• Finds order by ID, checks that it belongs to user</div>
+                    <div>• Recalculates order price based on current product prices</div>
+                    <div>• Validates payment method and order status</div>
                     <div>• Sets status to PAID and saves</div>
-                    <div>• Generates order PDF and sends email via MailUtil</div>
+                    <div>• Clears user's cart</div>
                     <div>• Returns OrderResponseDto</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>updateOrderDelivery(Integer orderId, OrderRequestDto orderRequestDto)</h4>
+                <p>Updates order delivery details.</p>
+                <div class="method-steps">
+                    <div>• Checks access to order via isAccessToOrderAllowed()</div>
+                    <div>• Validates order is in PENDING_PAYMENT or PAID status</div>
+                    <div>• Validates delivery address and contact phone</div>
+                    <div>• Updates delivery method, address and phone</div>
+                    <div>• Saves updated order</div>
+                    <div>• Returns updated OrderResponseDto</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>getOrderStatusDto(Integer orderId)</h4>
+                <p>Gets order status information.</p>
+                <div class="method-steps">
+                    <div>• Checks access to order via isAccessToOrderAllowed()</div>
+                    <div>• Finds order by ID, if not found - throws NotFoundException</div>
+                    <div>• Returns OrderStatusResponseDto with status and update timestamp</div>
                 </div>
             </div>
         </div>
@@ -84,18 +109,11 @@
 
             <div class="endpoint-detail">
                 <div class="endpoint-header">
-                    <span class="http-method post">POST</span>
-                    <span class="endpoint-path">/v1/orders</span>
-                    <span class="role-badge role-user">USER</span>
-                </div>
-                <p>Create new order for current user</p>
-            </div>
-
-            <div class="endpoint-detail">
-                <div class="endpoint-header">
                     <span class="http-method get">GET</span>
                     <span class="endpoint-path">/v1/orders/{orderId}</span>
                     <span class="role-badge role-user">USER</span>
+                    <span class="role-badge role-admin">ADMIN</span>
+                    <span class="role-badge role-manager">MANAGER</span>
                 </div>
                 <p>Get order by ID (users see only their own orders)</p>
             </div>
@@ -105,22 +123,26 @@
                     <span class="http-method get">GET</span>
                     <span class="endpoint-path">/v1/orders/ordersHistory/{userId}</span>
                     <span class="role-badge role-user">USER</span>
+                    <span class="role-badge role-admin">ADMIN</span>
+                    <span class="role-badge role-manager">MANAGER</span>
                 </div>
                 <p>Get user's order history</p>
             </div>
 
             <div class="endpoint-detail">
                 <div class="endpoint-header">
-                    <span class="http-method get">DELETE</span>
+                    <span class="http-method delete">DELETE</span>
                     <span class="endpoint-path">/v1/orders/cancel/{orderId}</span>
                     <span class="role-badge role-user">USER</span>
+                    <span class="role-badge role-admin">ADMIN</span>
+                    <span class="role-badge role-manager">MANAGER</span>
                 </div>
-                <p>Cancel order</p>
+                <p>Cancel order (only orders in PENDING_PAYMENT status)</p>
             </div>
 
             <div class="endpoint-detail">
                 <div class="endpoint-header">
-                    <span class="http-method get">POST</span>
+                    <span class="http-method post">POST</span>
                     <span class="endpoint-path">/v1/orders/confirm/{orderId}/{payMethod}</span>
                     <span class="role-badge role-user">USER</span>
                 </div>
@@ -139,6 +161,8 @@
                     <div>• <strong>Data Validation:</strong> Validation of delivery data and payment methods correctness</div>
                     <div>• <strong>Error Handling:</strong> Detailed exceptions for various error scenarios</div>
                     <div>• <strong>Payment Integration:</strong> Support for various payment methods (CREDIT_CARD, PAYPAL, BANK_TRANSFER)</div>
+                    <div>• <strong>Price Recalculation:</strong> Automatic price update based on current product prices and discounts</div>
+                    <div>• <strong>Cart Integration:</strong> Automatic cart clearing after successful payment</div>
                 </div>
             </div>
         </div>
@@ -149,9 +173,11 @@
             <div class="method-card">
                 <div class="method-steps">
                     <div>• <strong>Order Statuses:</strong> Clear workflow of status changes from creation to completion</div>
-                    <div>• <strong>Fixed Prices:</strong> Product prices are fixed at order creation moment</div>
+                    <div>• <strong>Fixed Prices:</strong> Product prices are recalculated at payment confirmation moment</div>
                     <div>• <strong>Automation:</strong> PDF invoice generation and email sending upon payment confirmation</div>
                     <div>• <strong>Audit:</strong> Saving order creation and update dates for tracking history</div>
+                    <div>• <strong>Status Restrictions:</strong> Cancellation allowed only for PENDING_PAYMENT orders</div>
+                    <div>• <strong>Delivery Updates:</strong> Delivery details can be updated for PENDING_PAYMENT and PAID orders</div>
                 </div>
             </div>
         </div>
