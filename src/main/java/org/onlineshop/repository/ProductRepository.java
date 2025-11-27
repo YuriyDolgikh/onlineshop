@@ -17,4 +17,8 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     Page<Product> findByDiscountPriceGreaterThan(BigDecimal discountPrice, Pageable pageable);
 
     Page<Product> findByCategory(Category category, Pageable pageable);
+
+    boolean existsByNameIgnoreCaseAndCategory(String name, Category category);
+
+    boolean existsByNameIgnoreCaseAndCategoryAndIdNot(String name, Category category, Integer id);
 }

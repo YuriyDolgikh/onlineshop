@@ -12,6 +12,7 @@ import org.onlineshop.repository.ProductRepository;
 import org.onlineshop.service.converter.ProductConverter;
 import org.onlineshop.service.interfaces.ProductServiceInterface;
 import org.onlineshop.service.util.ProductServiceHelper;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -46,17 +47,15 @@ public class ProductService implements ProductServiceInterface {
     public ProductResponseDto addProduct(ProductRequestDto productRequestDto) {
         validateProductRequestDto(productRequestDto);
         Category category = categoryService.getCategoryByName(productRequestDto.getProductCategory());
-        List<Product> productListFromCategory = category.getProducts();
-        productListFromCategory.stream().map(Product::getName)
-                .filter(productName -> productName.equalsIgnoreCase(productRequestDto.getProductName()))
-                .findFirst()
-                .ifPresent(productName -> {
-                    throw new IllegalArgumentException("Product with name: " + productName
-                            + " already exist in category: " + category.getCategoryName());
-                });
-        LocalDateTime now = LocalDateTime.now();
 
+        if (productRepository.existsByNameIgnoreCaseAndCategory(productRequestDto.getProductName().trim(), category)) {
+            throw new IllegalArgumentException("Product with name: " + productRequestDto.getProductName()
+                    + " already exist in category: " + category.getCategoryName());
+        }
+
+        LocalDateTime now = LocalDateTime.now();
         final String finalImage = helper.resolveImageUrl(productRequestDto.getImage());
+
         Product productToSave = Product.builder()
                 .name(productRequestDto.getProductName().trim())
                 .description(productRequestDto.getProductDescription())
@@ -67,73 +66,54 @@ public class ProductService implements ProductServiceInterface {
                 .createdAt(now)
                 .updatedAt(now)
                 .build();
-        Product savedProduct = productRepository.save(productToSave);
-        return productConverter.toDto(savedProduct);
+
+        try {
+            Product savedProduct = productRepository.save(productToSave);
+            return productConverter.toDto(savedProduct);
+        } catch (DataIntegrityViolationException e) {
+            // Защита от Race Condition - если уникальный индекс сработал
+            throw new IllegalArgumentException("Product with name: " + productRequestDto.getProductName()
+                    + " already exist in category: " + category.getCategoryName());
+        }
     }
 
     /**
      * Updates an existing product with the details provided in the given ProductUpdateDto.
-     * Validates and handles updates for product name, category, description, price, discount price, and image.
-     * Ensures constraints such as unique product name within a category and valid price values.
+     * Uses atomic checks to prevent race conditions and ensure product name uniqueness within category.
      *
      * @param productId        the ID of the product to be updated
-     * @param productUpdateDto the details of the product to be updated, including optional fields such as name, category, description, price, discount, and image
+     * @param productUpdateDto the details of the product to be updated
      * @return a ProductResponseDto representing the updated product
-     * @throws IllegalArgumentException if the product ID does not exist, if there is a duplicate product name within the updated category,
-     *                                  if the new product name is invalid, or if product price values are not valid.
+     * @throws IllegalArgumentException if the product ID does not exist, if there is a duplicate product name within the category,
+     *                                  or if product price values are not valid.
      */
     @Transactional
     @Override
     public ProductResponseDto updateProduct(Integer productId, ProductUpdateDto productUpdateDto) {
         Product productToUpdate = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Product with id = " + productId + " not found"));
-        Category currentCategory = productToUpdate.getCategory();
 
-        Category categoryAfterUpdate;
-        if (productUpdateDto.getProductCategory() != null && !productUpdateDto.getProductCategory().isBlank()) {
-            categoryAfterUpdate = categoryService.getCategoryByName(productUpdateDto.getProductCategory().trim());
-        } else {
-            categoryAfterUpdate = currentCategory;
+        Category targetCategory = (productUpdateDto.getProductCategory() != null && !productUpdateDto.getProductCategory().isBlank())
+                ? categoryService.getCategoryByName(productUpdateDto.getProductCategory().trim())
+                : productToUpdate.getCategory();
+
+        String targetName = (productUpdateDto.getProductName() != null && !productUpdateDto.getProductName().isBlank())
+                ? productUpdateDto.getProductName().trim()
+                : productToUpdate.getName();
+
+        if (targetName.length() < 3 || targetName.length() > 20) {
+            throw new IllegalArgumentException("Product title must be between 3 and 20 characters");
         }
 
-        if (currentCategory.equals(categoryAfterUpdate)) {  // если категория не меняется
-            if (productUpdateDto.getProductName() != null && !productUpdateDto.getProductName().isBlank()) {
-                // если имя для замены есть, проверить, что в этой категории нет товара с таким же именем,
-                // если это тот же самый товар, ничего не меняем, если нет, то бросаем исключение
-                List<Product> productListFromCurrentCategory = currentCategory.getProducts();
-                Optional<Product> productInCategory = productListFromCurrentCategory.stream()
-                        .filter(product -> product.getName().equalsIgnoreCase(productToUpdate.getName()))
-                        .findFirst();
-                if (productInCategory.isPresent()) {
-                    if (!productInCategory.get().getId().equals(productId)) {
-                        throw new IllegalArgumentException("Another product with the same name already exists in the category: "
-                                + currentCategory.getCategoryName() + ".");
-                    }
-                }
-            }
-        } else {    // если категория меняется
-            String newProductName;
-            if (productUpdateDto.getProductName() != null && !productUpdateDto.getProductName().isBlank()) {
-                newProductName = productUpdateDto.getProductName().trim();
-                if (newProductName.length() < 3 || newProductName.length() > 20) {
-                    throw new IllegalArgumentException("Product title must be between 3 and 20 characters");
-                }
-            } else {
-                newProductName = productToUpdate.getName();
-            }
-            // если имя для замены есть, проверить, что в этой категории нет товара с таким же именем,
-            // если товар есть, то бросаем исключение, если товара нет, то меняем категорию и имя товара
-            List<Product> productListFromNewCategory = categoryAfterUpdate.getProducts();
-            Optional<Product> productInNewCategory = productListFromNewCategory.stream()
-                    .filter(product -> product.getName().equalsIgnoreCase(newProductName))
-                    .findFirst();
-            if (productInNewCategory.isPresent()) {
+        if (!targetName.equalsIgnoreCase(productToUpdate.getName()) || !targetCategory.equals(productToUpdate.getCategory())) {
+            boolean nameExists = productRepository.existsByNameIgnoreCaseAndCategoryAndIdNot(targetName, targetCategory, productId);
+            if (nameExists) {
                 throw new IllegalArgumentException("Another product with the same name already exists in the category: "
-                        + categoryAfterUpdate.getCategoryName() + ".");
-            } else {
-                productToUpdate.setCategory(categoryAfterUpdate);
-                productToUpdate.setName(newProductName);
+                        + targetCategory.getCategoryName());
             }
+
+            productToUpdate.setName(targetName);
+            productToUpdate.setCategory(targetCategory);
         }
 
         if (productUpdateDto.getProductDescription() != null && !productUpdateDto.getProductDescription().isBlank()) {
@@ -152,10 +132,10 @@ public class ProductService implements ProductServiceInterface {
             String newImage = helper.resolveImageUrl(productUpdateDto.getImage());
             productToUpdate.setImage(newImage);
         }
-        LocalDateTime now = LocalDateTime.now();
-        productToUpdate.setUpdatedAt(now);
-        productRepository.save(productToUpdate);
-        return productConverter.toDto(productToUpdate);
+        productToUpdate.setUpdatedAt(LocalDateTime.now());
+
+        Product updatedProduct = productRepository.save(productToUpdate);
+        return productConverter.toDto(updatedProduct);
     }
 
     /**
@@ -177,11 +157,15 @@ public class ProductService implements ProductServiceInterface {
         if (newDiscountPrice.compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("New discount price cannot be less than 0");
         }
+
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Product with id = " + productId + " not found"));
+
         product.setDiscountPrice(newDiscountPrice);
-        productRepository.save(product);
-        return productConverter.toDto(product);
+        product.setUpdatedAt(LocalDateTime.now());
+
+        Product updatedProduct = productRepository.save(product);
+        return productConverter.toDto(updatedProduct);
     }
 
     /**
