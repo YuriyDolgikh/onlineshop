@@ -11,7 +11,7 @@
             <p>
                 The cart module is responsible for managing products that the user plans to purchase.
                 Includes functions for adding, removing, changing product quantities, as well as
-                converting cart to order.
+                converting cart to order. Integrated with discount system and order management.
             </p>
         </div>
 
@@ -34,8 +34,13 @@
                 <p>Transfers cart contents to new order.</p>
                 <div class="method-steps">
                     <div>• Gets current cart and user</div>
-                    <div>• Converts CartItem to OrderItem</div>
+                    <div>• Checks that cart is not empty</div>
+                    <div>• Validates discountPrice presence for all products</div>
+                    <div>• Checks absence of orders with PENDING_PAYMENT status</div>
+                    <div>• Converts CartItem to OrderItem via cartItemConverter</div>
                     <div>• Creates new Order object with PENDING_PAYMENT status</div>
+                    <div>• Sets DeliveryMethod.PICKUP by default</div>
+                    <div>• Sets created_at and updated_at timestamps</div>
                     <div>• Saves order via OrderRepository</div>
                     <div>• Clears cart after successful transfer</div>
                 </div>
@@ -46,8 +51,10 @@
                 <p>Returns full cart information as CartResponseDto.</p>
                 <div class="method-steps">
                     <div>• Gets current user and cart</div>
-                    <div>• Converts cart items to DTO</div>
+                    <div>• Converts cart items to CartItemResponseDto</div>
                     <div>• Calculates total cost considering discounts</div>
+                    <div>• Converts to CartItemSympleResponseDto for response</div>
+                    <div>• Calculation formula: (price * quantity) * (100 - discountPrice) / 100</div>
                     <div>• Returns DTO with ID, product list and total amount</div>
                 </div>
             </div>
@@ -57,6 +64,7 @@
                 <p>Returns current user's cart.</p>
                 <div class="method-steps">
                     <div>• Gets user via UserService</div>
+                    <div>• Checks that cart is not null</div>
                     <div>• Searches cart via CartRepository</div>
                     <div>• If cart is absent - BadRequestException("Cart is empty")</div>
                 </div>
@@ -83,7 +91,7 @@
                     <span class="endpoint-path">/v1/carts</span>
                     <span class="role-badge role-user">USER</span>
                 </div>
-                <p>Get full information about current user's cart</p>
+                <p>Get full information about current user's cart with total cost calculation including discounts</p>
             </div>
 
             <div class="endpoint-detail">
@@ -101,7 +109,37 @@
                     <span class="endpoint-path">/v1/carts/toOrder</span>
                     <span class="role-badge role-user">USER</span>
                 </div>
-                <p>Convert cart to order with subsequent cart clearing</p>
+                <p>Convert cart to order with subsequent cart clearing. Checks absence of pending orders.</p>
+            </div>
+        </div>
+
+        <!-- Implementation Features -->
+        <div class="features-section">
+            <h3>🔧 Implementation Features</h3>
+            <div class="method-card">
+                <div class="method-steps">
+                    <div>• <strong>Discount System:</strong> Automatic cost calculation considering discountPrice</div>
+                    <div>• <strong>Data Validation:</strong> Checking required fields before operations</div>
+                    <div>• <strong>Data Conversion:</strong> Using CartItemConverter for transformation between DTO and Entity</div>
+                    <div>• <strong>Order Management:</strong> Integration with OrderRepository for order creation</div>
+                    <div>• <strong>Order Statuses:</strong> Support for PENDING_PAYMENT status for new orders</div>
+                    <div>• <strong>Delivery Methods:</strong> Using DeliveryMethod.PICKUP by default</div>
+                    <div>• <strong>Transaction Safety:</strong> All critical operations performed within transactions</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Business Logic -->
+        <div class="business-logic-section">
+            <h3>💼 Business Logic</h3>
+            <div class="method-card">
+                <div class="method-steps">
+                    <div>• <strong>Shopping Cart:</strong> Temporary storage of products before order placement</div>
+                    <div>• <strong>Order Processing:</strong> Converting cart to order with validations</div>
+                    <div>• <strong>Discount System:</strong> Automatic application of discounts to products</div>
+                    <div>• <strong>State Management:</strong> Preventing duplicate order creation</div>
+                    <div>• <strong>Cost Calculation:</strong> Accurate total amount calculation considering quantity and discounts</div>
+                </div>
             </div>
         </div>
     </div>

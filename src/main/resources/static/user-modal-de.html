@@ -11,7 +11,7 @@
             <p>
                 UserService ist verantwortlich für die Benutzerverwaltung, einschließlich Registrierung,
                 E-Mail-Bestätigung, Datenaktualisierung, Löschung, Benutzerwiederherstellung und Passwortverschlüsselung,
-                sowie das Abrufen von Informationen über den aktuellen Benutzer.
+                sowie das Abrufen von Informationen über den aktuellen Benutzer. Integriert mit Spring Security und ConfirmationCodeService.
             </p>
         </div>
 
@@ -26,6 +26,8 @@
                     <div>• Prüft, ob ein Benutzer mit dieser E-Mail bereits existiert</div>
                     <div>• Validiert erforderliche Felder (Name und hashPassword)</div>
                     <div>• Erstellt einen neuen Benutzer mit USER-Rolle und NOT_CONFIRMED-Status</div>
+                    <div>• Initialisiert Bestellungen und Favoriten-Sammlungen</div>
+                    <div>• Erstellt Warenkorb für den Benutzer</div>
                     <div>• Speichert den Benutzer in der Datenbank</div>
                     <div>• Generiert und sendet Bestätigungscode über confirmationCodeService</div>
                     <div>• Gibt UserResponseDto zurück</div>
@@ -36,6 +38,9 @@
                 <h4>confirmationEmail(String code)</h4>
                 <p>Bestätigt Benutzer-E-Mail mit dem Code.</p>
                 <div class="method-steps">
+                    <div>• Validiert Bestätigungscode</div>
+                    <div>• Prüft Ablaufdatum des Bestätigungscodes</div>
+                    <div>• Wenn Code abgelaufen - generiert neuen und sendet an Benutzer</div>
                     <div>• Ändert Benutzerstatus auf CONFIRMED</div>
                     <div>• Speichert den Benutzer</div>
                     <div>• Gibt Erfolgsbestätigungsnachricht zurück</div>
@@ -49,6 +54,7 @@
                     <div>• Prüft, ob der Benutzer existiert</div>
                     <div>• Verifiziert, dass die Aktualisierung vom aktuellen Benutzer durchgeführt wird</div>
                     <div>• Aktualisiert bereitgestellte Felder (username, phoneNumber, hashPassword)</div>
+                    <div>• Verschlüsselt Passwort über PasswordEncoder bei Aktualisierung</div>
                     <div>• Speichert Änderungen</div>
                     <div>• Gibt UserResponseDto zurück</div>
                 </div>
@@ -61,7 +67,7 @@
                     <div>• Prüft, ob der Benutzer existiert</div>
                     <div>• Verhindert ADMIN-Benutzerlöschung</div>
                     <div>• Überprüft aktuelle Benutzerberechtigungen</div>
-                    <div>• Löscht Benutzerbestätigungscodes</div>
+                    <div>• Löscht Benutzerbestätigungscodes über confirmationCodeService</div>
                     <div>• Ändert Status auf DELETED</div>
                     <div>• Speichert den Benutzer</div>
                     <div>• Gibt UserResponseDto zurück</div>
@@ -73,11 +79,20 @@
                 <p>Stellt einen gelöschten Benutzer wieder her.</p>
                 <div class="method-steps">
                     <div>• Validiert E-Mail</div>
-                    <div>• Prüft, dass der Benutzer gelöscht ist</div>
+                    <div>• Prüft, dass der Benutzer gelöscht ist (DELETED-Status)</div>
                     <div>• Generiert neuen Bestätigungscode</div>
                     <div>• Ändert Status auf NOT_CONFIRMED</div>
                     <div>• Speichert den Benutzer</div>
                     <div>• Gibt UserResponseDto zurück</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>getAllUsers(Pageable pageable)</h4>
+                <p>Ruft paginierte Benutzerliste ab.</p>
+                <div class="method-steps">
+                    <div>• Gibt Seite mit UserResponseDto zurück</div>
+                    <div>• Verwendet Paginierung über Pageable</div>
                 </div>
             </div>
 
@@ -87,6 +102,15 @@
                 <div class="method-steps">
                     <div>• Verwendet Spring-Security-Mechanismen zum Abrufen des aktuellen Benutzers</div>
                     <div>• Gibt aktuelle Benutzerdaten zurück</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>getUserByEmail(String email)</h4>
+                <p>Ruft Benutzer per E-Mail-Adresse ab.</p>
+                <div class="method-steps">
+                    <div>• Sucht Benutzer nach E-Mail</div>
+                    <div>• Gibt UserResponseDto zurück</div>
                 </div>
             </div>
         </div>
@@ -119,34 +143,46 @@
                     <span class="endpoint-path">/v1/users/confirmation?code={code}</span>
                     <span class="role-badge role-public">PUBLIC</span>
                 </div>
-                <p>E-Mail-Adressenbestätigung mit Bestätigungscode.</p>
+                <p>E-Mail-Adressenbestätigung mit Bestätigungscode. Generiert automatisch neuen Code bei Ablauf.</p>
             </div>
 
             <div class="endpoint-detail">
                 <div class="endpoint-header">
                     <span class="http-method put">PUT</span>
                     <span class="endpoint-path">/v1/users/{userId}</span>
-                    <span class="role-badge role-user">USER</span>
+                    <span class="role-badge role-user">USER, MANAGER, ADMIN</span>
                 </div>
-                <p>Aktualisiert Benutzerinformationen. Benutzer können nur ihr eigenes Profil aktualisieren.</p>
+                <p>Aktualisiert Benutzerinformationen. Benutzer können nur ihr eigenes Profil aktualisieren. Passwort automatisch verschlüsselt.</p>
             </div>
 
             <div class="endpoint-detail">
                 <div class="endpoint-header">
                     <span class="http-method delete">DELETE</span>
                     <span class="endpoint-path">/v1/users/{userId}</span>
-                    <span class="role-badge role-user">USER</span>
+                    <span class="role-badge role-user">USER, MANAGER, ADMIN</span>
                 </div>
-                <p>Löscht Benutzerkonto. ADMIN kann jeden Benutzer löschen.</p>
+                <p>Löscht Benutzerkonto logisch. ADMIN kann jeden Benutzer außer andere ADMINS löschen. Löscht zugehörige Bestätigungscodes.</p>
             </div>
 
             <div class="endpoint-detail">
                 <div class="endpoint-header">
                     <span class="http-method get">GET</span>
                     <span class="endpoint-path">/v1/users/renew/{email}</span>
-                    <span class="role-badge role-user">USER</span>
+                    <span class="role-badge role-user">USER, MANAGER, ADMIN</span>
                 </div>
-                <p>Stellt gelöschtes Benutzerkonto wieder her.</p>
+                <p>Stellt gelöschtes Benutzerkonto wieder her. Generiert neuen Bestätigungscode.</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/users/admin/all?page=0&size=20</span>
+                    <span class="role-badge role-admin">ADMIN</span>
+                </div>
+                <p>Ruft paginierte Liste aller Benutzer ab. Nur für Administratoren.</p>
+                <div class="method-steps">
+                    <div>• Parameter: page (Standard 0), size (Standard 20)</div>
+                </div>
             </div>
         </div>
 
@@ -161,6 +197,9 @@
                     <div>• <strong>Logisches Löschen:</strong> Benutzer werden als DELETED markiert statt physisch gelöscht</div>
                     <div>• <strong>Kontowiederherstellung:</strong> Möglichkeit, gelöschte Konten wiederherzustellen</div>
                     <div>• <strong>Spring Security:</strong> Integration mit Spring Security für Authentifizierung und Autorisierung</div>
+                    <div>• <strong>Paginierung:</strong> Paginierungsunterstützung für Benutzerlisten</div>
+                    <div>• <strong>Code-Validierung:</strong> Automatische Prüfung des Ablaufdatums von Bestätigungscodes</div>
+                    <div>• <strong>Warenkorb-Integration:</strong> Automatische Warenkorberstellung während der Registrierung</div>
                 </div>
             </div>
         </div>
@@ -175,6 +214,8 @@
                     <div>• <strong>Profilverwaltung:</strong> Benutzer können ihre Daten aktualisieren</div>
                     <div>• <strong>Zugriffskontrolle:</strong> Unterschiedliche Rollen mit verschiedenen Berechtigungsebenen</div>
                     <div>• <strong>Wiederherstellung:</strong> Mechanismus zur Wiederherstellung gelöschter Konten</div>
+                    <div>• <strong>Administration:</strong> Separate Methoden für administrative Verwaltung</div>
+                    <div>• <strong>Benutzerstatus:</strong> NOT_CONFIRMED → CONFIRMED → DELETED → NOT_CONFIRMED</div>
                 </div>
             </div>
         </div>

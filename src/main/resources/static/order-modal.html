@@ -10,7 +10,7 @@
             <h3>Общее описание</h3>
             <p>
                 Сервис OrderService отвечает за управление заказами пользователя.
-                Выполняет операции сохранения, получения, обновления статуса, отмены и подтверждения оплаты заказов.
+                Выполняет операции получения, обновления статуса, отмены и подтверждения оплаты заказов.
                 Обеспечивает полный жизненный цикл заказа от создания до завершения.
             </p>
         </div>
@@ -18,20 +18,6 @@
         <!-- Основные методы сервиса -->
         <div class="methods-section">
             <h3>Основные сервисные методы</h3>
-
-            <div class="method-card">
-                <h4>saveOrder(OrderRequestDto dto)</h4>
-                <p>Сохраняет новый заказ для текущего пользователя.</p>
-                <div class="method-steps">
-                    <div>• Проверяет, что dto не null, иначе выбрасывает BadRequestException</div>
-                    <div>• Преобразует метод доставки в enum Order.DeliveryMethod</div>
-                    <div>• Получает текущего пользователя</div>
-                    <div>• Создаёт объект Order с данными из dto и статусом PENDING_PAYMENT</div>
-                    <div>• Если указаны элементы заказа, добавляет их через OrderItemService</div>
-                    <div>• Сохраняет заказ через OrderRepository</div>
-                    <div>• Возвращает OrderResponseDto через OrderConverter</div>
-                </div>
-            </div>
 
             <div class="method-card">
                 <h4>getOrderById(Integer orderId)</h4>
@@ -56,11 +42,25 @@
             </div>
 
             <div class="method-card">
+                <h4>updateOrderStatus(Integer orderId, String newStatus)</h4>
+                <p>Обновляет статус заказа.</p>
+                <div class="method-steps">
+                    <div>• Проверяет доступ к заказу через isAccessToOrderAllowed()</div>
+                    <div>• Проверяет, что newStatus не null или пустой</div>
+                    <div>• Находит заказ по ID, если не найден — выбрасывает NotFoundException</div>
+                    <div>• Преобразует строковый статус в enum Order.Status</div>
+                    <div>• Обновляет статус и сохраняет заказ</div>
+                    <div>• Возвращает обновленный OrderResponseDto</div>
+                </div>
+            </div>
+
+            <div class="method-card">
                 <h4>cancelOrder(Integer orderId)</h4>
                 <p>Отменяет заказ.</p>
                 <div class="method-steps">
                     <div>• Проверяет доступ к заказу</div>
                     <div>• Находит заказ по ID, если не найден — выбрасывает NotFoundException</div>
+                    <div>• Проверяет, что заказ в статусе PENDING_PAYMENT</div>
                     <div>• Устанавливает статус CANCELLED и сохраняет</div>
                 </div>
             </div>
@@ -71,9 +71,34 @@
                 <div class="method-steps">
                     <div>• Получает текущего пользователя</div>
                     <div>• Находит заказ по ID, проверяет, что он принадлежит пользователю</div>
+                    <div>• Пересчитывает цену заказа на основе текущих цен товаров</div>
+                    <div>• Проверяет метод оплаты и статус заказа</div>
                     <div>• Устанавливает статус PAID и сохраняет</div>
-                    <div>• Генерирует PDF заказа и отправляет email через MailUtil</div>
+                    <div>• Очищает корзину пользователя</div>
                     <div>• Возвращает OrderResponseDto</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>updateOrderDelivery(Integer orderId, OrderRequestDto orderRequestDto)</h4>
+                <p>Обновляет детали доставки заказа.</p>
+                <div class="method-steps">
+                    <div>• Проверяет доступ к заказу через isAccessToOrderAllowed()</div>
+                    <div>• Проверяет, что заказ в статусе PENDING_PAYMENT или PAID</div>
+                    <div>• Проверяет адрес доставки и контактный телефон</div>
+                    <div>• Обновляет метод доставки, адрес и телефон</div>
+                    <div>• Сохраняет обновленный заказ</div>
+                    <div>• Возвращает обновленный OrderResponseDto</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>getOrderStatusDto(Integer orderId)</h4>
+                <p>Получает информацию о статусе заказа.</p>
+                <div class="method-steps">
+                    <div>• Проверяет доступ к заказу через isAccessToOrderAllowed()</div>
+                    <div>• Находит заказ по ID, если не найден — выбрасывает NotFoundException</div>
+                    <div>• Возвращает OrderStatusResponseDto со статусом и временем обновления</div>
                 </div>
             </div>
         </div>
@@ -84,18 +109,11 @@
 
             <div class="endpoint-detail">
                 <div class="endpoint-header">
-                    <span class="http-method post">POST</span>
-                    <span class="endpoint-path">/v1/orders</span>
-                    <span class="role-badge role-user">USER</span>
-                </div>
-                <p>Создание нового заказа для текущего пользователя</p>
-            </div>
-
-            <div class="endpoint-detail">
-                <div class="endpoint-header">
                     <span class="http-method get">GET</span>
                     <span class="endpoint-path">/v1/orders/{orderId}</span>
                     <span class="role-badge role-user">USER</span>
+                    <span class="role-badge role-admin">ADMIN</span>
+                    <span class="role-badge role-manager">MANAGER</span>
                 </div>
                 <p>Получение заказа по ID (пользователи видят только свои заказы)</p>
             </div>
@@ -105,22 +123,26 @@
                     <span class="http-method get">GET</span>
                     <span class="endpoint-path">/v1/orders/ordersHistory/{userId}</span>
                     <span class="role-badge role-user">USER</span>
+                    <span class="role-badge role-admin">ADMIN</span>
+                    <span class="role-badge role-manager">MANAGER</span>
                 </div>
                 <p>Получение истории заказов пользователя</p>
             </div>
 
             <div class="endpoint-detail">
                 <div class="endpoint-header">
-                    <span class="http-method get">DELETE</span>
+                    <span class="http-method delete">DELETE</span>
                     <span class="endpoint-path">/v1/orders/cancel/{orderId}</span>
                     <span class="role-badge role-user">USER</span>
+                    <span class="role-badge role-admin">ADMIN</span>
+                    <span class="role-badge role-manager">MANAGER</span>
                 </div>
-                <p>Отмена заказа</p>
+                <p>Отмена заказа (только заказы в статусе PENDING_PAYMENT)</p>
             </div>
 
             <div class="endpoint-detail">
                 <div class="endpoint-header">
-                    <span class="http-method get">POST</span>
+                    <span class="http-method post">POST</span>
                     <span class="endpoint-path">/v1/orders/confirm/{orderId}/{payMethod}</span>
                     <span class="role-badge role-user">USER</span>
                 </div>
@@ -139,6 +161,8 @@
                     <div>• <strong>Валидация данных:</strong> Проверка корректности данных доставки и методов оплаты</div>
                     <div>• <strong>Обработка ошибок:</strong> Детальные исключения для различных сценариев ошибок</div>
                     <div>• <strong>Интеграция с платежами:</strong> Поддержка различных методов оплаты (CREDIT_CARD, PAYPAL, BANK_TRANSFER)</div>
+                    <div>• <strong>Пересчет цен:</strong> Автоматическое обновление цен на основе текущих цен товаров и скидок</div>
+                    <div>• <strong>Интеграция с корзиной:</strong> Автоматическая очистка корзины после успешной оплаты</div>
                 </div>
             </div>
         </div>
@@ -149,9 +173,11 @@
             <div class="method-card">
                 <div class="method-steps">
                     <div>• <strong>Статусы заказов:</strong> Чёткий workflow смены статусов от создания до завершения</div>
-                    <div>• <strong>Фиксированные цены:</strong> Цены товаров фиксируются на момент создания заказа</div>
+                    <div>• <strong>Фиксированные цены:</strong> Цены товаров пересчитываются в момент подтверждения оплаты</div>
                     <div>• <strong>Автоматизация:</strong> PDF генерация счетов и email рассылка при подтверждении оплаты</div>
                     <div>• <strong>Аудит:</strong> Сохранение дат создания и обновления заказов для отслеживания истории</div>
+                    <div>• <strong>Ограничения статусов:</strong> Отмена разрешена только для заказов в статусе PENDING_PAYMENT</div>
+                    <div>• <strong>Обновление доставки:</strong> Детали доставки можно обновлять для заказов в статусах PENDING_PAYMENT и PAID</div>
                 </div>
             </div>
         </div>

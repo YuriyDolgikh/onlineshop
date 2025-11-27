@@ -10,7 +10,7 @@
             <h3>Allgemeine Beschreibung</h3>
             <p>
                 OrderService ist verantwortlich für die Verwaltung von Benutzerbestellungen.
-                Führt Operationen zum Speichern, Abrufen, Aktualisieren des Status, Stornieren und Bestätigen von Bestellzahlungen durch.
+                Führt Operationen zum Abrufen, Aktualisieren des Status, Stornieren und Bestätigen von Bestellzahlungen durch.
                 Bietet vollständigen Bestelllebenszyklus von der Erstellung bis zum Abschluss.
             </p>
         </div>
@@ -18,20 +18,6 @@
         <!-- Hauptservice-Methoden -->
         <div class="methods-section">
             <h3>Hauptservice-Methoden</h3>
-
-            <div class="method-card">
-                <h4>saveOrder(OrderRequestDto dto)</h4>
-                <p>Speichert neue Bestellung für aktuellen Benutzer.</p>
-                <div class="method-steps">
-                    <div>• Prüft, dass dto nicht null ist, sonst wirft BadRequestException</div>
-                    <div>• Konvertiert Liefermethode zu enum Order.DeliveryMethod</div>
-                    <div>• Ruft aktuellen Benutzer ab</div>
-                    <div>• Erstellt Order-Objekt mit Daten aus dto und PENDING_PAYMENT-Status</div>
-                    <div>• Wenn Bestellpositionen angegeben, fügt sie über OrderItemService hinzu</div>
-                    <div>• Speichert Bestellung über OrderRepository</div>
-                    <div>• Gibt OrderResponseDto über OrderConverter zurück</div>
-                </div>
-            </div>
 
             <div class="method-card">
                 <h4>getOrderById(Integer orderId)</h4>
@@ -56,11 +42,25 @@
             </div>
 
             <div class="method-card">
+                <h4>updateOrderStatus(Integer orderId, String newStatus)</h4>
+                <p>Aktualisiert Bestellstatus.</p>
+                <div class="method-steps">
+                    <div>• Prüft Zugriff auf Bestellung über isAccessToOrderAllowed()</div>
+                    <div>• Validiert, dass newStatus nicht null oder leer ist</div>
+                    <div>• Findet Bestellung nach ID, wenn nicht gefunden - wirft NotFoundException</div>
+                    <div>• Konvertiert String-Status zu Order.Status enum</div>
+                    <div>• Aktualisiert Status und speichert Bestellung</div>
+                    <div>• Gibt aktualisiertes OrderResponseDto zurück</div>
+                </div>
+            </div>
+
+            <div class="method-card">
                 <h4>cancelOrder(Integer orderId)</h4>
                 <p>Storniert Bestellung.</p>
                 <div class="method-steps">
                     <div>• Prüft Zugriff auf Bestellung</div>
                     <div>• Findet Bestellung nach ID, wenn nicht gefunden - wirft NotFoundException</div>
+                    <div>• Validiert, dass Bestellung in PENDING_PAYMENT-Status ist</div>
                     <div>• Setzt Status auf CANCELLED und speichert</div>
                 </div>
             </div>
@@ -71,9 +71,34 @@
                 <div class="method-steps">
                     <div>• Ruft aktuellen Benutzer ab</div>
                     <div>• Findet Bestellung nach ID, prüft, dass sie Benutzer gehört</div>
+                    <div>• Berechnet Bestellpreis basierend auf aktuellen Produktpreisen neu</div>
+                    <div>• Validiert Zahlungsmethode und Bestellstatus</div>
                     <div>• Setzt Status auf PAID und speichert</div>
-                    <div>• Generiert Bestell-PDF und sendet E-Mail über MailUtil</div>
+                    <div>• Leert Warenkorb des Benutzers</div>
                     <div>• Gibt OrderResponseDto zurück</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>updateOrderDelivery(Integer orderId, OrderRequestDto orderRequestDto)</h4>
+                <p>Aktualisiert Lieferdetails der Bestellung.</p>
+                <div class="method-steps">
+                    <div>• Prüft Zugriff auf Bestellung über isAccessToOrderAllowed()</div>
+                    <div>• Validiert, dass Bestellung in PENDING_PAYMENT oder PAID Status ist</div>
+                    <div>• Validiert Lieferadresse und Kontakttelefon</div>
+                    <div>• Aktualisiert Liefermethode, Adresse und Telefon</div>
+                    <div>• Speichert aktualisierte Bestellung</div>
+                    <div>• Gibt aktualisiertes OrderResponseDto zurück</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>getOrderStatusDto(Integer orderId)</h4>
+                <p>Ruft Bestellstatusinformationen ab.</p>
+                <div class="method-steps">
+                    <div>• Prüft Zugriff auf Bestellung über isAccessToOrderAllowed()</div>
+                    <div>• Findet Bestellung nach ID, wenn nicht gefunden - wirft NotFoundException</div>
+                    <div>• Gibt OrderStatusResponseDto mit Status und Aktualisierungszeitstempel zurück</div>
                 </div>
             </div>
         </div>
@@ -84,18 +109,11 @@
 
             <div class="endpoint-detail">
                 <div class="endpoint-header">
-                    <span class="http-method post">POST</span>
-                    <span class="endpoint-path">/v1/orders</span>
-                    <span class="role-badge role-user">USER</span>
-                </div>
-                <p>Erstellt neue Bestellung für aktuellen Benutzer</p>
-            </div>
-
-            <div class="endpoint-detail">
-                <div class="endpoint-header">
                     <span class="http-method get">GET</span>
                     <span class="endpoint-path">/v1/orders/{orderId}</span>
                     <span class="role-badge role-user">USER</span>
+                    <span class="role-badge role-admin">ADMIN</span>
+                    <span class="role-badge role-manager">MANAGER</span>
                 </div>
                 <p>Ruft Bestellung nach ID ab (Benutzer sehen nur eigene Bestellungen)</p>
             </div>
@@ -105,22 +123,26 @@
                     <span class="http-method get">GET</span>
                     <span class="endpoint-path">/v1/orders/ordersHistory/{userId}</span>
                     <span class="role-badge role-user">USER</span>
+                    <span class="role-badge role-admin">ADMIN</span>
+                    <span class="role-badge role-manager">MANAGER</span>
                 </div>
                 <p>Ruft Bestellverlauf des Benutzers ab</p>
             </div>
 
             <div class="endpoint-detail">
                 <div class="endpoint-header">
-                    <span class="http-method get">DELETE</span>
+                    <span class="http-method delete">DELETE</span>
                     <span class="endpoint-path">/v1/orders/cancel/{orderId}</span>
                     <span class="role-badge role-user">USER</span>
+                    <span class="role-badge role-admin">ADMIN</span>
+                    <span class="role-badge role-manager">MANAGER</span>
                 </div>
-                <p>Storniert Bestellung</p>
+                <p>Storniert Bestellung (nur Bestellungen in PENDING_PAYMENT-Status)</p>
             </div>
 
             <div class="endpoint-detail">
                 <div class="endpoint-header">
-                    <span class="http-method get">POST</span>
+                    <span class="http-method post">POST</span>
                     <span class="endpoint-path">/v1/orders/confirm/{orderId}/{payMethod}</span>
                     <span class="role-badge role-user">USER</span>
                 </div>
@@ -139,6 +161,8 @@
                     <div>• <strong>Datenvalidierung:</strong> Validierung von Lieferdaten und Zahlungsmethodenkorrektheit</div>
                     <div>• <strong>Fehlerbehandlung:</strong> Detaillierte Ausnahmen für verschiedene Fehlerszenarien</div>
                     <div>• <strong>Zahlungsintegration:</strong> Unterstützung verschiedener Zahlungsmethoden (CREDIT_CARD, PAYPAL, BANK_TRANSFER)</div>
+                    <div>• <strong>Preisneuberechnung:</strong> Automatische Preisaktualisierung basierend auf aktuellen Produktpreisen und Rabatten</div>
+                    <div>• <strong>Warenkorb-Integration:</strong> Automatische Warenkorbleerung nach erfolgreicher Zahlung</div>
                 </div>
             </div>
         </div>
@@ -149,9 +173,11 @@
             <div class="method-card">
                 <div class="method-steps">
                     <div>• <strong>Bestellstatus:</strong> Klarer Workflow von Statusänderungen von Erstellung bis Abschluss</div>
-                    <div>• <strong>Feste Preise:</strong> Produktpreise werden zum Zeitpunkt der Bestellungserstellung festgelegt</div>
+                    <div>• <strong>Feste Preise:</strong> Produktpreise werden zum Zeitpunkt der Zahlungsbestätigung neu berechnet</div>
                     <div>• <strong>Automatisierung:</strong> PDF-Rechnungserstellung und E-Mail-Versand bei Zahlungsbestätigung</div>
                     <div>• <strong>Audit:</strong> Speichern von Bestellungserstellungs- und Aktualisierungsdaten zur Verlaufverfolgung</div>
+                    <div>• <strong>Statusbeschränkungen:</strong> Stornierung nur für Bestellungen in PENDING_PAYMENT-Status erlaubt</div>
+                    <div>• <strong>Lieferaktualisierungen:</strong> Lieferdetails können für Bestellungen in PENDING_PAYMENT und PAID Status aktualisiert werden</div>
                 </div>
             </div>
         </div>

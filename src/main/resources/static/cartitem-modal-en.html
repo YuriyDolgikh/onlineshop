@@ -9,10 +9,9 @@
         <div class="description-section">
             <h3>General Description</h3>
             <p>
-                CartItemService is responsible for managing products in user's cart.
+                CartItemService is responsible for managing products in user's shopping cart.
                 It provides adding, removing, updating and retrieving cart items (CartItem),
-                ensures convenient user work with shopping cart, automatically creating it when necessary
-                and synchronizing data between Order (cart) and OrderItem (cart positions) entities.
+                integrated with product and cart services to ensure data integrity.
             </p>
         </div>
 
@@ -24,23 +23,30 @@
                 <h4>addItemToCart(CartItemRequestDto)</h4>
                 <p>Adds product to current user's cart.</p>
                 <div class="method-steps">
-                    <div>• Validates input data (presence of productId and quantity)</div>
-                    <div>• Gets current user from security context</div>
-                    <div>• Checks if product is already in cart</div>
+                    <div>• Validates input data (productId and quantity not null)</div>
+                    <div>• Checks that quantity ≥ 1</div>
+                    <div>• Verifies product existence via ProductService</div>
+                    <div>• Gets current user and their cart</div>
+                    <div>• Checks if product is already in cart via getCartItemFromCart()</div>
                     <div>• If product found - increases quantity</div>
-                    <div>• If not - creates new OrderItem linked to open order (Order)</div>
-                    <div>• Saves changes and returns DTO of added product</div>
+                    <div>• If not - creates new CartItem and links to cart</div>
+                    <div>• Saves changes in CartItemRepository</div>
+                    <div>• Updates cart via CartService.saveCart()</div>
+                    <div>• Returns CartItemSympleResponseDto</div>
                 </div>
             </div>
 
             <div class="method-card">
                 <h4>removeItemFromCart(Integer productId)</h4>
-                <p>Removes specific product from user's cart.</p>
+                <p>Removes specific product from current user's cart.</p>
                 <div class="method-steps">
-                    <div>• Validates ID correctness</div>
-                    <div>• Gets user and current cart</div>
-                    <div>• Finds OrderItem element and deletes it from repository</div>
-                    <div>• Returns DTO of deleted element</div>
+                    <div>• Checks that productId is not null</div>
+                    <div>• Gets current cart via CartService</div>
+                    <div>• Searches CartItem by productId in cart items</div>
+                    <div>• If not found - NotFoundException</div>
+                    <div>• Removes item from cart and from CartItemRepository</div>
+                    <div>• Saves updated cart</div>
+                    <div>• Returns CartItemResponseDto of removed element</div>
                 </div>
             </div>
 
@@ -48,10 +54,13 @@
                 <h4>updateItemInCart(CartItemUpdateDto)</h4>
                 <p>Updates product quantity in cart.</p>
                 <div class="method-steps">
-                    <div>• Validates data (presence of productId and quantity > 0)</div>
-                    <div>• Finds required OrderItem</div>
-                    <div>• Sets new quantity and saves changes</div>
-                    <div>• Returns updated DTO</div>
+                    <div>• Validates data (productId and quantity not null)</div>
+                    <div>• Checks that quantity ≥ 1</div>
+                    <div>• Verifies product existence via ProductService</div>
+                    <div>• Searches CartItem in cart via getCartItemFromCart()</div>
+                    <div>• If not found - NotFoundException</div>
+                    <div>• Sets new quantity and saves in CartItemRepository</div>
+                    <div>• Returns CartItemResponseDto of updated element</div>
                 </div>
             </div>
 
@@ -59,8 +68,10 @@
                 <h4>getCartItems()</h4>
                 <p>Returns all cart items of current user.</p>
                 <div class="method-steps">
-                    <div>• Gets user and their open cart</div>
-                    <div>• Converts list of OrderItem to list of CartItemResponseDto and returns to client</div>
+                    <div>• Gets current cart via CartService</div>
+                    <div>• Extracts Set<CartItem> from cart</div>
+                    <div>• Converts to Set<CartItemFullResponseDto> via CartItemConverter</div>
+                    <div>• Returns result</div>
                 </div>
             </div>
         </div>
@@ -70,20 +81,60 @@
             <h3>Helper Methods</h3>
 
             <div class="method-card">
-                <h4>getCurrentCart(User user)</h4>
-                <p>Returns user's open cart.</p>
+                <h4>getCartItemFromCart(Integer productId)</h4>
+                <p>Finds specific cart item by product ID.</p>
                 <div class="method-steps">
-                    <div>• If cart exists and has OPEN status - returns it</div>
-                    <div>• If cart doesn't exist - creates new cart (Order) with OPEN status and saves to database</div>
+                    <div>• Gets current user</div>
+                    <div>• Extracts user's cart</div>
+                    <div>• Searches CartItem by productId in cart items</div>
+                    <div>• Returns Optional<CartItem></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DTO Objects -->
+        <div class="methods-section">
+            <h3>📊 DTO Objects</h3>
+
+            <div class="method-card">
+                <h4>CartItemRequestDto</h4>
+                <p>For adding product to cart</p>
+                <div class="method-steps">
+                    <div>• productId: Integer - product identifier</div>
+                    <div>• quantity: Integer - quantity (≥ 1)</div>
                 </div>
             </div>
 
             <div class="method-card">
-                <h4>getOrderItemFromCart(User user, Integer productId)</h4>
-                <p>Returns specific cart item by product ID.</p>
+                <h4>CartItemUpdateDto</h4>
+                <p>For updating product quantity</p>
                 <div class="method-steps">
-                    <div>• Searches OrderItem in user's open order</div>
-                    <div>• If element not found - throws IllegalArgumentException</div>
+                    <div>• productId: Integer - product identifier</div>
+                    <div>• quantity: Integer - new quantity (≥ 1)</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>CartItemResponseDto</h4>
+                <p>Full information about product in cart</p>
+                <div class="method-steps">
+                    <div>• Contains full product data and quantity</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>CartItemSympleResponseDto</h4>
+                <p>Simplified version for add operation response</p>
+                <div class="method-steps">
+                    <div>• Contains basic information about added product</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>CartItemFullResponseDto</h4>
+                <p>For getting all cart items</p>
+                <div class="method-steps">
+                    <div>• Used in getCartItems()</div>
                 </div>
             </div>
         </div>
@@ -98,7 +149,7 @@
                     <span class="endpoint-path">/v1/cartItems</span>
                     <span class="role-badge role-user">USER</span>
                 </div>
-                <p>Add new product to user's cart</p>
+                <p>Add new product to user's cart. Returns CartItemSympleResponseDto.</p>
             </div>
 
             <div class="endpoint-detail">
@@ -107,7 +158,7 @@
                     <span class="endpoint-path">/v1/cartItems/{productId}</span>
                     <span class="role-badge role-user">USER</span>
                 </div>
-                <p>Remove specific product from cart by product ID</p>
+                <p>Remove specific product from cart by product ID. Returns CartItemResponseDto.</p>
             </div>
 
             <div class="endpoint-detail">
@@ -116,7 +167,7 @@
                     <span class="endpoint-path">/v1/cartItems</span>
                     <span class="role-badge role-user">USER</span>
                 </div>
-                <p>Update product quantity in cart</p>
+                <p>Update product quantity in cart. Returns CartItemResponseDto.</p>
             </div>
 
             <div class="endpoint-detail">
@@ -125,7 +176,35 @@
                     <span class="endpoint-path">/v1/cartItems</span>
                     <span class="role-badge role-user">USER</span>
                 </div>
-                <p>Get all cart items of current user</p>
+                <p>Get all cart items of current user. Returns Set<CartItemFullResponseDto>.</p>
+            </div>
+        </div>
+
+        <!-- Implementation Features -->
+        <div class="features-section">
+            <h3>🔧 Implementation Features</h3>
+            <div class="method-card">
+                <div class="method-steps">
+                    <div>• <strong>Integration with ProductService:</strong> Verifying product existence before operations</div>
+                    <div>• <strong>Data Validation:</strong> Checking null values and minimum quantity</div>
+                    <div>• <strong>Transaction Safety:</strong> All operations performed within transactions</div>
+                    <div>• <strong>DTO Conversion:</strong> Using CartItemConverter for data transformation</div>
+                    <div>• <strong>Cart Synchronization:</strong> Automatic cart update after changes</div>
+                    <div>• <strong>Error Handling:</strong> Detailed exceptions for different scenarios</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Business Logic -->
+        <div class="business-logic-section">
+            <h3>💼 Business Logic</h3>
+            <div class="method-card">
+                <div class="method-steps">
+                    <div>• <strong>Quantity Management:</strong> Automatic quantity increase when adding existing product</div>
+                    <div>• <strong>Data Integrity:</strong> Verifying product existence before cart operations</div>
+                    <div>• <strong>Input Validation:</strong> Ensuring data correctness before saving</div>
+                    <div>• <strong>Query Optimization:</strong> Minimizing database calls</div>
+                </div>
             </div>
         </div>
     </div>

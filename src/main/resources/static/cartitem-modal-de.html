@@ -11,8 +11,7 @@
             <p>
                 CartItemService ist verantwortlich für die Verwaltung von Produkten im Benutzerwarenkorb.
                 Er bietet Hinzufügen, Entfernen, Aktualisieren und Abrufen von Warenkorbpositionen (CartItem),
-                gewährleistet bequeme Benutzerarbeit mit dem Warenkorb, erstellt ihn automatisch bei Bedarf
-                und synchronisiert Daten zwischen Order (Warenkorb) und OrderItem (Warenkorbpositionen) Entitäten.
+                integriert mit Produkt- und Warenkorbdiensten zur Gewährleistung der Datenintegrität.
             </p>
         </div>
 
@@ -24,12 +23,16 @@
                 <h4>addItemToCart(CartItemRequestDto)</h4>
                 <p>Fügt Produkt zum aktuellen Benutzerwarenkorb hinzu.</p>
                 <div class="method-steps">
-                    <div>• Validiert Eingabedaten (Vorhandensein von productId und Menge)</div>
-                    <div>• Ruft aktuellen Benutzer aus Sicherheitskontext ab</div>
-                    <div>• Prüft, ob Produkt bereits im Warenkorb ist</div>
+                    <div>• Validiert Eingabedaten (productId und quantity nicht null)</div>
+                    <div>• Prüft, dass quantity ≥ 1</div>
+                    <div>• Überprüft Produktexistenz über ProductService</div>
+                    <div>• Ruft aktuellen Benutzer und dessen Warenkorb ab</div>
+                    <div>• Prüft, ob Produkt bereits im Warenkorb ist über getCartItemFromCart()</div>
                     <div>• Wenn Produkt gefunden - erhöht Menge</div>
-                    <div>• Wenn nicht - erstellt neue OrderItem, verknüpft mit offener Bestellung (Order)</div>
-                    <div>• Speichert Änderungen und gibt DTO des hinzugefügten Produkts zurück</div>
+                    <div>• Wenn nicht - erstellt neuen CartItem und verknüpft mit Warenkorb</div>
+                    <div>• Speichert Änderungen in CartItemRepository</div>
+                    <div>• Aktualisiert Warenkorb über CartService.saveCart()</div>
+                    <div>• Gibt CartItemSympleResponseDto zurück</div>
                 </div>
             </div>
 
@@ -37,10 +40,13 @@
                 <h4>removeItemFromCart(Integer productId)</h4>
                 <p>Entfernt bestimmtes Produkt aus Benutzerwarenkorb.</p>
                 <div class="method-steps">
-                    <div>• Validiert ID-Korrektheit</div>
-                    <div>• Ruft Benutzer und aktuellen Warenkorb ab</div>
-                    <div>• Findet OrderItem-Element und löscht es aus Repository</div>
-                    <div>• Gibt DTO des gelöschten Elements zurück</div>
+                    <div>• Prüft, dass productId nicht null ist</div>
+                    <div>• Ruft aktuellen Warenkorb über CartService ab</div>
+                    <div>• Sucht CartItem nach productId in Warenkorbpositionen</div>
+                    <div>• Wenn nicht gefunden - NotFoundException</div>
+                    <div>• Entfernt Element aus Warenkorb und aus CartItemRepository</div>
+                    <div>• Speichert aktualisierten Warenkorb</div>
+                    <div>• Gibt CartItemResponseDto des entfernten Elements zurück</div>
                 </div>
             </div>
 
@@ -48,10 +54,13 @@
                 <h4>updateItemInCart(CartItemUpdateDto)</h4>
                 <p>Aktualisiert Produktmenge im Warenkorb.</p>
                 <div class="method-steps">
-                    <div>• Validiert Daten (Vorhandensein von productId und Menge > 0)</div>
-                    <div>• Findet erforderliches OrderItem</div>
-                    <div>• Setzt neue Menge und speichert Änderungen</div>
-                    <div>• Gibt aktualisiertes DTO zurück</div>
+                    <div>• Validiert Daten (productId und quantity nicht null)</div>
+                    <div>• Prüft, dass quantity ≥ 1</div>
+                    <div>• Überprüft Produktexistenz über ProductService</div>
+                    <div>• Sucht CartItem im Warenkorb über getCartItemFromCart()</div>
+                    <div>• Wenn nicht gefunden - NotFoundException</div>
+                    <div>• Setzt neue Menge und speichert in CartItemRepository</div>
+                    <div>• Gibt CartItemResponseDto des aktualisierten Elements zurück</div>
                 </div>
             </div>
 
@@ -59,8 +68,10 @@
                 <h4>getCartItems()</h4>
                 <p>Gibt alle Warenkorbpositionen des aktuellen Benutzers zurück.</p>
                 <div class="method-steps">
-                    <div>• Ruft Benutzer und deren offenen Warenkorb ab</div>
-                    <div>• Konvertiert OrderItem-Liste zu CartItemResponseDto-Liste und gibt an Client zurück</div>
+                    <div>• Ruft aktuellen Warenkorb über CartService ab</div>
+                    <div>• Extrahiert Set<CartItem> aus Warenkorb</div>
+                    <div>• Konvertiert zu Set<CartItemFullResponseDto> über CartItemConverter</div>
+                    <div>• Gibt Ergebnis zurück</div>
                 </div>
             </div>
         </div>
@@ -70,20 +81,60 @@
             <h3>Hilfsmethoden</h3>
 
             <div class="method-card">
-                <h4>getCurrentCart(User user)</h4>
-                <p>Gibt offenen Warenkorb des Benutzers zurück.</p>
+                <h4>getCartItemFromCart(Integer productId)</h4>
+                <p>Findet bestimmte Warenkorbposition nach Produkt-ID.</p>
                 <div class="method-steps">
-                    <div>• Wenn Warenkorb existiert und OPEN-Status hat - gibt ihn zurück</div>
-                    <div>• Wenn Warenkorb nicht existiert - erstellt neuen Warenkorb (Order) mit OPEN-Status und speichert in Datenbank</div>
+                    <div>• Ruft aktuellen Benutzer ab</div>
+                    <div>• Extrahiert Benutzerwarenkorb</div>
+                    <div>• Sucht CartItem nach productId in Warenkorbpositionen</div>
+                    <div>• Gibt Optional<CartItem> zurück</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DTO Objekte -->
+        <div class="methods-section">
+            <h3>📊 DTO Objekte</h3>
+
+            <div class="method-card">
+                <h4>CartItemRequestDto</h4>
+                <p>Für Hinzufügen von Produkt zum Warenkorb</p>
+                <div class="method-steps">
+                    <div>• productId: Integer - Produktkennung</div>
+                    <div>• quantity: Integer - Menge (≥ 1)</div>
                 </div>
             </div>
 
             <div class="method-card">
-                <h4>getOrderItemFromCart(User user, Integer productId)</h4>
-                <p>Gibt bestimmte Warenkorbposition nach Produkt-ID zurück.</p>
+                <h4>CartItemUpdateDto</h4>
+                <p>Für Aktualisieren der Produktmenge</p>
                 <div class="method-steps">
-                    <div>• Sucht OrderItem in offener Bestellung des Benutzers</div>
-                    <div>• Wenn Element nicht gefunden - wirft IllegalArgumentException</div>
+                    <div>• productId: Integer - Produktkennung</div>
+                    <div>• quantity: Integer - neue Menge (≥ 1)</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>CartItemResponseDto</h4>
+                <p>Vollständige Informationen über Produkt im Warenkorb</p>
+                <div class="method-steps">
+                    <div>• Enthält vollständige Produktdaten und Menge</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>CartItemSympleResponseDto</h4>
+                <p>Vereinfachte Version für Add-Operation-Antwort</p>
+                <div class="method-steps">
+                    <div>• Enthält grundlegende Informationen über hinzugefügtes Produkt</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>CartItemFullResponseDto</h4>
+                <p>Für Abrufen aller Warenkorbpositionen</p>
+                <div class="method-steps">
+                    <div>• Wird in getCartItems() verwendet</div>
                 </div>
             </div>
         </div>
@@ -98,7 +149,7 @@
                     <span class="endpoint-path">/v1/cartItems</span>
                     <span class="role-badge role-user">USER</span>
                 </div>
-                <p>Fügt neues Produkt zum Benutzerwarenkorb hinzu</p>
+                <p>Fügt neues Produkt zum Benutzerwarenkorb hinzu. Gibt CartItemSympleResponseDto zurück.</p>
             </div>
 
             <div class="endpoint-detail">
@@ -107,7 +158,7 @@
                     <span class="endpoint-path">/v1/cartItems/{productId}</span>
                     <span class="role-badge role-user">USER</span>
                 </div>
-                <p>Entfernt bestimmtes Produkt aus Warenkorb nach Produkt-ID</p>
+                <p>Entfernt bestimmtes Produkt aus Warenkorb nach Produkt-ID. Gibt CartItemResponseDto zurück.</p>
             </div>
 
             <div class="endpoint-detail">
@@ -116,7 +167,7 @@
                     <span class="endpoint-path">/v1/cartItems</span>
                     <span class="role-badge role-user">USER</span>
                 </div>
-                <p>Aktualisiert Produktmenge im Warenkorb</p>
+                <p>Aktualisiert Produktmenge im Warenkorb. Gibt CartItemResponseDto zurück.</p>
             </div>
 
             <div class="endpoint-detail">
@@ -125,7 +176,35 @@
                     <span class="endpoint-path">/v1/cartItems</span>
                     <span class="role-badge role-user">USER</span>
                 </div>
-                <p>Ruft alle Warenkorbpositionen des aktuellen Benutzers ab</p>
+                <p>Ruft alle Warenkorbpositionen des aktuellen Benutzers ab. Gibt Set<CartItemFullResponseDto> zurück.</p>
+            </div>
+        </div>
+
+        <!-- Implementierungsmerkmale -->
+        <div class="features-section">
+            <h3>🔧 Implementierungsmerkmale</h3>
+            <div class="method-card">
+                <div class="method-steps">
+                    <div>• <strong>Integration mit ProductService:</strong> Überprüfung der Produktexistenz vor Operationen</div>
+                    <div>• <strong>Datenvalidierung:</strong> Prüfung auf Null-Werte und Mindestmenge</div>
+                    <div>• <strong>Transaktionssicherheit:</strong> Alle Operationen werden innerhalb von Transaktionen durchgeführt</div>
+                    <div>• <strong>DTO-Konvertierung:</strong> Verwendung von CartItemConverter für Datentransformation</div>
+                    <div>• <strong>Warenkorb-Synchronisation:</strong> Automatische Warenkorbaktualisierung nach Änderungen</div>
+                    <div>• <strong>Fehlerbehandlung:</strong> Detaillierte Ausnahmen für verschiedene Szenarien</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Geschäftslogik -->
+        <div class="business-logic-section">
+            <h3>💼 Geschäftslogik</h3>
+            <div class="method-card">
+                <div class="method-steps">
+                    <div>• <strong>Mengenverwaltung:</strong> Automatische Mengenerhöhung beim Hinzufügen bestehender Produkte</div>
+                    <div>• <strong>Datenintegrität:</strong> Überprüfung der Produktexistenz vor Warenkorboperationen</div>
+                    <div>• <strong>Eingabevalidierung:</strong> Sicherstellung der Datenkorrektheit vor dem Speichern</div>
+                    <div>• <strong>Abfrageoptimierung:</strong> Minimierung der Datenbankaufrufe</div>
+                </div>
             </div>
         </div>
     </div>

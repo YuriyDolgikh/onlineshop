@@ -11,7 +11,7 @@
             <p>
                 ProductService is responsible for product management.
                 Performs operations for adding, updating, deleting and retrieving products with various filtering and sorting criteria.
-                Provides full cycle of product catalog management for the store.
+                Provides full cycle of product catalog management for the store with pagination support.
             </p>
         </div>
 
@@ -23,10 +23,12 @@
                 <h4>addProduct(ProductRequestDto productRequestDto)</h4>
                 <p>Adds a new product.</p>
                 <div class="method-steps">
-                    <div>• Gets category by name</div>
+                    <div>• Validates product request data (name length, price > 0, etc.)</div>
+                    <div>• Gets category by name from CategoryService</div>
                     <div>• Checks that product with this name doesn't exist in the category</div>
-                    <div>• Determines current date and time</div>
-                    <div>• Creates Product object and saves via ProductRepository</div>
+                    <div>• Resolves image URL using ProductServiceHelper</div>
+                    <div>• Creates Product object with current timestamp and saves via ProductRepository</div>
+                    <div>• Handles race conditions with DataIntegrityViolationException</div>
                     <div>• Returns ProductResponseDto via ProductConverter</div>
                 </div>
             </div>
@@ -36,9 +38,10 @@
                 <p>Updates data of existing product.</p>
                 <div class="method-steps">
                     <div>• Finds product by ID, if not found - throws IllegalArgumentException</div>
+                    <div>• Validates new category and name uniqueness within category</div>
                     <div>• Updates category, name, description, price, discount and image</div>
-                    <div>• Validates data correctness (name length, price > 0, etc.)</div>
-                    <div>• Updates modification date</div>
+                    <div>• Validates data correctness (name length 3-20, price > 0, etc.)</div>
+                    <div>• Updates modification timestamp</div>
                     <div>• Saves product via ProductRepository</div>
                     <div>• Returns ProductResponseDto</div>
                 </div>
@@ -48,9 +51,11 @@
                 <h4>setDiscountPrice(Integer productId, BigDecimal newDiscountPrice)</h4>
                 <p>Sets new discount for product.</p>
                 <div class="method-steps">
+                    <div>• Validates productId and newDiscountPrice are not null</div>
+                    <div>• Validates discount price is not negative</div>
                     <div>• Finds product by ID</div>
-                    <div>• Sets discountPrice and saves</div>
-                    <div>• Returns ProductResponseDto</div>
+                    <div>• Sets discountPrice and updates timestamp</div>
+                    <div>• Saves product and returns ProductResponseDto</div>
                 </div>
             </div>
 
@@ -60,17 +65,28 @@
                 <div class="method-steps">
                     <div>• Finds product by ID</div>
                     <div>• Deletes it via ProductRepository</div>
-                    <div>• Returns ProductResponseDto</div>
+                    <div>• Returns ProductResponseDto of deleted product</div>
                 </div>
             </div>
 
             <div class="method-card">
-                <h4>getProductsByCriteria(String paramName, String paramValue, String sortDirection)</h4>
-                <p>Gets list of products by specified criteria.</p>
+                <h4>getProductsByCriteria(String paramName, String paramValue, Pageable pageable)</h4>
+                <p>Gets paginated list of products by specified criteria.</p>
                 <div class="method-steps">
                     <div>• Processes parameters: price, discount, category, name, createDate</div>
-                    <div>• Calls corresponding methods to get products</div>
-                    <div>• Returns list of ProductResponseDto</div>
+                    <div>• For price: parses range from "minPrice-maxPrice" format</div>
+                    <div>• Calls corresponding repository methods with pagination</div>
+                    <div>• Returns Page of ProductResponseDto</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>getProductsForUser(Pageable pageable)</h4>
+                <p>Gets paginated list of products for regular users.</p>
+                <div class="method-steps">
+                    <div>• Retrieves all products with pagination</div>
+                    <div>• Converts to ProductResponseForUserDto (simplified view)</div>
+                    <div>• Returns Page of ProductResponseForUserDto</div>
                 </div>
             </div>
 
@@ -78,9 +94,10 @@
                 <h4>getTopFiveDiscountedProductsOfTheDay()</h4>
                 <p>Gets top-5 products with highest discount.</p>
                 <div class="method-steps">
-                    <div>• Finds products with active discounts</div>
-                    <div>• Sorts by discount size in descending order</div>
-                    <div>• Limits result to 5 records</div>
+                    <div>• Creates PageRequest for 5 items sorted by discount descending</div>
+                    <div>• Finds products with discountPrice greater than zero</div>
+                    <div>• Converts to ProductResponseForUserDto list</div>
+                    <div>• Throws NotFoundException if no discounted products found</div>
                     <div>• Returns list of ProductResponseForUserDto</div>
                 </div>
             </div>
@@ -95,17 +112,19 @@
                     <span class="http-method post">POST</span>
                     <span class="endpoint-path">/v1/products</span>
                     <span class="role-badge role-admin">ADMIN</span>
+                    <span class="role-badge role-manager">MANAGER</span>
                 </div>
-                <p>Create new product (only for ADMIN and MANAGER)</p>
+                <p>Create new product (requires MANAGER or ADMIN role)</p>
             </div>
 
             <div class="endpoint-detail">
                 <div class="endpoint-header">
                     <span class="http-method put">PUT</span>
                     <span class="endpoint-path">/v1/products/{productId}</span>
+                    <span class="role-badge role-admin">ADMIN</span>
                     <span class="role-badge role-manager">MANAGER</span>
                 </div>
-                <p>Update product data (only for ADMIN and MANAGER)</p>
+                <p>Update product data (requires MANAGER or ADMIN role)</p>
             </div>
 
             <div class="endpoint-detail">
@@ -113,26 +132,32 @@
                     <span class="http-method delete">DELETE</span>
                     <span class="endpoint-path">/v1/products/{productId}</span>
                     <span class="role-badge role-admin">ADMIN</span>
+                    <span class="role-badge role-manager">MANAGER</span>
                 </div>
-                <p>Delete product (only for ADMIN and MANAGER)</p>
+                <p>Delete product (requires MANAGER or ADMIN role)</p>
             </div>
 
             <div class="endpoint-detail">
                 <div class="endpoint-header">
                     <span class="http-method get">GET</span>
                     <span class="endpoint-path">/v1/products/updateProductDiscount/{productId}/{newDiscount}</span>
+                    <span class="role-badge role-admin">ADMIN</span>
                     <span class="role-badge role-manager">MANAGER</span>
                 </div>
-                <p>Update discount for product (only for ADMIN and MANAGER)</p>
+                <p>Update discount for product (requires MANAGER or ADMIN role)</p>
             </div>
 
             <div class="endpoint-detail">
                 <div class="endpoint-header">
                     <span class="http-method get">GET</span>
                     <span class="endpoint-path">/v1/products</span>
+                    <span class="role-badge role-admin">ADMIN</span>
                     <span class="role-badge role-manager">MANAGER</span>
                 </div>
-                <p>Get all products (full information for ADMIN and MANAGER)</p>
+                <p>Get all products with full details (requires MANAGER or ADMIN role)</p>
+                <div class="endpoint-params">
+                    <strong>Parameters:</strong> page, size, sort, direction
+                </div>
             </div>
 
             <div class="endpoint-detail">
@@ -141,7 +166,10 @@
                     <span class="endpoint-path">/v1/products/getAllProductForUser</span>
                     <span class="role-badge role-user">USER</span>
                 </div>
-                <p>Get all products (simplified information for users)</p>
+                <p>Get all products with simplified information for users</p>
+                <div class="endpoint-params">
+                    <strong>Parameters:</strong> page, size, sort, direction
+                </div>
             </div>
 
             <div class="endpoint-detail">
@@ -151,6 +179,9 @@
                     <span class="role-badge role-user">USER</span>
                 </div>
                 <p>Search products by criteria (price, category, name, etc.)</p>
+                <div class="endpoint-params">
+                    <strong>Parameters:</strong> paramName, paramValue, sortDirection, page, size
+                </div>
             </div>
 
             <div class="endpoint-detail">
@@ -169,11 +200,12 @@
             <div class="method-card">
                 <div class="method-steps">
                     <div>• <strong>Permission Separation:</strong> Different access levels for users, MANAGER and ADMIN</div>
-                    <div>• <strong>Flexible Search:</strong> Support for multiple filtering and sorting criteria</div>
-                    <div>• <strong>Data Validation:</strong> Validation of prices, discounts and other parameters</div>
-                    <div>• <strong>Product Uniqueness:</strong> Guarantee of unique product name within category</div>
-                    <div>• <strong>Query Optimization:</strong> Efficient database queries via repositories</div>
-                    <div>• <strong>Caching:</strong> Ability to cache frequently requested data</div>
+                    <div>• <strong>Pagination Support:</strong> All list operations support pagination and sorting</div>
+                    <div>• <strong>Flexible Search:</strong> Support for multiple filtering criteria with automatic parameter handling</div>
+                    <div>• <strong>Data Validation:</strong> Comprehensive validation of prices, discounts, names and categories</div>
+                    <div>• <strong>Product Uniqueness:</strong> Guarantee of unique product name within category with race condition protection</div>
+                    <div>• <strong>Image Handling:</strong> Automatic image URL resolution and validation</div>
+                    <div>• <strong>Timestamp Management:</strong> Automatic creation and update timestamp handling</div>
                 </div>
             </div>
         </div>
@@ -183,11 +215,12 @@
             <h3>💼 Business Logic</h3>
             <div class="method-card">
                 <div class="method-steps">
-                    <div>• <strong>Pricing Policy:</strong> Support for regular prices and discount prices</div>
-                    <div>• <strong>Categorization:</strong> Clear organization of products by categories</div>
+                    <div>• <strong>Pricing Policy:</strong> Support for regular prices and discount prices with validation</div>
+                    <div>• <strong>Categorization:</strong> Clear organization of products by categories with uniqueness enforcement</div>
                     <div>• <strong>Promotions:</strong> Top-5 discounted products mechanism for sales stimulation</div>
-                    <div>• <strong>Management Flexibility:</strong> Ability to quickly update prices and discounts</div>
-                    <div>• <strong>Search and Filtering:</strong> Convenient product search by various parameters</div>
+                    <div>• <strong>Management Flexibility:</strong> Ability to quickly update prices, discounts and product information</div>
+                    <div>• <strong>Search and Filtering:</strong> Convenient product search by price ranges, categories, names and creation dates</div>
+                    <div>• <strong>User Experience:</strong> Separate views for administrators (full details) and users (simplified information)</div>
                 </div>
             </div>
         </div>
