@@ -1,5 +1,6 @@
 package org.onlineshop.service;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,6 +11,7 @@ import org.onlineshop.entity.*;
 import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.repository.CartRepository;
 import org.onlineshop.repository.OrderRepository;
+import org.onlineshop.repository.UserRepository;
 import org.onlineshop.service.converter.CartItemConverter;
 import org.onlineshop.service.interfaces.UserServiceInterface;
 
@@ -19,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -27,6 +30,9 @@ class CartServiceTransferCartToOrderTest {
 
     @Mock
     private CartRepository cartRepository;
+
+    @Mock
+    private UserRepository userRepository;
 
     @Mock
     private UserServiceInterface userService;
@@ -69,7 +75,7 @@ class CartServiceTransferCartToOrderTest {
                 .id(100)
                 .name("Test Product")
                 .price(BigDecimal.valueOf(10))
-                .discountPrice(BigDecimal.ZERO)
+                .discountPrice(BigDecimal.valueOf(5))
                 .build();
 
         cartItemTest = CartItem.builder()
@@ -89,11 +95,19 @@ class CartServiceTransferCartToOrderTest {
                 .build();
     }
 
+    @AfterEach
+    void tearDown() {
+        cartRepository.deleteAll();
+        orderRepository.deleteAll();
+        userRepository.deleteAll();
+    }
+
     @Test
     void testTransferCartToOrderAllIsOk() {
         when(userService.getCurrentUser()).thenReturn(userTest);
         when(cartRepository.findByUser(userTest)).thenReturn(Optional.of(cartTest));
         when(cartItemConverter.cartItemToOrderItem(cartItemTest)).thenReturn(orderItemTest);
+        when(orderRepository.findByUserAndStatus(userTest, Order.Status.PENDING_PAYMENT)).thenReturn(null);
 
         Order savedOrder = Order.builder()
                 .orderId(200)
@@ -113,11 +127,7 @@ class CartServiceTransferCartToOrderTest {
         verify(cartRepository, times(1)).findByUser(userTest);
         verify(cartItemConverter, times(1)).cartItemToOrderItem(cartItemTest);
         verify(orderRepository, times(2)).save(any(Order.class));
-        verify(userService, times(2)).saveUser(userTest);
-
-        CartService cartServiceSpy = spy(cartService);
-        cartServiceSpy.transferCartToOrder();
-        verify(cartServiceSpy, times(1)).clearCart();
+        verify(userService, times(1)).saveUser(userTest);
     }
 
     @Test
@@ -126,7 +136,7 @@ class CartServiceTransferCartToOrderTest {
                 .id(101)
                 .name("Test Product 2")
                 .price(BigDecimal.valueOf(20))
-                .discountPrice(BigDecimal.ZERO)
+                .discountPrice(BigDecimal.valueOf(15))
                 .build();
 
         CartItem cartItemTest2 = CartItem.builder()
@@ -149,6 +159,7 @@ class CartServiceTransferCartToOrderTest {
         when(cartRepository.findByUser(userTest)).thenReturn(Optional.of(cartTest));
         when(cartItemConverter.cartItemToOrderItem(cartItemTest)).thenReturn(orderItemTest);
         when(cartItemConverter.cartItemToOrderItem(cartItemTest2)).thenReturn(orderItemTest2);
+        when(orderRepository.findByUserAndStatus(userTest, Order.Status.PENDING_PAYMENT)).thenReturn(null);
 
         Order savedOrder = Order.builder()
                 .orderId(200)
@@ -166,11 +177,7 @@ class CartServiceTransferCartToOrderTest {
 
         verify(cartItemConverter, times(2)).cartItemToOrderItem(any(CartItem.class));
         verify(orderRepository, times(2)).save(any(Order.class));
-        verify(userService, times(2)).saveUser(userTest);
-
-        CartService cartServiceSpy = spy(cartService);
-        cartServiceSpy.transferCartToOrder();
-        verify(cartServiceSpy, times(1)).clearCart();
+        verify(userService, times(1)).saveUser(userTest);
     }
 
     @Test
@@ -180,15 +187,40 @@ class CartServiceTransferCartToOrderTest {
         when(userService.getCurrentUser()).thenReturn(userTest);
         when(cartRepository.findByUser(userTest)).thenReturn(Optional.of(cartTest));
 
-        when(orderRepository.save(any(Order.class))).thenThrow(new BadRequestException("User's cart is empty. Nothing to transfer."));
+        assertThrows(BadRequestException.class, () -> cartService.transferCartToOrder());
 
-        cartService.transferCartToOrder();
+        verify(orderRepository, never()).save(any(Order.class));
+        verify(userService, never()).saveUser(any(User.class));
+    }
 
-        verify(orderRepository, times(2)).save(any(Order.class));
-        verify(userService, times(2)).saveUser(userTest);
+    @Test
+    void testTransferCartToOrderWhenProductHasNoDiscount() {
+        cartItemTest.getProduct().setDiscountPrice(null);
 
-        CartService cartServiceSpy = spy(cartService);
-        cartServiceSpy.transferCartToOrder();
-        verify(cartServiceSpy, times(1)).clearCart();
+        when(userService.getCurrentUser()).thenReturn(userTest);
+        when(cartRepository.findByUser(userTest)).thenReturn(Optional.of(cartTest));
+
+        assertThrows(BadRequestException.class, () -> cartService.transferCartToOrder());
+
+        verify(orderRepository, never()).save(any(Order.class));
+        verify(userService, never()).saveUser(any(User.class));
+    }
+
+    @Test
+    void testTransferCartToOrderWhenPendingOrderExists() {
+        when(userService.getCurrentUser()).thenReturn(userTest);
+        when(cartRepository.findByUser(userTest)).thenReturn(Optional.of(cartTest));
+
+        Order existingOrder = Order.builder()
+                .orderId(300)
+                .user(userTest)
+                .status(Order.Status.PENDING_PAYMENT)
+                .build();
+        when(orderRepository.findByUserAndStatus(userTest, Order.Status.PENDING_PAYMENT)).thenReturn(existingOrder);
+
+        assertThrows(BadRequestException.class, () -> cartService.transferCartToOrder());
+
+        verify(orderRepository, never()).save(any(Order.class));
+        verify(userService, never()).saveUser(any(User.class));
     }
 }

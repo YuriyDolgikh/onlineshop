@@ -549,7 +549,7 @@ class ProductServiceGetProductByCriteriaTest {
 
 
         Page<ProductResponseDto> result = productService.getProductsByCriteria("category", "testCategorySecond",
-                PageRequest.of(0, 5, Sort.by(Sort.Direction.ASC, "name")));
+                PageRequest.of(0, 5, Sort.unsorted()));
 
         assertEquals(2, result.getTotalElements());
         assertEquals("ProductThree", result.getContent().get(0).getProductName());
@@ -597,7 +597,7 @@ class ProductServiceGetProductByCriteriaTest {
         String dateNow = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(now);
 
         Page<ProductResponseDto> result = productService.getProductsByCriteria("createDate", dateNow,
-                PageRequest.of(0, 5, Sort.Direction.valueOf("asc")));
+                PageRequest.of(0, 5, Sort.by(Sort.Direction.ASC, "createdAt")));
 
         assertEquals(2, result.getTotalElements());
 
@@ -667,7 +667,7 @@ class ProductServiceGetProductByCriteriaTest {
 
 
         Page<ProductResponseDto> result = productService.getProductsByCriteria(" ", " ",
-                PageRequest.of(0, 5, Sort.Direction.valueOf("asc")));
+                PageRequest.of(0, 5, Sort.by(Sort.Direction.ASC, "name")));
 
         assertEquals(4, result.getTotalElements());
     }

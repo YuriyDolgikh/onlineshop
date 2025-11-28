@@ -1,5 +1,6 @@
 package org.onlineshop.service;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,7 +41,6 @@ class CartServiceGetCartFullDataTest {
 
     private User userTest;
     private Cart cartTest;
-    private Product productTest;
     private CartItem cartItemTest;
     private CartItemResponseDto cartItemDto;
     private CartItemSympleResponseDto simpleDto;
@@ -54,7 +54,7 @@ class CartServiceGetCartFullDataTest {
                 .phoneNumber("+497856221413")
                 .build();
 
-        productTest = Product.builder()
+        Product productTest = Product.builder()
                 .name("TestProduct")
                 .price(BigDecimal.valueOf(100))
                 .discountPrice(BigDecimal.valueOf(10))
@@ -85,6 +85,11 @@ class CartServiceGetCartFullDataTest {
                 .build();
     }
 
+    @AfterEach
+    void tearDown() {
+        cartRepository.deleteAll();
+    }
+
     @Test
     void testGetCartFullData() {
         when(userService.getCurrentUser()).thenReturn(userTest);
@@ -94,7 +99,7 @@ class CartServiceGetCartFullDataTest {
 
         CartResponseDto result = cartService.getCartFullData();
 
-        assertEquals(BigDecimal.valueOf(180.00), result.getTotalPrice());
+        assertEquals(180.00, result.getTotalPrice().doubleValue());
         assertEquals(userTest.getUserId(), result.getUserId());
 
         assertEquals(1, result.getCartSympleItems().size());
