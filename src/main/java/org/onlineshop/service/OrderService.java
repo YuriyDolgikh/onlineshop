@@ -4,8 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.order.OrderRequestDto;
 import org.onlineshop.dto.order.OrderResponseDto;
 import org.onlineshop.dto.order.OrderStatusResponseDto;
-import org.onlineshop.dto.orderItem.OrderItemRequestDto;
 import org.onlineshop.entity.Order;
+import org.onlineshop.entity.OrderItem;
+import org.onlineshop.entity.Product;
 import org.onlineshop.entity.User;
 import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.exception.MailSendingException;
@@ -16,10 +17,14 @@ import org.onlineshop.service.converter.OrderConverter;
 import org.onlineshop.service.interfaces.OrderServiceInterface;
 import org.onlineshop.service.util.MailUtil;
 import org.onlineshop.service.util.PdfOrderGenerator;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 @Service
@@ -29,44 +34,8 @@ public class OrderService implements OrderServiceInterface {
     private final UserService userService;
     private final UserRepository userRepository;
     private final OrderConverter orderConverter;
-    private final OrderItemService orderItemService;
     private final MailUtil mailUtil;
-
-    /**
-     * Saves an order based on the provided order request data.
-     *
-     * @param dto the {@link OrderRequestDto} containing order request information such as
-     *            delivery address, contact phone, delivery method, and order items.
-     *            Must not be null.
-     * @return an {@link OrderResponseDto} containing details of the saved order.
-     * @throws BadRequestException      if the provided {@code dto} is null.
-     * @throws IllegalArgumentException if the specified delivery method in {@code dto}
-     *                                  does not match any {@code Order.DeliveryMethod} constants.
-     */
-    @Transactional
-    @Override
-    public OrderResponseDto saveOrder(OrderRequestDto dto) {
-        if (dto == null) {
-            throw new BadRequestException("OrderRequestDto cannot be null");
-        }
-        // Throws: IllegalArgumentException – if this enum type has no constant with the specified name
-        Order.DeliveryMethod method = Order.DeliveryMethod.valueOf(dto.getDeliveryMethod().toUpperCase());
-        User currentUser = userService.getCurrentUser();
-        Order order = Order.builder()
-                .user(currentUser)
-                .deliveryAddress(dto.getDeliveryAddress())
-                .contactPhone(dto.getContactPhone())
-                .deliveryMethod(method)
-                .status(Order.Status.PENDING_PAYMENT)
-                .build();
-        if (dto.getItems() != null) {
-            for (OrderItemRequestDto item : dto.getItems()) {
-                orderItemService.addItemToOrder(item);
-            }
-        }
-        orderRepository.save(order);
-        return orderConverter.toDto(order);
-    }
+    private final CartService cartService;
 
     /**
      * Retrieves an order by its ID.
@@ -74,8 +43,8 @@ public class OrderService implements OrderServiceInterface {
      * @param orderId the ID of the order to be retrieved - must not be null
      * @return an {@link OrderResponseDto} containing details of the retrieved order
      */
-    @Transactional
     @Override
+    @Transactional(readOnly = true)
     public OrderResponseDto getOrderById(Integer orderId) {
         if (!isAccessToOrderAllowed(orderId)) {
             throw new AccessDeniedException("Access denied");
@@ -95,8 +64,8 @@ public class OrderService implements OrderServiceInterface {
      * @throws IllegalArgumentException if the specified user ID is null
      */
 
-    @Transactional
     @Override
+    @Transactional
     public List<OrderResponseDto> getOrdersByUser(Integer userId) {
         if (userId == null) {
             throw new IllegalArgumentException("UserId cannot be null");
@@ -122,8 +91,8 @@ public class OrderService implements OrderServiceInterface {
      * @throws AccessDeniedException    if the current user is not authorized to update the order
      * @throws IllegalArgumentException if the specified order ID or new status is null or blank
      */
-    @Transactional
     @Override
+    @Transactional
     public OrderResponseDto updateOrderStatus(Integer orderId, String newStatus) {
         if (!isAccessToOrderAllowed(orderId)) {
             throw new AccessDeniedException("Access denied");
@@ -146,8 +115,8 @@ public class OrderService implements OrderServiceInterface {
      * @throws NotFoundException     if the order with the specified ID is not found
      * @throws AccessDeniedException if the current user is not authorized to cancel the order
      */
-    @Transactional
     @Override
+    @Transactional
     public void cancelOrder(Integer orderId) {
         if (!isAccessToOrderAllowed(orderId)) {
             throw new AccessDeniedException("Access denied");
@@ -155,6 +124,9 @@ public class OrderService implements OrderServiceInterface {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Order not found with ID: " + orderId));
 
+        if (!order.getStatus().equals(Order.Status.PENDING_PAYMENT)) {
+            throw new BadRequestException("You can't CANCEL order for an order that is not in PENDING_PAYMENT status");
+        }
         order.setStatus(Order.Status.CANCELLED);
         orderRepository.save(order);
     }
@@ -163,16 +135,16 @@ public class OrderService implements OrderServiceInterface {
      * Confirms the payment for a given order if valid and updates the order status to PAID.
      * Also, triggers the sending of a confirmation email with the order details.
      *
-     * @param orderId        the unique identifier of the order to confirm payment for
-     * @param paymentMethod  the payment method used to confirm the payment. Must not be null or blank
+     * @param orderId       the unique identifier of the order to confirm payment for
+     * @param paymentMethod the payment method used to confirm the payment. Must not be null or blank
      * @return an OrderResponseDto containing the details of the updated order
-     * @throws NotFoundException       if the order with the specified ID is not found
-     * @throws AccessDeniedException   if the current user does not have access to the specified order
-     * @throws BadRequestException     if the payment method is invalid or the order status is not PENDING_PAYMENT
-     * @throws MailSendingException    if an error occurs while trying to send the order confirmation email
+     * @throws NotFoundException     if the order with the specified ID is not found
+     * @throws AccessDeniedException if the current user does not have access to the specified order
+     * @throws BadRequestException   if the payment method is invalid or the order status is not PENDING_PAYMENT
+     * @throws MailSendingException  if an error occurs while trying to send the order confirmation email
      */
-    @Transactional
     @Override
+    @Transactional
     public OrderResponseDto confirmPayment(Integer orderId, String paymentMethod) {
         User currentUser = userService.getCurrentUser();
         Order order = orderRepository.findById(orderId)
@@ -180,6 +152,7 @@ public class OrderService implements OrderServiceInterface {
         if (!order.getUser().getUserId().equals(currentUser.getUserId())) {
             throw new AccessDeniedException("Access denied");
         }
+        recalculateOrderPrice(order);
         if (paymentMethod == null || paymentMethod.isBlank()) {
             throw new BadRequestException("PaymentMethod cannot be null or blank");
         }
@@ -188,13 +161,8 @@ public class OrderService implements OrderServiceInterface {
         }
         order.setStatus(Order.Status.PAID);
         orderRepository.save(order);
+        cartService.clearCart();
 
-        byte[] pdfBytes = PdfOrderGenerator.generatePdfOrder(order);
-        try {
-            mailUtil.sendOrderPaidEmail(order.getUser(), order, pdfBytes);
-        } catch (Exception e) {
-            throw new MailSendingException("Failed to send order confirmation email: " + e.getMessage());
-        }
         return orderConverter.toDto(order);
     }
 
@@ -210,24 +178,31 @@ public class OrderService implements OrderServiceInterface {
      *                                  are null or invalid
      * @throws RuntimeException         if the order is not found or the specified delivery method is invalid
      */
-    @Transactional
     @Override
+    @Transactional
     public OrderResponseDto updateOrderDelivery(Integer orderId, OrderRequestDto orderRequestDto) {
         if (!isAccessToOrderAllowed(orderId)) {
             throw new AccessDeniedException("Access denied");
         }
+
         if (orderRequestDto == null) {
             throw new IllegalArgumentException("OrderRequestDto cannot be null");
         }
+
         if (orderRequestDto.getDeliveryAddress() == null || orderRequestDto.getDeliveryAddress().isBlank()) {
             throw new IllegalArgumentException("Delivery address cannot be null or empty");
         }
 
         if (orderRequestDto.getContactPhone() == null || orderRequestDto.getContactPhone().isBlank()) {
-            throw new IllegalArgumentException("Contact phone cannot be null empty");
+            throw new IllegalArgumentException("Contact phone cannot be null or empty");
         }
+
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        if (order.getStatus() != Order.Status.PENDING_PAYMENT && order.getStatus() != Order.Status.PAID) {
+            throw new RuntimeException("You can't update delivery details for an order that is not in PENDING_PAYMENT or PAID status");
+        }
 
         try {
             order.setDeliveryMethod(Order.DeliveryMethod.valueOf(orderRequestDto.getDeliveryMethod().toUpperCase()));
@@ -250,8 +225,8 @@ public class OrderService implements OrderServiceInterface {
      * @throws AccessDeniedException if the user does not have access to the specified order
      * @throws NotFoundException     if the order with the given ID is not found
      */
-    @Transactional
     @Override
+    @Transactional(readOnly = true)
     public OrderStatusResponseDto getOrderStatusDto(Integer orderId) {
         if (!isAccessToOrderAllowed(orderId)) {
             throw new AccessDeniedException("Access denied");
@@ -269,12 +244,11 @@ public class OrderService implements OrderServiceInterface {
      * @throws NotFoundException   if the order with the given ID is not found
      * @throws BadRequestException if the specified order ID is null
      */
+    @Transactional(readOnly = true)
     public boolean isAccessToOrderAllowed(Integer orderId) {
         if (orderId == null) {
             throw new BadRequestException("OrderId cannot be null");
         }
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new NotFoundException("Order not found with ID: " + orderId));
         User currentUser = userService.getCurrentUser();
         if (currentUser.getRole() == User.Role.ADMIN || currentUser.getRole() == User.Role.MANAGER) {
             return true;
@@ -283,5 +257,63 @@ public class OrderService implements OrderServiceInterface {
         return orderRepository.findById(orderId)
                 .map(o -> o.getUser() != null && o.getUser().getUserId().equals(currentUser.getUserId()))
                 .orElseThrow(() -> new NotFoundException("Order not found with ID: " + orderId));
+    }
+
+    /**
+     * Recalculates the total price for an order based on the current product prices and discounts.
+     * Updates each order item's price at the time of purchase.
+     *
+     * @param order the order for which the price needs to be recalculated.
+     *              Must not be null, must have a status of PENDING_PAYMENT, and must include at least one order item.
+     * @throws BadRequestException if the provided order is null, or if the order status is not PENDING_PAYMENT.
+     * @throws NotFoundException   if the order does not contain any order items.
+     */
+    @Transactional(readOnly = true)
+    public void recalculateOrderPrice(Order order) {
+        if (order == null) {
+            throw new BadRequestException("Order cannot be null");
+        }
+        if (order.getStatus() != Order.Status.PENDING_PAYMENT) {
+            throw new BadRequestException("The price can't be recalculated for this order");
+        }
+        List<OrderItem> orderItemList = order.getOrderItems();
+        if (orderItemList == null || orderItemList.isEmpty()) {
+            throw new NotFoundException("Order Items cannot be null or empty");
+        }
+        for (OrderItem oi : orderItemList) {
+            Product product = oi.getProduct();
+            BigDecimal price = product.getPrice();
+            BigDecimal discont = product.getDiscountPrice();
+            BigDecimal priceAtPurchase = price.subtract(price.multiply(discont.divide(new BigDecimal(100)))).setScale(2, RoundingMode.CEILING);
+            oi.setPriceAtPurchase(priceAtPurchase);
+        }
+        orderRepository.save(order);
+    }
+
+    /**
+     * Sends an order confirmation email to the user associated with the specified order.
+     * The email includes the order details and a PDF attachment of the order summary.
+     * This method is executed asynchronously in a new transactional context.
+     *
+     * @param orderId the unique identifier of the order for which the confirmation email should be sent.
+     *                The method retrieves the order details based on this ID.
+     * @throws BadRequestException  if the specified order is not found in the database.
+     * @throws MailSendingException if an error occurs while generating or sending the email.
+     */
+    @Async
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void sendOrderConfirmationEmail(Integer orderId) {
+        try {
+            Order order = orderRepository.findById(orderId)
+                    .orElseThrow(() -> new NotFoundException("Order not found for email sending: " + orderId));
+
+            byte[] pdfBytes = PdfOrderGenerator.generatePdfOrder(order);
+            mailUtil.sendOrderPaidEmail(order.getUser(), order, pdfBytes);
+
+        } catch (NotFoundException e) {
+            throw new BadRequestException("Order not found for email sending: " + orderId);
+        } catch (Exception e) {
+            throw new MailSendingException("Error sending order confirmation email: " + e.getMessage()); // TODO Resend Email
+        }
     }
 }

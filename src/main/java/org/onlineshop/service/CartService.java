@@ -47,25 +47,46 @@ public class CartService implements CartServiceInterface {
     }
 
     /**
-     * Transfers the current user's shopping cart to an order.
+     * Transfers the contents of the current user's shopping cart to a new order
+     * and updates the order repository and user information.
+     *
+     * This method performs the following steps:
+     * 1. Retrieves the current cart and validates it is not empty.
+     * 2. Converts cart items to order items while validating the presence of product discounts.
+     * 3. Checks that the user does not already have an order in the PENDING_PAYMENT status.
+     * 4. Creates a new order with the appropriate status and delivery method and saves it to the repository.
+     * 5. Associates the converted order items with the newly created order.
+     * 6. Updates the user's order list and persists the changes.
+     *
+     * @throws BadRequestException if the cart is empty, any product lacks a discount price,
+     *                             or if the user already has an order in PENDING_PAYMENT status.
      */
     @Transactional
     @Override
     public void transferCartToOrder() {
 
         Cart cart = getCurrentCart();
-        User user = userService.getCurrentUser();
         Set<CartItem> cartItems = cart.getCartItems();
+        if (cartItems.isEmpty()) {
+            throw new BadRequestException("User's cart is empty. Nothing to transfer.");
+        }
+        User user = userService.getCurrentUser();
 
         List<OrderItem> orderItems = new ArrayList<>();
 
         for (CartItem cartItem : cartItems) {
+            if (cartItem.getProduct().getDiscountPrice() == null) {
+                throw  new BadRequestException("Product discount cannot be null.");
+            }
             OrderItem orderItem = cartItemConverter.cartItemToOrderItem(cartItem);
             orderItems.add(orderItem);
         }
+        Order currentOrder = orderRepository.findByUserAndStatus(user, Order.Status.PENDING_PAYMENT);
+        if (currentOrder != null) {
+            throw new BadRequestException("User already has an order in PENDING_PAYMENT status.");
+        }
         Order newOrder = new Order();
         LocalDateTime now = LocalDateTime.now();
-//        newOrder.setOrderItems(orderItems);
         newOrder.setUser(user);
         newOrder.setStatus(Order.Status.PENDING_PAYMENT);
         newOrder.setDeliveryMethod(Order.DeliveryMethod.PICKUP);
@@ -77,7 +98,6 @@ public class CartService implements CartServiceInterface {
         orderRepository.save(savedOrder);
         user.getOrders().add(savedOrder);
         userService.saveUser(user);
-        clearCart();
     }
 
     /**
@@ -102,7 +122,8 @@ public class CartService implements CartServiceInterface {
             BigDecimal itemTotal = product.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
             BigDecimal itemTotalWithDiscount = itemTotal
                     .multiply(BigDecimal.valueOf(100).subtract(product.getDiscountPrice()))
-                    .divide(BigDecimal.valueOf(100));
+                                                    .setScale(2, BigDecimal.ROUND_CEILING)
+                    .divide(BigDecimal.valueOf(100)).setScale(2, BigDecimal.ROUND_CEILING);
             totalPrice = totalPrice.add(itemTotalWithDiscount);
         }
         List<CartItemSympleResponseDto> cartItemSympleDtos = cartItemDtos
@@ -150,7 +171,6 @@ public class CartService implements CartServiceInterface {
         if (cart.getCartItems() == null) {
             throw new IllegalArgumentException("Cart items can't be null");
         }
-
         return cartRepository.save(cart);
     }
 }

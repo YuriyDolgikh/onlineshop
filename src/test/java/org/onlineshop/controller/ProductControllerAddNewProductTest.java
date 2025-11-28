@@ -1,16 +1,13 @@
 package org.onlineshop.controller;
 
-import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.onlineshop.dto.product.ProductRequestDto;
 import org.onlineshop.dto.product.ProductResponseDto;
-import org.onlineshop.dto.product.ProductUpdateDto;
 import org.onlineshop.entity.Category;
 import org.onlineshop.entity.Product;
 import org.onlineshop.entity.User;
-import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.exception.UrlValidationException;
 import org.onlineshop.repository.CategoryRepository;
 import org.onlineshop.repository.ProductRepository;
@@ -19,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
@@ -98,7 +94,7 @@ class ProductControllerAddNewProductTest {
         ResponseEntity<ProductResponseDto> response = productController.addNewProduct(requestDto);
 
         assertNotNull(response);
-        assertEquals(201, response.getStatusCodeValue());
+        assertEquals(201, response.getStatusCode().value());
         assertNotNull(response.getBody());
         assertEquals(1, productRepository.findAll().size());
         assertEquals("TestProduct", response.getBody().getProductName());
@@ -152,7 +148,7 @@ class ProductControllerAddNewProductTest {
                 .productDiscountPrice(BigDecimal.valueOf(5))
                 .build();
 
-        assertThrows(ConstraintViolationException.class, () -> productController.addNewProduct(requestDto));
+        assertThrows(IllegalArgumentException.class, () -> productController.addNewProduct(requestDto));
         assertEquals(0, productRepository.findAll().size());
     }
 
@@ -169,7 +165,7 @@ class ProductControllerAddNewProductTest {
                 .productDiscountPrice(BigDecimal.valueOf(5))
                 .build();
 
-        assertThrows(BadRequestException.class, () -> productController.addNewProduct(requestDto));
+        assertThrows(IllegalArgumentException.class, () -> productController.addNewProduct(requestDto));
         assertEquals(0, productRepository.findAll().size());
     }
 
@@ -186,7 +182,7 @@ class ProductControllerAddNewProductTest {
                 .productDiscountPrice(BigDecimal.valueOf(5))
                 .build();
 
-        assertThrows(NullPointerException.class, () -> productController.addNewProduct(requestDto));
+        assertThrows(IllegalArgumentException.class, () -> productController.addNewProduct(requestDto));
         assertEquals(0, productRepository.findAll().size());
     }
 
@@ -203,7 +199,7 @@ class ProductControllerAddNewProductTest {
                 .productDiscountPrice(BigDecimal.valueOf(5))
                 .build();
 
-        assertThrows(BadRequestException.class, () -> productController.addNewProduct(requestDto));
+        assertThrows(IllegalArgumentException.class, () -> productController.addNewProduct(requestDto));
         assertEquals(0, productRepository.findAll().size());
     }
 
@@ -220,13 +216,13 @@ class ProductControllerAddNewProductTest {
                 .productDiscountPrice(BigDecimal.valueOf(5))
                 .build();
 
-        assertThrows(DataIntegrityViolationException.class, () -> productController.addNewProduct(requestDto));
+        assertThrows(IllegalArgumentException.class, () -> productController.addNewProduct(requestDto));
         assertEquals(0, productRepository.findAll().size());
     }
 
     @Test
     @WithMockUser(username = "testUser@email.com",
-            roles ={"ADMIN", "MANAGER"})
+            roles = {"ADMIN", "MANAGER"})
     void testAddNewProductIfRoleAdminAndManagerAndProductPriceIsZero() {
         ProductRequestDto requestDto = ProductRequestDto.builder()
                 .productName("TestProduct")
@@ -237,7 +233,7 @@ class ProductControllerAddNewProductTest {
                 .productDiscountPrice(BigDecimal.valueOf(5))
                 .build();
 
-        assertThrows(ConstraintViolationException.class, () -> productController.addNewProduct(requestDto));
+        assertThrows(IllegalArgumentException.class, () -> productController.addNewProduct(requestDto));
         assertEquals(0, productRepository.findAll().size());
     }
 
@@ -299,7 +295,7 @@ class ProductControllerAddNewProductTest {
     @Test
     @WithMockUser(username = "testUser@email.com",
             roles = {"ADMIN", "MANAGER"})
-    void  testAddNewProductIfRoleAdminAndManagerAndNameIsTooShort() {
+    void testAddNewProductIfRoleAdminAndManagerAndNameIsTooShort() {
         ProductRequestDto requestDto = ProductRequestDto.builder()
                 .productName("Te")
                 .productCategory("testCategory")
@@ -309,7 +305,7 @@ class ProductControllerAddNewProductTest {
                 .productDiscountPrice(BigDecimal.valueOf(5))
                 .build();
 
-        assertThrows(ConstraintViolationException.class, () -> productController.addNewProduct(requestDto));
+        assertThrows(IllegalArgumentException.class, () -> productController.addNewProduct(requestDto));
         assertEquals(0, productRepository.findAll().size());
 
     }
@@ -317,7 +313,7 @@ class ProductControllerAddNewProductTest {
     @Test
     @WithMockUser(username = "testUser@email.com",
             roles = {"ADMIN", "MANAGER"})
-    void  testAddNewProductIfRoleAdminAndManagerAndNameIsTooLong() {
+    void testAddNewProductIfRoleAdminAndManagerAndNameIsTooLong() {
         ProductRequestDto requestDto = ProductRequestDto.builder()
                 .productName("TestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProduct")
                 .productCategory("testCategory")
@@ -327,7 +323,7 @@ class ProductControllerAddNewProductTest {
                 .productDiscountPrice(BigDecimal.valueOf(5))
                 .build();
 
-        assertThrows(ConstraintViolationException.class, () -> productController.addNewProduct(requestDto));
+        assertThrows(IllegalArgumentException.class, () -> productController.addNewProduct(requestDto));
         assertEquals(0, productRepository.findAll().size());
 
     }

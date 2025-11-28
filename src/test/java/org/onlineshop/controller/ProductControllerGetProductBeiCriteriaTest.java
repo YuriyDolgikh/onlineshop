@@ -1,6 +1,7 @@
 package org.onlineshop.controller;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.onlineshop.dto.product.ProductResponseDto;
@@ -13,6 +14,7 @@ import org.onlineshop.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -22,10 +24,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -130,12 +130,14 @@ class ProductControllerGetProductBeiCriteriaTest {
         productRepository.save(productTestFour);
 
 
-        ResponseEntity<List<ProductResponseDto>> result = productController.getProductsByCriteria("price","100-300","asc");
+        ResponseEntity<Page<ProductResponseDto>> resultPage = productController.getProductsByCriteria("price", "100-300", "asc", 0, 5);
 
-        assertEquals(3, result.getBody().size());
-        assertTrue(result.getBody().get(0).getProductPrice().compareTo(new BigDecimal("100")) == 0);
-        assertTrue(result.getBody().get(1).getProductPrice().compareTo(new BigDecimal("200")) == 0);
-        assertTrue(result.getBody().get(2).getProductPrice().compareTo(new BigDecimal("250")) == 0);
+        Assertions.assertNotNull(resultPage.getBody());
+        assertEquals(3, resultPage.getBody().getTotalElements());
+
+        assertEquals(0, resultPage.getBody().getContent().get(0).getProductPrice().compareTo(new BigDecimal("100")));
+        assertEquals(0, resultPage.getBody().getContent().get(1).getProductPrice().compareTo(new BigDecimal("200")));
+        assertEquals(0, resultPage.getBody().getContent().get(2).getProductPrice().compareTo(new BigDecimal("250")));
 
     }
 
@@ -204,12 +206,14 @@ class ProductControllerGetProductBeiCriteriaTest {
         productRepository.save(productTestFour);
 
 
-        ResponseEntity<List<ProductResponseDto>> result = productController.getProductsByCriteria("price","100-300","desc");
+        ResponseEntity<Page<ProductResponseDto>> resultPage = productController.getProductsByCriteria("price", "100-300", "desc", 0, 5);
 
-        assertEquals(3, result.getBody().size());
-        assertTrue(result.getBody().get(2).getProductPrice().compareTo(new BigDecimal("100")) == 0);
-        assertTrue(result.getBody().get(1).getProductPrice().compareTo(new BigDecimal("200")) == 0);
-        assertTrue(result.getBody().get(0).getProductPrice().compareTo(new BigDecimal("250")) == 0);
+        Assertions.assertNotNull(resultPage.getBody());
+        assertEquals(3, resultPage.getBody().getTotalElements());
+
+        assertEquals(0, resultPage.getBody().getContent().get(0).getProductPrice().compareTo(new BigDecimal("250")));
+        assertEquals(0, resultPage.getBody().getContent().get(1).getProductPrice().compareTo(new BigDecimal("200")));
+        assertEquals(0, resultPage.getBody().getContent().get(2).getProductPrice().compareTo(new BigDecimal("100")));
 
     }
 
@@ -264,12 +268,14 @@ class ProductControllerGetProductBeiCriteriaTest {
 
         productRepository.save(productTestThree);
 
-        ResponseEntity<List<ProductResponseDto>> result = productController.getProductsByCriteria("discount"," ","desc");
+        ResponseEntity<Page<ProductResponseDto>> resultPage = productController.getProductsByCriteria("discount", " ", "desc", 0, 5);
 
-        assertEquals(3, result.getBody().size());
-        assertTrue(result.getBody().get(0).getProductDiscountPrice().compareTo(new BigDecimal("30")) == 0);
-        assertTrue(result.getBody().get(1).getProductDiscountPrice().compareTo(new BigDecimal("20")) == 0);
-        assertTrue(result.getBody().get(2).getProductDiscountPrice().compareTo(new BigDecimal("10")) == 0);
+        Assertions.assertNotNull(resultPage.getBody());
+        assertEquals(3, resultPage.getBody().getTotalElements());
+
+        assertEquals(0, resultPage.getBody().getContent().get(0).getProductDiscountPrice().compareTo(new BigDecimal("30")));
+        assertEquals(0, resultPage.getBody().getContent().get(1).getProductDiscountPrice().compareTo(new BigDecimal("20")));
+        assertEquals(0, resultPage.getBody().getContent().get(2).getProductDiscountPrice().compareTo(new BigDecimal("10")));
 
     }
 
@@ -324,13 +330,14 @@ class ProductControllerGetProductBeiCriteriaTest {
 
         productRepository.save(productTestThree);
 
-        ResponseEntity<List<ProductResponseDto>> result = productController.getProductsByCriteria("discount"," ","asc");
+        ResponseEntity<Page<ProductResponseDto>> resultPage = productController.getProductsByCriteria("discount", " ", "asc", 0, 5);
 
-        assertEquals(3, result.getBody().size());
-        assertTrue(result.getBody().get(2).getProductDiscountPrice().compareTo(new BigDecimal("30")) == 0);
-        assertTrue(result.getBody().get(1).getProductDiscountPrice().compareTo(new BigDecimal("20")) == 0);
-        assertTrue(result.getBody().get(0).getProductDiscountPrice().compareTo(new BigDecimal("10")) == 0);
+        Assertions.assertNotNull(resultPage.getBody());
+        assertEquals(3, resultPage.getBody().getTotalElements());
 
+        assertEquals(0, resultPage.getBody().getContent().get(2).getProductDiscountPrice().compareTo(new BigDecimal("30")));
+        assertEquals(0, resultPage.getBody().getContent().get(1).getProductDiscountPrice().compareTo(new BigDecimal("20")));
+        assertEquals(0, resultPage.getBody().getContent().get(0).getProductDiscountPrice().compareTo(new BigDecimal("10")));
     }
 
     @Test
@@ -384,11 +391,13 @@ class ProductControllerGetProductBeiCriteriaTest {
 
         productRepository.save(productTestThree);
 
-        ResponseEntity<List<ProductResponseDto>> result = productController.getProductsByCriteria("name","te","desc");
+        ResponseEntity<Page<ProductResponseDto>> resultPage = productController.getProductsByCriteria("name", "te", "desc", 0, 5);
 
-        assertEquals(2, result.getBody().size());
-        assertEquals(result.getBody().get(1).getProductName(),"testProductOne");
-        assertEquals(result.getBody().get(0).getProductName(),"testProductTwo");
+        Assertions.assertNotNull(resultPage.getBody());
+        assertEquals(2, resultPage.getBody().getTotalElements());
+
+        assertEquals("testProductOne", resultPage.getBody().getContent().get(1).getProductName());
+        assertEquals("testProductTwo", resultPage.getBody().getContent().get(0).getProductName());
 
     }
 
@@ -443,11 +452,13 @@ class ProductControllerGetProductBeiCriteriaTest {
 
         productRepository.save(productTestThree);
 
-        ResponseEntity<List<ProductResponseDto>> result = productController.getProductsByCriteria("name","te","asc");
+        ResponseEntity<Page<ProductResponseDto>> resultPage = productController.getProductsByCriteria("name", "te", "asc", 0, 5);
 
-        assertEquals(2, result.getBody().size());
-        assertEquals(result.getBody().get(0).getProductName(),"testProductOne");
-        assertEquals(result.getBody().get(1).getProductName(),"testProductTwo");
+        Assertions.assertNotNull(resultPage.getBody());
+        assertEquals(2, resultPage.getBody().getTotalElements());
+
+        assertEquals("testProductOne", resultPage.getBody().getContent().get(0).getProductName());
+        assertEquals("testProductTwo", resultPage.getBody().getContent().get(1).getProductName());
 
     }
 
@@ -510,12 +521,13 @@ class ProductControllerGetProductBeiCriteriaTest {
 
         productRepository.save(productTestThree);
 
-        ResponseEntity<List<ProductResponseDto>> result = productController.getProductsByCriteria("category","testCategoryFirst","asc");
+        ResponseEntity<Page<ProductResponseDto>> resultPage = productController.getProductsByCriteria("category", "testCategoryFirst", "asc", 0, 5);
 
-        assertEquals(2, result.getBody().size());
-        assertEquals(result.getBody().get(0).getProductName(),"testProductOne");
-        assertEquals(result.getBody().get(1).getProductName(),"testProductTwo");
+        Assertions.assertNotNull(resultPage.getBody());
+        assertEquals(2, resultPage.getBody().getTotalElements());
 
+        assertEquals("testProductOne", resultPage.getBody().getContent().get(0).getProductName());
+        assertEquals("testProductTwo", resultPage.getBody().getContent().get(1).getProductName());
     }
 
     @Test
@@ -567,9 +579,10 @@ class ProductControllerGetProductBeiCriteriaTest {
         LocalDateTime now = LocalDateTime.now();
         String dateNow = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(now);
 
-        ResponseEntity<List<ProductResponseDto>> result = productController.getProductsByCriteria("createDate",dateNow,"asc");
+        ResponseEntity<Page<ProductResponseDto>> resultPage = productController.getProductsByCriteria("createDate", dateNow, "asc", 0, 5);
 
-        assertEquals(2, result.getBody().size());
+        Assertions.assertNotNull(resultPage.getBody());
+        assertEquals(2, resultPage.getBody().getTotalElements());
     }
 
     @Test
@@ -618,11 +631,11 @@ class ProductControllerGetProductBeiCriteriaTest {
 
         productRepository.save(productTestTwo);
 
-        ResponseEntity<List<ProductResponseDto>> result = productController.getProductsByCriteria(" "," "," ");
+        ResponseEntity<Page<ProductResponseDto>> result = productController.getProductsByCriteria(" ", " ", "asc", 0, 5);
 
-        assertEquals(2, result.getBody().size());
+        Assertions.assertNotNull(result.getBody());
+        assertEquals(2, result.getBody().getTotalElements());
     }
-
 
 
 }

@@ -7,6 +7,7 @@ import org.onlineshop.dto.orderItem.OrderItemResponseDto;
 import org.onlineshop.entity.Order;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Generated
@@ -34,10 +35,13 @@ public class OrderConverter {
                                 .priceAtPurchase(i.getPriceAtPurchase())
                                 .build())
                         .toList())
+                .totalPrice(order.getOrderItems().stream()
+                        .map(i -> i.getQuantity() * i.getPriceAtPurchase().doubleValue())
+                        .reduce(0.0, Double::sum))
                 .build();
     }
 
-    public List<OrderResponseDto> toDtos(List<Order> orders){
+    public List<OrderResponseDto> toDtos(List<Order> orders) {
         return orders.stream()
                 .map(this::toDto).toList();
     }

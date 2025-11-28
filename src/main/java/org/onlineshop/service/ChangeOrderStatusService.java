@@ -34,7 +34,6 @@ public class ChangeOrderStatusService {
     public void processOrderStatus() {
         List<Order> ordersForProcess = getOrdersForChangeStatus();
         if (!ordersForProcess.isEmpty()) {
-            System.out.println("Orders for change status: " + ordersForProcess.size());
             for (Order order : ordersForProcess) {
                 setNextOrderStatus(order);
             }
@@ -80,6 +79,5 @@ public class ChangeOrderStatusService {
         }
         order.setUpdatedAt(LocalDateTime.now());
         orderRepository.save(order);
-        System.out.println("Changed order status to " + order.getStatus() + " for order with ID = " + order.getOrderId());
     }
 }

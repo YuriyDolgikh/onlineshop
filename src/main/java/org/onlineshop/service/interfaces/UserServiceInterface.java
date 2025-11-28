@@ -4,14 +4,14 @@ import org.onlineshop.dto.user.UserRequestDto;
 import org.onlineshop.dto.user.UserResponseDto;
 import org.onlineshop.dto.user.UserUpdateRequestDto;
 import org.onlineshop.entity.User;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface UserServiceInterface {
 
     UserResponseDto registration(UserRequestDto request);
 
-    List<UserResponseDto> getAllUsers();
+    Page<UserResponseDto> getAllUsers(Pageable pageable);
 
     UserResponseDto getUserById(Integer id);
 

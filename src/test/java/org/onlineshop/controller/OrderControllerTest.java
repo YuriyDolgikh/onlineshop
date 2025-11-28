@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.onlineshop.dto.order.OrderRequestDto;
 import org.onlineshop.dto.order.OrderResponseDto;
 import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.exception.MailSendingException;
@@ -25,51 +24,13 @@ import static org.mockito.Mockito.*;
 @DisplayName("OrderController unit tests")
 class OrderControllerTest {
 
-    @Mock
-    private OrderService orderService;
-
-    @InjectMocks
-    private OrderController orderController;
-
     private static final Integer ORDER_ID = 123;
     private static final Integer USER_ID = 456;
     private static final String PAY_METHOD = "CARD";
-    @Nested
-    @DisplayName("saveOrder() endpoint tests")
-    class SaveOrderTests {
-
-        @Test
-        @DisplayName("Should return 201 CREATED and response body when order is successfully created")
-        void saveOrder_whenValidRequest_shouldReturnCreated() {
-            OrderRequestDto requestDto = new OrderRequestDto();
-            OrderResponseDto serviceResponse = new OrderResponseDto();
-
-            when(orderService.saveOrder(requestDto)).thenReturn(serviceResponse);
-
-            ResponseEntity<OrderResponseDto> response = orderController.saveOrder(requestDto);
-
-            assertEquals(HttpStatus.CREATED, response.getStatusCode());
-            assertSame(serviceResponse, response.getBody());
-            verify(orderService).saveOrder(requestDto);
-        }
-
-        @Test
-        @DisplayName("Should propagate BadRequestException from service when request is invalid")
-        void saveOrder_whenServiceThrowsBadRequest_shouldPropagateException() {
-            OrderRequestDto requestDto = new OrderRequestDto();
-
-            when(orderService.saveOrder(requestDto))
-                    .thenThrow(new BadRequestException("Invalid order data"));
-
-            BadRequestException ex = assertThrows(
-                    BadRequestException.class,
-                    () -> orderController.saveOrder(requestDto)
-            );
-
-            assertEquals("Invalid order data", ex.getMessage());
-            verify(orderService).saveOrder(requestDto);
-        }
-    }
+    @Mock
+    private OrderService orderService;
+    @InjectMocks
+    private OrderController orderController;
 
     @Nested
     @DisplayName("getOrderById() endpoint tests")

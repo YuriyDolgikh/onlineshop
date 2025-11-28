@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
@@ -24,9 +25,9 @@ import org.springframework.test.context.TestPropertySource;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
@@ -117,16 +118,18 @@ class ProductControllerGetAllProductsForAdminTest {
 
         productRepository.save(productTestThree);
 
-        ResponseEntity<List<ProductResponseDto>> products = productController.getAllProductsForAdmin();
-        assertEquals(3, products.getBody().size());
+        ResponseEntity<Page<ProductResponseDto>> products = productController.getAllProductsForAdmin(0, 3, "name", "asc");
+        assertNotNull(products.getBody());
+        assertEquals(3, products.getBody().getTotalElements());
     }
 
     @Test
     @WithMockUser(username = "testUser@email.com",
             roles = {"ADMIN", "MANAGER"})
     void testGetAllProductsForAdminIfRoleAdminAndManagerIfDateBaseEmpty() {
-        ResponseEntity<List<ProductResponseDto>> products = productController.getAllProductsForAdmin();
-        assertEquals(0, products.getBody().size());
+        ResponseEntity<Page<ProductResponseDto>> products = productController.getAllProductsForAdmin(0, 3, "name", "asc");
+        assertNotNull(products.getBody());
+        assertEquals(0, products.getBody().getTotalElements());
     }
 
     @Test
@@ -179,7 +182,7 @@ class ProductControllerGetAllProductsForAdminTest {
 
         productRepository.save(productTestThree);
 
-        assertThrows(AuthorizationDeniedException.class, () -> productController.getAllProductsForAdmin());
+        assertThrows(AuthorizationDeniedException.class, () -> productController.getAllProductsForAdmin(0, 3, "name", "asc"));
 
     }
 
@@ -232,6 +235,6 @@ class ProductControllerGetAllProductsForAdminTest {
 
         productRepository.save(productTestThree);
 
-        assertThrows(AuthenticationCredentialsNotFoundException.class, () -> productController.getAllProductsForAdmin());
+        assertThrows(AuthenticationCredentialsNotFoundException.class, () -> productController.getAllProductsForAdmin(0, 3, "name", "asc"));
     }
 }

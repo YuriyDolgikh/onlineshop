@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.time.format.DateTimeFormatter;
 
@@ -63,13 +64,13 @@ public class PdfOrderGenerator {
 
                 BigDecimal finalPrice;
                 if (discount != null && discount.compareTo(BigDecimal.ZERO) > 0) {
-                    finalPrice = price.subtract(price.multiply(discount).divide(BigDecimal.valueOf(100)));
+                    finalPrice = price.subtract(price.multiply(discount).divide(BigDecimal.valueOf(100)).setScale(2, RoundingMode.CEILING));
                 } else {
-                    finalPrice = price;
+                    finalPrice = price.setScale(2, RoundingMode.CEILING);
                 }
 
                 BigDecimal total = finalPrice.multiply(BigDecimal.valueOf(quantity));
-                totalSumm = totalSumm.add(total);
+                totalSumm = totalSumm.add(total).setScale(2, RoundingMode.CEILING);
 
                 addTableRow(table,
                         product,

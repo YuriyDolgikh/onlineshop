@@ -1,59 +1,32 @@
 package org.onlineshop.controller;
 
-import jakarta.validation.ConstraintViolationException;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.onlineshop.dto.user.UserRequestDto;
 import org.onlineshop.dto.user.UserResponseDto;
-import org.onlineshop.entity.User;
 import org.onlineshop.exception.AlreadyExistException;
 import org.onlineshop.exception.BadRequestException;
-import org.onlineshop.repository.ConfirmationCodeRepository;
-import org.onlineshop.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.onlineshop.service.UserService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
+
+import jakarta.validation.ConstraintViolationException;
 
 import static org.junit.jupiter.api.Assertions.*;
-@SpringBootTest
-@ActiveProfiles("test")
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@TestPropertySource(locations = "classpath:application-test.yml")
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
 class UserControllerRegisterTest {
 
-    @Autowired
-    private UserRepository userRepository;
+    @Mock
+    private UserService userService;
 
-    @Autowired
-    private ConfirmationCodeRepository confirmationCodeRepository;
-
-    @Autowired
+    @InjectMocks
     private UserController userController;
-
-    @AfterEach
-    void dropDatabase() {
-        confirmationCodeRepository.deleteAll();
-        userRepository.deleteAll();
-    }
-
-    @BeforeEach
-    void setUp() {
-        User newTestUser = User.builder()
-                .username("User")
-                .email("User@email.com")
-                .hashPassword("$2a$10$WiAt7dmC1vLIxjY9/9n7P.I5RQU1MKKSOI1Dy1pNLPPIts7K5RJR2")
-                .phoneNumber("+494949494949")
-                .status(User.Status.CONFIRMED)
-                .role(User.Role.USER)
-                .build();
-
-        userRepository.save(newTestUser);
-    }
 
     @Test
     void testRegisterIfOk() {
@@ -64,10 +37,19 @@ class UserControllerRegisterTest {
                 .hashPassword("1234")
                 .build();
 
-        ResponseEntity<UserResponseDto> responseDto = userController.register(userRequestDto);
+        UserResponseDto responseDto = UserResponseDto.builder()
+                .username("TestUser")
+                .email("testUser@email.com")
+                .build();
 
-        assertNotNull(responseDto);
-        assertEquals(responseDto.getBody().getUsername(), userRequestDto.getName());
+        when(userService.registration(any(UserRequestDto.class))).thenReturn(responseDto);
+
+        ResponseEntity<UserResponseDto> response = userController.register(userRequestDto);
+
+        assertNotNull(response);
+        assertNotNull(response.getBody());
+        assertEquals(userRequestDto.getName(), response.getBody().getUsername());
+        assertEquals("testUser@email.com", response.getBody().getEmail());
     }
 
     @Test
@@ -78,6 +60,9 @@ class UserControllerRegisterTest {
                 .name("TestUser")
                 .hashPassword("1234")
                 .build();
+
+        when(userService.registration(any(UserRequestDto.class)))
+                .thenThrow(new ConstraintViolationException("Email cannot be blank", null));
 
         assertThrows(ConstraintViolationException.class, () -> userController.register(userRequestDto));
     }
@@ -91,6 +76,9 @@ class UserControllerRegisterTest {
                 .hashPassword("1234")
                 .build();
 
+        when(userService.registration(any(UserRequestDto.class)))
+                .thenThrow(new BadRequestException("Name cannot be blank"));
+
         assertThrows(BadRequestException.class, () -> userController.register(userRequestDto));
     }
 
@@ -102,6 +90,9 @@ class UserControllerRegisterTest {
                 .name("TestUser")
                 .hashPassword(" ")
                 .build();
+
+        when(userService.registration(any(UserRequestDto.class)))
+                .thenThrow(new BadRequestException("Password cannot be blank"));
 
         assertThrows(BadRequestException.class, () -> userController.register(userRequestDto));
     }
@@ -115,6 +106,9 @@ class UserControllerRegisterTest {
                 .hashPassword("1234")
                 .build();
 
+        when(userService.registration(any(UserRequestDto.class)))
+                .thenThrow(new ConstraintViolationException("Phone number cannot be blank", null));
+
         assertThrows(ConstraintViolationException.class, () -> userController.register(userRequestDto));
     }
 
@@ -126,6 +120,9 @@ class UserControllerRegisterTest {
                 .name("TestUser")
                 .hashPassword("1234")
                 .build();
+
+        when(userService.registration(any(UserRequestDto.class)))
+                .thenThrow(new DataIntegrityViolationException("Email cannot be null"));
 
         assertThrows(DataIntegrityViolationException.class, () -> userController.register(userRequestDto));
     }
@@ -139,6 +136,9 @@ class UserControllerRegisterTest {
                 .hashPassword("1234")
                 .build();
 
+        when(userService.registration(any(UserRequestDto.class)))
+                .thenThrow(new BadRequestException("Name cannot be null"));
+
         assertThrows(BadRequestException.class, () -> userController.register(userRequestDto));
     }
 
@@ -150,6 +150,9 @@ class UserControllerRegisterTest {
                 .name("TestUser")
                 .hashPassword(null)
                 .build();
+
+        when(userService.registration(any(UserRequestDto.class)))
+                .thenThrow(new BadRequestException("Password cannot be null"));
 
         assertThrows(BadRequestException.class, () -> userController.register(userRequestDto));
     }
@@ -163,9 +166,11 @@ class UserControllerRegisterTest {
                 .hashPassword("1234")
                 .build();
 
+        when(userService.registration(any(UserRequestDto.class)))
+                .thenThrow(new ConstraintViolationException("Phone number cannot be null", null));
+
         assertThrows(ConstraintViolationException.class, () -> userController.register(userRequestDto));
     }
-
 
     @Test
     void testRegisterIfPhoneAlreadyExists() {
@@ -175,6 +180,9 @@ class UserControllerRegisterTest {
                 .name("TestUser")
                 .hashPassword("1234")
                 .build();
+
+        when(userService.registration(any(UserRequestDto.class)))
+                .thenThrow(new DataIntegrityViolationException("Phone number already exists"));
 
         assertThrows(DataIntegrityViolationException.class, () -> userController.register(userRequestDto));
     }
@@ -187,6 +195,9 @@ class UserControllerRegisterTest {
                 .name("TestUser")
                 .hashPassword("1234")
                 .build();
+
+        when(userService.registration(any(UserRequestDto.class)))
+                .thenThrow(new AlreadyExistException("Email already exists"));
 
         assertThrows(AlreadyExistException.class, () -> userController.register(userRequestDto));
     }

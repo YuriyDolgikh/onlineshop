@@ -100,7 +100,7 @@ class ProductControllerUpdateProductTest {
         ResponseEntity<ProductResponseDto> response = productController.updateProduct(productTestOne.getId(),requestDto);
 
         assertNotNull(response);
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertNotNull(response.getBody());
         assertEquals(1, productRepository.findAll().size());
         assertEquals("TestProductSecond", response.getBody().getProductName());
@@ -148,7 +148,7 @@ class ProductControllerUpdateProductTest {
         ResponseEntity<ProductResponseDto> response = productController.updateProduct(productTestOne.getId(),requestDto);
 
         assertNotNull(response);
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertNotNull(response.getBody());
         assertEquals(1, productRepository.findAll().size());
         assertEquals("testCategorySecond", response.getBody().getProductCategory());
@@ -187,7 +187,7 @@ class ProductControllerUpdateProductTest {
         ResponseEntity<ProductResponseDto> response = productController.updateProduct(productTestOne.getId(),requestDto);
 
         assertNotNull(response);
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertNotNull(response.getBody());
         assertEquals(1, productRepository.findAll().size());
         assertEquals(BigDecimal.valueOf(80), response.getBody().getProductPrice());
@@ -227,7 +227,7 @@ class ProductControllerUpdateProductTest {
         ResponseEntity<ProductResponseDto> response = productController.updateProduct(productTestOne.getId(),requestDto);
 
         assertNotNull(response);
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertNotNull(response.getBody());
         assertEquals(1, productRepository.findAll().size());
         assertEquals(BigDecimal.valueOf(80), response.getBody().getProductDiscountPrice());
@@ -267,7 +267,7 @@ class ProductControllerUpdateProductTest {
         ResponseEntity<ProductResponseDto> response = productController.updateProduct(productTestOne.getId(),requestDto);
 
         assertNotNull(response);
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertNotNull(response.getBody());
         assertEquals(1, productRepository.findAll().size());
         assertEquals("New Description", response.getBody().getProductDescription());
@@ -307,7 +307,7 @@ class ProductControllerUpdateProductTest {
         ResponseEntity<ProductResponseDto> response = productController.updateProduct(productTestOne.getId(),requestDto);
 
         assertNotNull(response);
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertNotNull(response.getBody());
         assertEquals(1, productRepository.findAll().size());
         assertEquals("https://drive.google.com/file/new", response.getBody().getImage());

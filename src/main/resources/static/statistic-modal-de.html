@@ -21,7 +21,7 @@
 
             <div class="method-card">
                 <h4>getTopTenPurchasedProducts()</h4>
-                <p>Ruft Liste von 10 meistgekauften Produkten mit PAID-Status ab.</p>
+                <p>Ruft Liste von 10 meistgekauften Produkten aus bezahlten Bestellungen (PAID-Status) ab.</p>
                 <div class="method-steps">
                     <div>• Ruft private Methode getTopTenProducts(Order.Status.PAID) auf</div>
                     <div>• Gibt Liste von ProductStatisticResponseDto zurück</div>
@@ -30,7 +30,7 @@
 
             <div class="method-card">
                 <h4>getTenCanceledProducts()</h4>
-                <p>Ruft Liste von 10 Produkten ab, für die stornierte Bestellungen vorhanden waren.</p>
+                <p>Ruft Liste von 10 Produkten ab, für die stornierte Bestellungen (CANCELLED-Status) vorhanden waren.</p>
                 <div class="method-steps">
                     <div>• Ruft private Methode getTopTenProducts(Order.Status.CANCELLED) auf</div>
                     <div>• Gibt Liste von ProductStatisticResponseDto zurück</div>
@@ -41,6 +41,7 @@
                 <h4>getProductsInPendingPaymentStatus(Integer days)</h4>
                 <p>Ruft Produkte mit Bestellungen im PENDING_PAYMENT-Status für die letzten N Tage ab.</p>
                 <div class="method-steps">
+                    <div>• Validiert days-Parameter (darf nicht null oder ≤ 0 sein)</div>
                     <div>• Berechnet Periodenstartdatum</div>
                     <div>• Erstellt productQuantityMap zum Zählen der Menge jedes Produkts</div>
                     <div>• Ruft Bestellungen mit PENDING_PAYMENT-Status ab, die nach startDate erstellt wurden</div>
@@ -53,11 +54,12 @@
                 <h4>getProfitStatistics(ProfitStatisticRequestDto request)</h4>
                 <p>Ruft Gewinnstatistiken für Zeitraum mit Gruppierung nach Stunde, Tag, Woche oder Monat ab.</p>
                 <div class="method-steps">
+                    <div>• Validiert periodCount (muss > 0 sein)</div>
                     <div>• Validiert Periodeneinheit (DAYS, WEEKS, MONTHS, YEARS) und groupBy (HOUR, DAY, WEEK, MONTH)</div>
                     <div>• Bestimmt startDate und endDate</div>
-                    <div>• Ruft Bestellungen mit PAID-Status nach startDate ab</div>
+                    <div>• Ruft Bestellungen mit Status PAID, IN_TRANSIT, DELIVERED nach startDate ab</div>
                     <div>• Gruppiert Gewinn nach Schlüssel abhängig von groupBy</div>
-                    <div>• Berechnet totalProfit</div>
+                    <div>• Berechnet totalProfit als Summe aller Bestellungen</div>
                     <div>• Gibt ProfitStatisticsResponseDto mit Gewinndaten zurück</div>
                 </div>
             </div>
@@ -85,7 +87,7 @@
                     <span class="endpoint-path">/v1/statistics/topSold</span>
                     <span class="role-badge role-admin">ADMIN</span>
                 </div>
-                <p>Ruft Top-10 meistverkaufte Produkte ab</p>
+                <p>Ruft Top-10 meistverkaufte Produkte aus bezahlten Bestellungen ab</p>
             </div>
 
             <div class="endpoint-detail">
@@ -104,6 +106,9 @@
                     <span class="role-badge role-admin">ADMIN</span>
                 </div>
                 <p>Ruft Produkte mit ausstehenden Zahlungen für die letzten N Tage ab</p>
+                <div class="parameter-info">
+                    <strong>Parameter:</strong> days - Anzahl der Tage zur Überprüfung (erforderlich, Beispiel: 7)
+                </div>
             </div>
 
             <div class="endpoint-detail">
@@ -113,6 +118,9 @@
                     <span class="role-badge role-admin">ADMIN</span>
                 </div>
                 <p>Ruft Gewinnstatistiken für angegebenen Zeitraum mit Gruppierung ab</p>
+                <div class="parameter-info">
+                    <strong>Anfragebody:</strong> ProfitStatisticRequestDto (periodCount, periodUnit, groupBy)
+                </div>
             </div>
         </div>
 
@@ -122,7 +130,7 @@
             <div class="method-card">
                 <div class="method-steps">
                     <div>• <strong>Flexible Gruppierung:</strong> Unterstützung verschiedener Gruppierungsperioden (Stunde, Tag, Woche, Monat)</div>
-                    <div>• <strong>Effiziente Abfragen:</strong> Optimierte SQL-Abfragen für Arbeit mit großen Datenmengen</div>
+                    <div>• <strong>Erweiterte Gewinnstatistik:</strong> Berücksichtigung von Bestellungen mit Status PAID, IN_TRANSIT, DELIVERED</div>
                     <div>• <strong>Parametervalidierung:</strong> Überprüfung der Perioden- und Gruppierungskriterienkorrektheit</div>
                     <div>• <strong>Echtzeit-Statistiken:</strong> Aktuelle Daten basierend auf tatsächlichen Bestellungen</div>
                     <div>• <strong>Skalierbarkeit:</strong> Fähigkeit zur Verarbeitung großer Mengen historischer Daten</div>
@@ -138,8 +146,8 @@
                 <div class="method-steps">
                     <div>• <strong>Verkaufsanalyse:</strong> Identifizierung beliebtester und problematischer Produkte</div>
                     <div>• <strong>Lagerverwaltung:</strong> Daten zur Optimierung von Lagerbeständen</div>
-                    <div>• <strong>Finanzanalyse:</strong> Detaillierte Gewinnstatistiken nach Perioden</div>
-                    <div>• <strong>Problemidentifikation:</strong> Analyse stornierter Bestellungen zur Serviceverbesserung</div>
+                    <div>• <strong>Finanzanalyse:</strong> Detaillierte Gewinnstatistiken für abgeschlossene und aktive Bestellungen</div>
+                    <div>• <strong>Problemidentifikation:</strong> Analyse stornierter Bestellungen und ausstehender Zahlungen zur Serviceverbesserung</div>
                     <div>• <strong>Planung:</strong> Daten für Verkaufsprognosen und Beschaffung</div>
                 </div>
             </div>
@@ -150,11 +158,11 @@
             <h3>📈 Schlüsselmetriken</h3>
             <div class="method-card">
                 <div class="method-steps">
-                    <div>• <strong>Top-Verkäufe:</strong> 10 meistverkaufte Produkte</div>
+                    <div>• <strong>Top-Verkäufe:</strong> 10 meistverkaufte Produkte aus bezahlten Bestellungen</div>
                     <div>• <strong>Top-Stornierungen:</strong> 10 meiststornierte Produkte</div>
                     <div>• <strong>Ausstehende Zahlungen:</strong> Produkte in Bestellungen mit PENDING_PAYMENT-Status</div>
                     <div>• <strong>Gewinn nach Perioden:</strong> Gewinngruppierung nach Stunden, Tagen, Wochen, Monaten</div>
-                    <div>• <strong>Gesamtgewinn:</strong> Gesamtgewinn für ausgewählten Zeitraum</div>
+                    <div>• <strong>Gesamtgewinn:</strong> Gesamtgewinn für ausgewählten Zeitraum für abgeschlossene und aktive Bestellungen</div>
                 </div>
             </div>
         </div>

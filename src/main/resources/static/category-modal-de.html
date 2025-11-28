@@ -1,6 +1,6 @@
 <div class="modal-content">
     <div class="modal-header">
-        <h2>❤️ Favoriten Details</h2>
+        <h2>📑 Produktkategorien Details</h2>
         <button onclick="closeModal()" class="modal-close-btn">&times;</button>
     </div>
 
@@ -9,8 +9,9 @@
         <div class="description-section">
             <h3>Allgemeine Beschreibung</h3>
             <p>
-                FavouriteService ist verantwortlich für die Verwaltung der Favoritenproduktliste des Benutzers und bietet Hinzufügen,
-                Entfernen und Abrufen von Favoritenprodukten. Ermöglicht Benutzern, gemochte Produkte für schnellen Zugriff zu speichern.
+                CategoryService ist verantwortlich für die Verwaltung von Produktkategorien im System,
+                bietet Hinzufügen, Aktualisieren, Löschen von Kategorien,
+                sowie das Abrufen einer paginierten Liste aller Kategorien.
             </p>
         </div>
 
@@ -19,39 +20,103 @@
             <h3>Hauptservice-Methoden</h3>
 
             <div class="method-card">
-                <h4>addFavourite(Integer productId)</h4>
-                <p>Fügt Produkt zur Favoritenliste des Benutzers hinzu.</p>
+                <h4>addCategory(CategoryRequestDto categoryRequestDto)</h4>
+                <p>Fügt neue Kategorie hinzu.</p>
                 <div class="method-steps">
-                    <div>• Prüft, dass Produkt-ID nicht null ist</div>
-                    <div>• Ruft aktuellen Benutzer über UserService ab</div>
-                    <div>• Prüft Produktexistenz in Datenbank über ProductRepository</div>
-                    <div>• Prüft, dass dieses Produkt nicht bereits zu Favoriten hinzugefügt wurde</div>
-                    <div>• Erstellt neues Favourite-Objekt, speichert es in Datenbank</div>
-                    <div>• Gibt DTO mit Daten über dieses Element zurück</div>
-                    <div>• Im Fehlerfall wirft IllegalArgumentException, NotFoundException oder BadRequestException</div>
+                    <div>• Prüft, dass categoryRequestDto nicht null ist</div>
+                    <div>• Prüft, dass Kategoriename nicht leer ist</div>
+                    <div>• Validiert Eindeutigkeit des Kategorienamens</div>
+                    <div>• Verarbeitet Bild über CategoryServiceHelper.resolveImageUrl()</div>
+                    <div>• Erstellt neue Kategorie und speichert sie in der Datenbank</div>
+                    <div>• Gibt CategoryResponseDto der erstellten Kategorie zurück</div>
                 </div>
             </div>
 
             <div class="method-card">
-                <h4>deleteFavourite(Integer productId)</h4>
-                <p>Entfernt Produkt aus Favoritenliste des Benutzers.</p>
+                <h4>updateCategory(Integer categoryId, CategoryUpdateDto categoryUpdateDto)</h4>
+                <p>Aktualisiert bestehende Kategorie nach ihrem Identifikator.</p>
                 <div class="method-steps">
-                    <div>• Prüft, dass Produkt-ID nicht null ist</div>
-                    <div>• Ruft aktuellen Benutzer über UserService ab</div>
-                    <div>• Sucht Favoritenprodukt für diesen Benutzer</div>
-                    <div>• Löscht gefundenes Favourite-Objekt aus Datenbank</div>
-                    <div>• Gibt DTO des gelöschten Favoritenprodukts zurück</div>
-                    <div>• Im Fehlerfall wirft IllegalArgumentException oder NotFoundException</div>
+                    <div>• Prüft Existenz der Kategorie mit angegebener ID</div>
+                    <div>• Wenn neuer Name angegeben - validiert Länge (3-20 Zeichen)</div>
+                    <div>• Validiert Eindeutigkeit des neuen Kategorienamens</div>
+                    <div>• Wenn Bild angegeben - verarbeitet über Helper</div>
+                    <div>• Aktualisiert entsprechende Kategoriefelder</div>
+                    <div>• Speichert Änderungen und gibt CategoryResponseDto zurück</div>
                 </div>
             </div>
 
             <div class="method-card">
-                <h4>getFavourites()</h4>
-                <p>Gibt Liste aller Favoritenprodukte des aktuellen Benutzers zurück.</p>
+                <h4>deleteCategory(Integer categoryId)</h4>
+                <p>Löscht Kategorie nach ihrem Identifikator.</p>
                 <div class="method-steps">
-                    <div>• Ruft aktuellen Benutzer über UserService ab</div>
-                    <div>• Ruft alle Favoritenprodukte des Benutzers aus Datenbank über FavouriteRepository ab</div>
-                    <div>• Konvertiert Favourite-Liste zu FavouriteResponseDto-Liste mit FavouriteConverter</div>
+                    <div>• Prüft, dass categoryId nicht null ist</div>
+                    <div>• Prüft Kategorieexistenz in der Datenbank</div>
+                    <div>• Setzt Kategorie aller verknüpften Produkte auf null</div>
+                    <div>• Löscht Kategorie aus der Datenbank</div>
+                    <div>• Gibt CategoryResponseDto der gelöschten Kategorie zurück</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>getAllCategories(Pageable pageable)</h4>
+                <p>Gibt Seite aller Kategorien mit Paginierung zurück.</p>
+                <div class="method-steps">
+                    <div>• Ruft Seite der Kategorien über CategoryRepository ab</div>
+                    <div>• Konvertiert Category zu CategoryResponseDto über CategoryConverter</div>
+                    <div>• Gibt Page<CategoryResponseDto> zurück</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>getCategoryById(Integer categoryId)</h4>
+                <p>Gibt Kategorie nach ihrem Identifikator zurück.</p>
+                <div class="method-steps">
+                    <div>• Sucht Kategorie über CategoryRepository.findByCategoryId()</div>
+                    <div>• Wenn Kategorie nicht gefunden, wirft BadRequestException</div>
+                    <div>• Gibt Category-Objekt zurück (nicht DTO)</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>getCategoryByName(String categoryName)</h4>
+                <p>Gibt Kategorie nach ihrem Namen zurück.</p>
+                <div class="method-steps">
+                    <div>• Sucht Kategorie über CategoryRepository.findByCategoryName()</div>
+                    <div>• Wenn Kategorie nicht gefunden, wirft BadRequestException</div>
+                    <div>• Gibt Category-Objekt zurück (nicht DTO)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DTO Objekte -->
+        <div class="methods-section">
+            <h3>📊 DTO Objekte</h3>
+
+            <div class="method-card">
+                <h4>CategoryRequestDto</h4>
+                <p>Für Erstellung neuer Kategorie</p>
+                <div class="method-steps">
+                    <div>• categoryName: String - Kategoriename (erforderlich)</div>
+                    <div>• image: String - Kategoriebild-URL</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>CategoryUpdateDto</h4>
+                <p>Für Aktualisierung bestehender Kategorie</p>
+                <div class="method-steps">
+                    <div>• categoryName: String - neuer Kategoriename (optional)</div>
+                    <div>• image: String - neues Kategoriebild (optional)</div>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <h4>CategoryResponseDto</h4>
+                <p>Antwort mit Kategorieinformationen</p>
+                <div class="method-steps">
+                    <div>• categoryId: Integer - Kategorie-Identifikator</div>
+                    <div>• categoryName: String - Kategoriename</div>
+                    <div>• image: String - Kategoriebild-URL</div>
                 </div>
             </div>
         </div>
@@ -62,29 +127,41 @@
 
             <div class="endpoint-detail">
                 <div class="endpoint-header">
-                    <span class="http-method get">GET</span>
-                    <span class="endpoint-path">/v1/favorites</span>
-                    <span class="role-badge role-user">USER</span>
+                    <span class="http-method post">POST</span>
+                    <span class="endpoint-path">/v1/categories</span>
+                    <span class="role-badge role-admin">ADMIN</span>
                 </div>
-                <p>Ruft Liste aller Favoritenprodukte des aktuellen Benutzers ab</p>
+                <p>Erstellt neue Kategorie im System. Erfordert eindeutigen Kategorienamen.</p>
             </div>
 
             <div class="endpoint-detail">
                 <div class="endpoint-header">
-                    <span class="http-method get">GET</span>
-                    <span class="endpoint-path">/v1/favorites/{productId}</span>
-                    <span class="role-badge role-user">USER</span>
+                    <span class="http-method put">PUT</span>
+                    <span class="endpoint-path">/v1/categories/{categoryId}</span>
+                    <span class="role-badge role-manager">MANAGER</span>
                 </div>
-                <p>Fügt Produkt zur Favoritenliste hinzu (verwendet GET für Client-Anwendungen Bequemlichkeit)</p>
+                <p>Aktualisiert bestehende Kategorie nach ID. Unterstützt partielle Aktualisierungen.</p>
             </div>
 
             <div class="endpoint-detail">
                 <div class="endpoint-header">
                     <span class="http-method delete">DELETE</span>
-                    <span class="endpoint-path">/v1/favorites/{productId}</span>
+                    <span class="endpoint-path">/v1/categories/{categoryId}</span>
+                    <span class="role-badge role-admin">ADMIN</span>
+                </div>
+                <p>Löscht Kategorie aus dem System. Produkte bleiben ohne Kategorie (category = null).</p>
+            </div>
+
+            <div class="endpoint-detail">
+                <div class="endpoint-header">
+                    <span class="http-method get">GET</span>
+                    <span class="endpoint-path">/v1/categories?page=0&size=20</span>
                     <span class="role-badge role-user">USER</span>
                 </div>
-                <p>Entfernt Produkt aus Favoritenliste</p>
+                <p>Ruft paginierte Liste aller Kategorien ab.</p>
+                <div class="method-steps">
+                    <div>• Parameter: page (Standard 0), size (Standard 20)</div>
+                </div>
             </div>
         </div>
 
@@ -93,9 +170,12 @@
             <h3>🔧 Implementierungsmerkmale</h3>
             <div class="method-card">
                 <div class="method-steps">
-                    <div>• <strong>Favoriteneindeutigkeit:</strong> Ein Produkt kann nur einmal pro Benutzer zu Favoriten hinzugefügt werden</div>
-                    <div>• <strong>Datenvalidierung:</strong> Überprüfung der Produktexistenz und Abwesenheit von Duplikaten in Favoriten</div>
-                    <div>• <strong>Sicherheit:</strong> Zugriff nur auf eigene Favoritenliste des Benutzers</div>
+                    <div>• <strong>Datenvalidierung:</strong> Prüfung der Namenseindeutigkeit, Namenslänge (3-20 Zeichen)</div>
+                    <div>• <strong>Bildverarbeitung:</strong> Automatische URL-Konvertierung über CategoryServiceHelper</div>
+                    <div>• <strong>Sicheres Löschen:</strong> Produkte werden nicht gelöscht, sondern bleiben ohne Kategorie</div>
+                    <div>• <strong>Paginierung:</strong> Unterstützung für seitenweise Ausgabe der Kategorieliste</div>
+                    <div>• <strong>Flexible Aktualisierungen:</strong> Unterstützung für partielle Feldaktualisierungen</div>
+                    <div>• <strong>Transaktionssicherheit:</strong> Alle Operationen werden innerhalb von Transaktionen durchgeführt</div>
                 </div>
             </div>
         </div>
@@ -105,9 +185,10 @@
             <h3>💼 Geschäftslogik</h3>
             <div class="method-card">
                 <div class="method-steps">
-                    <div>• <strong>Einschränkungen:</strong> Maximale Anzahl von Favoritenprodukten kann auf Geschäftsregeln-Ebene begrenzt werden</div>
-                    <div>• <strong>Validierung:</strong> Produkt muss im System existieren, bevor es zu Favoriten hinzugefügt wird</div>
-                    <div>• <strong>Datenintegrität:</strong> Wenn Produkt aus System gelöscht wird, wird es automatisch aus allen Favoritenlisten entfernt</div>
+                    <div>• <strong>Kategorieeindeutigkeit:</strong> Kategorienamen müssen im System eindeutig sein</div>
+                    <div>• <strong>Datenintegrität:</strong> Produkte gehen nicht verloren, wenn Kategorie gelöscht wird</div>
+                    <div>• <strong>Eingabevalidierung:</strong> Strenge Anforderungen an die Länge der Kategorienamen</div>
+                    <div>• <strong>Bildverwaltung:</strong> Zentrale Verarbeitung von Bild-URLs</div>
                 </div>
             </div>
         </div>

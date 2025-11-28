@@ -9,9 +9,9 @@
         <div class="description-section">
             <h3>General Description</h3>
             <p>
-                OrderItemService is responsible for managing products added to user orders.
-                Performs operations for adding, deleting and updating product quantities in current user order
-                with PENDING_PAYMENT status. Provides flexible management of order contents until payment moment.
+                OrderItemService is responsible for managing individual items within user orders.
+                Performs operations for deleting and updating product quantities in orders
+                with PENDING_PAYMENT status. Provides management of order contents until payment moment.
             </p>
         </div>
 
@@ -20,26 +20,15 @@
             <h3>Main Service Methods</h3>
 
             <div class="method-card">
-                <h4>addItemToOrder(OrderItemRequestDto dto)</h4>
-                <p>Adds product to current user's open order.</p>
-                <div class="method-steps">
-                    <div>• Validates input data</div>
-                    <div>• Checks that productId and quantity are not null and quantity is greater than zero</div>
-                    <div>• Finds product by provided productId in ProductRepository</div>
-                    <div>• Calculates price at purchase moment - if product has discount, price with discount is applied</div>
-                    <div>• Creates new OrderItem object, adds it to current order and saves to database</div>
-                    <div>• Returns DTO of added order item (OrderItemResponseDto)</div>
-                </div>
-            </div>
-
-            <div class="method-card">
                 <h4>deleteItemFromOrder(Integer orderItemId)</h4>
                 <p>Deletes specific product from order by order item identifier.</p>
                 <div class="method-steps">
                     <div>• Checks that orderItemId is not null</div>
-                    <div>• Finds corresponding element in OrderItemRepository</div>
-                    <div>• Deletes element from current order's orderItems collection (orphanRemoval mechanism included)</div>
-                    <div>• Deletes element from database and saves updated order</div>
+                    <div>• Finds corresponding order item in OrderItemRepository</div>
+                    <div>• Validates that order is in PENDING_PAYMENT status</div>
+                    <div>• Checks that order belongs to current user</div>
+                    <div>• Removes item from order's orderItems collection</div>
+                    <div>• Deletes item from database and saves updated order</div>
                 </div>
             </div>
 
@@ -47,21 +36,13 @@
                 <h4>updateItemQuantityInOrder(OrderItemUpdateDto dto)</h4>
                 <p>Updates quantity of specific product in user's order.</p>
                 <div class="method-steps">
-                    <div>• Validates input data (dto != null, quantity > 0)</div>
-                    <div>• Checks if order item exists by orderItemId</div>
-                    <div>• Checks if order belongs to current user (prevents modification of someone else's order)</div>
-                    <div>• Updates product quantity, saves changes in OrderItemRepository</div>
+                    <div>• Validates input data (dto != null)</div>
+                    <div>• Finds order item by orderItemId from dto</div>
+                    <div>• Validates that quantity is at least 1</div>
+                    <div>• Checks if order belongs to current user</div>
+                    <div>• Validates that order is in PENDING_PAYMENT status</div>
+                    <div>• Updates product quantity and saves changes</div>
                     <div>• Returns updated order item as DTO (OrderItemResponseDto)</div>
-                </div>
-            </div>
-
-            <div class="method-card">
-                <h4>getCurrentOrder() [private method]</h4>
-                <p>Returns current user's open order.</p>
-                <div class="method-steps">
-                    <div>• Gets current user via UserService</div>
-                    <div>• Searches among user's orders for one with PENDING_PAYMENT status</div>
-                    <div>• If such order not found - throws NotFoundException</div>
                 </div>
             </div>
         </div>
@@ -95,11 +76,10 @@
             <div class="method-card">
                 <div class="method-steps">
                     <div>• <strong>Security:</strong> Checking order ownership by current user</div>
-                    <div>• <strong>Fixed Prices:</strong> Product price is fixed when added to order</div>
-                    <div>• <strong>Discount Accounting:</strong> Automatic discount application when calculating price</div>
-                    <div>• <strong>Orphan Removal:</strong> Automatic element deletion when removed from collection</div>
-                    <div>• <strong>Validation:</strong> Checking quantity correctness and product existence</div>
-                    <div>• <strong>Limitations:</strong> Changes possible only for orders with PENDING_PAYMENT status</div>
+                    <div>• <strong>Status Validation:</strong> Operations allowed only for orders with PENDING_PAYMENT status</div>
+                    <div>• <strong>Data Integrity:</strong> Automatic removal from order collection when deleting items</div>
+                    <div>• <strong>Validation:</strong> Checking quantity correctness and order item existence</div>
+                    <div>• <strong>Error Handling:</strong> Detailed exceptions for various error scenarios</div>
                 </div>
             </div>
         </div>
@@ -109,9 +89,10 @@
             <h3>💼 Business Logic</h3>
             <div class="method-card">
                 <div class="method-steps">
-                    <div>• <strong>Pricing Policy:</strong> Prices are fixed when added to order, protecting from changes</div>
-                    <div>• <strong>Change Flexibility:</strong> User can modify order contents until payment moment</div>
-                    <div>• <strong>Integrity Control:</strong> Checking product existence before adding to order</div>
+                    <div>• <strong>Order Modification:</strong> Users can modify order contents until payment is confirmed</div>
+                    <div>• <strong>Ownership Control:</strong> Users can only manage items in their own orders</div>
+                    <div>• <strong>Status Workflow:</strong> Order items become immutable after payment confirmation</div>
+                    <div>• <strong>Quantity Control:</strong> Minimum quantity of 1 enforced for all order items</div>
                 </div>
             </div>
         </div>

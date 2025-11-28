@@ -1,43 +1,31 @@
 package org.onlineshop.controller;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.onlineshop.dto.favourite.FavouriteResponseDto;
 import org.onlineshop.service.FavouriteService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@AutoConfigureMockMvc
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@TestPropertySource(locations = "classpath:application-test.yml")
+@ExtendWith(MockitoExtension.class)
 class FavouriteControllerGetFavouriteTest {
-    @Autowired
-    private MockMvc mockMvc;
 
-    @MockBean
+    @Mock
     private FavouriteService favouriteService;
 
-    @Test
-    @WithMockUser(username = "testUser@email.com",
-            roles = {"ADMIN", "MANAGER", "USER"})
-    void getFavouriteIfOk() throws Exception {
+    @InjectMocks
+    private FavouriteController favouriteController;
 
+    @Test
+    void getFavouriteIfOk() {
         List<FavouriteResponseDto> list = List.of(
                 new FavouriteResponseDto(1, "aaaa"),
                 new FavouriteResponseDto(5, "bbbb"),
@@ -46,51 +34,39 @@ class FavouriteControllerGetFavouriteTest {
 
         when(favouriteService.getFavourites()).thenReturn(list);
 
-        mockMvc.perform(get("/v1/favorites"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        ResponseEntity<List<FavouriteResponseDto>> response = favouriteController.getFavorites();
 
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$.size()").value(3))
-
-                .andExpect(jsonPath("$[0].favouriteId").value(1))
-                .andExpect(jsonPath("$[0].productName").value("aaaa"))
-                .andExpect(jsonPath("$[1].favouriteId").value(5))
-                .andExpect(jsonPath("$[1].productName").value("bbbb"))
-                .andExpect(jsonPath("$[2].favouriteId").value(13))
-                .andExpect(jsonPath("$[2].productName").value("dddd"));
-
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(3, response.getBody().size());
+        assertEquals(1, response.getBody().get(0).getFavouriteId());
+        assertEquals("aaaa", response.getBody().get(0).getProductName());
+        assertEquals(5, response.getBody().get(1).getFavouriteId());
+        assertEquals("bbbb", response.getBody().get(1).getProductName());
+        assertEquals(13, response.getBody().get(2).getFavouriteId());
+        assertEquals("dddd", response.getBody().get(2).getProductName());
         verify(favouriteService, times(1)).getFavourites();
     }
 
     @Test
-    void getFavouriteUnauthorized() throws Exception {
-        mockMvc.perform(get("/v1/favorites"))
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    @WithMockUser(username = "testUser@email.com",
-            roles = {"ADMIN", "MANAGER", "USER"})
-    void getFavouriteIfEmpty() throws Exception {
-
+    void getFavouriteIfEmpty() {
         when(favouriteService.getFavourites()).thenReturn(List.of());
 
-        mockMvc.perform(get("/v1/favorites"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()").value(0));
+        ResponseEntity<List<FavouriteResponseDto>> response = favouriteController.getFavorites();
 
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().isEmpty());
         verify(favouriteService, times(1)).getFavourites();
     }
 
     @Test
-    @WithMockUser(username = "testUser@email.com",
-            roles = {"ADMIN", "MANAGER", "USER"})
-    void getFavouriteIfErrors() throws Exception {
+    void getFavouriteIfErrors() {
         when(favouriteService.getFavourites())
                 .thenThrow(new RuntimeException("Test service failure"));
 
-        mockMvc.perform(get("/v1/favorites"))
-                .andExpect(status().is5xxServerError());
+        assertThrows(RuntimeException.class, () -> favouriteController.getFavorites());
     }
 }

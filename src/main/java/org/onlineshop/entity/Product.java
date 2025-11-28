@@ -40,7 +40,7 @@ public class Product {
     @DecimalMin(value = "0.01", message = "Price must be greater than 0")
     private BigDecimal price;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 

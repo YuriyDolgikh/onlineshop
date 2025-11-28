@@ -34,15 +34,18 @@ public class Order {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    //    @NotBlank
     @Size(max = 100)
     private String deliveryAddress;
 
+    //    @NotBlank
     @Pattern(
             regexp = "^\\+?[0-9]{7,15}$",
             message = "Phone number must contain only digits and may start with +, length 7–15"
     )
     private String contactPhone;
 
+    //    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private DeliveryMethod deliveryMethod;
 
@@ -53,6 +56,7 @@ public class Order {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    @Builder.Default
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<OrderItem> orderItems = new ArrayList<>();

@@ -912,7 +912,332 @@ databaseChangeLog:
               UPDATE users u
               SET cart_id = c.cart_id
               FROM carts c
-              WHERE c.user_id = u.user_id;                
+              WHERE c.user_id = u.user_id;
+
+  - changeSet:
+      id: 22
+      author: 050525group
+      comment: "Create index on users.email for fast lookups"
+      changes:
+        - createIndex:
+            indexName: idx_users_email
+            tableName: users
+            unique: false
+            columns:
+              - column:
+                  name: email
+#                 Speeds up user lookup by email (used during authentication)
+
+  - changeSet:
+      id: 23
+      author: 050525group
+      comment: "Create unique index for products (name + category) to prevent race conditions"
+      changes:
+        - createIndex:
+            indexName: idx_product_name_category_unique
+            tableName: products
+            unique: true
+            columns:
+              - column:
+                  name: name
+              - column:
+                  name: category_id
+#                 Note: PostgreSQL automatically creates an index for a unique constraint
+#                 This prevents creating duplicate products within the same category
+
+  - changeSet:
+      id: 24
+      author: 050525group
+      comment: "Create unique index for favourites (user + product) to prevent race conditions"
+      changes:
+        - createIndex:
+            indexName: idx_favourites_user_product_unique
+            tableName: favourites
+            unique: true
+            columns:
+              - column:
+                  name: user_id
+              - column:
+                  name: product_id
+#                 Prevents adding the same product to favourites twice
+
+  - changeSet:
+      id: 25
+      author: 050525group
+      comment: "Create index on users.phone_number for fast lookups"
+      changes:
+        - createIndex:
+            indexName: idx_users_phone_number
+            tableName: users
+            unique: false
+            columns:
+              - column:
+                  name: phone_number
+#                  Speeds up user lookup by phone number
+
+  - changeSet:
+      id: 26
+      author: 050525group
+      comment: "Create composite index on orders (status + created_at) for statistics queries"
+      changes:
+        - createIndex:
+            indexName: idx_orders_status_created_at
+            tableName: orders
+            unique: false
+            columns:
+              - column:
+                  name: status
+              - column:
+                  name: created_at
+                  # Speeds up statistics queries: findByStatusAndCreatedAtAfter()
+                  # Used in StatisticService to retrieve orders by status and date
+
+  - changeSet:
+      id: 27
+      author: 050525group
+      comment: "Create index on orders.user_id for fast user order lookups"
+      changes:
+        - createIndex:
+            indexName: idx_orders_user_id
+            tableName: orders
+            unique: false
+            columns:
+              - column:
+                  name: user_id
+                  # Speeds up fetching user orders: findByUser()
+
+  - changeSet:
+      id: 28
+      author: 050525group
+      comment: "Create index on products.category_id for fast category product lookups"
+      changes:
+        - createIndex:
+            indexName: idx_products_category_id
+            tableName: products
+            unique: false
+            columns:
+              - column:
+                  name: category_id
+                  # Speeds up fetching products by category: findByCategory()
+
+  - changeSet:
+      id: 29
+      author: 050525group
+      comment: "Create index on products.name for fast product name searches"
+      changes:
+        - createIndex:
+            indexName: idx_products_name
+            tableName: products
+            unique: false
+            columns:
+              - column:
+                  name: name
+                  # Speeds up product name searches: findByNameContainingIgnoreCase()
+                  # Note: for case-insensitive search, a functional index may be required
+
+  - changeSet:
+      id: 30
+      author: 050525group
+      comment: "Create index on products.price for fast price range queries"
+      changes:
+        - createIndex:
+            indexName: idx_products_price
+            tableName: products
+            unique: false
+            columns:
+              - column:
+                  name: price
+                  # Speeds up price range lookup: findByPriceBetween()
+
+  - changeSet:
+      id: 31
+      author: 050525group
+      comment: "Create index on products.discount_price for discount queries"
+      changes:
+        - createIndex:
+            indexName: idx_products_discount_price
+            tableName: products
+            unique: false
+            columns:
+              - column:
+                  name: discount_price
+                  # Speeds up fetching discounted products: findByDiscountPriceGreaterThan()
+
+  - changeSet:
+      id: 32
+      author: 050525group
+      comment: "Create index on products.created_at for date-based sorting"
+      changes:
+        - createIndex:
+            indexName: idx_products_created_at
+            tableName: products
+            unique: false
+            columns:
+              - column:
+                  name: created_at
+                  # Speeds up sorting products by creation date
+
+  - changeSet:
+      id: 33
+      author: 050525group
+      comment: "Create index on order_items.order_id for fast order item lookups"
+      changes:
+        - createIndex:
+            indexName: idx_order_items_order_id
+            tableName: order_items
+            unique: false
+            columns:
+              - column:
+                  name: order_id
+                  # Speeds up loading order items
+
+  - changeSet:
+      id: 34
+      author: 050525group
+      comment: "Create index on order_items.product_id for product statistics"
+      changes:
+        - createIndex:
+            indexName: idx_order_items_product_id
+            tableName: order_items
+            unique: false
+            columns:
+              - column:
+                  name: product_id
+                  # Speeds up product statistics (top selling, cancelled, etc.)
+
+  - changeSet:
+      id: 35
+      author: 050525group
+      comment: "Create index on cart_items.cart_id for fast cart item lookups"
+      changes:
+        - createIndex:
+            indexName: idx_cart_items_cart_id
+            tableName: cart_items
+            unique: false
+            columns:
+              - column:
+                  name: cart_id
+                  # Speeds up loading cart items
+
+  - changeSet:
+      id: 36
+      author: 050525group
+      comment: "Create index on cart_items.product_id for product lookups in cart"
+      changes:
+        - createIndex:
+            indexName: idx_cart_items_product_id
+            tableName: cart_items
+            unique: false
+            columns:
+              - column:
+                  name: product_id
+                  # Speeds up checking product presence in cart
+
+  - changeSet:
+      id: 37
+      author: 050525group
+      comment: "Create index on confirmation_codes.code for fast code lookups"
+      changes:
+        - createIndex:
+            indexName: idx_confirmation_codes_code
+            tableName: confirmation_codes
+            unique: false
+            columns:
+              - column:
+                  name: code
+                  # Speeds up confirmation code lookup: findByCode()
+                  # Note: the code already has a unique constraint, but this index improves performance
+
+  - changeSet:
+      id: 38
+      author: 050525group
+      comment: "Create index on confirmation_codes.user_id for user code lookups"
+      changes:
+        - createIndex:
+            indexName: idx_confirmation_codes_user_id
+            tableName: confirmation_codes
+            unique: false
+            columns:
+              - column:
+                  name: user_id
+                  # Speeds up user-based confirmation code lookup: findByUser()
+
+  - changeSet:
+      id: 39
+      author: 050525group
+      comment: "Create index on confirmation_codes.expire_data_time for expiration checks"
+      changes:
+        - createIndex:
+            indexName: idx_confirmation_codes_expire_data_time
+            tableName: confirmation_codes
+            unique: false
+            columns:
+              - column:
+                  name: expire_data_time
+                  # Speeds up user-based confirmation code lookup: findByUser()
+
+  - changeSet:
+      id: 40
+      author: 050525group
+      comment: "Create functional index for case-insensitive product name search"
+      changes:
+        - sql:
+            sql: |
+              CREATE INDEX IF NOT EXISTS idx_products_name_lower 
+              ON products (LOWER(name));
+            # Speeds up case-insensitive search: findByNameContainingIgnoreCase()
+            # PostgreSQL uses this index for queries with LOWER() or ILIKE
+
+  - changeSet:
+      id: 41
+      author: 050525group
+      comment: "Create functional index for case-insensitive category name search"
+      changes:
+        - sql:
+            sql: |
+              CREATE INDEX IF NOT EXISTS idx_category_name_lower 
+              ON category (LOWER(category_name));
+            # Speeds up case-insensitive category name search
+
+  - changeSet:
+      id: 42
+      author: 050525group
+      comment: "Create composite index for orders by user and status"
+      changes:
+        - createIndex:
+            indexName: idx_orders_user_status
+            tableName: orders
+            unique: false
+            columns:
+              - column:
+                  name: user_id
+              - column:
+                  name: status
+                  # Speeds up lookup of user's open orders:
+                  # SELECT * FROM orders WHERE user_id = ? AND status = 'PENDING_PAYMENT'
+
+  - changeSet:
+      id: 43
+      author: 050525group
+      comment: "Create composite index for products by category and discount"
+      changes:
+        - createIndex:
+            indexName: idx_products_category_discount
+            tableName: products
+            unique: false
+            columns:
+              - column:
+                  name: category_id
+              - column:
+                  name: discount_price
+                  # Speeds up fetching discounted products within a category
+
+
+            
+
+  
+
+  
 
 
 

@@ -5,10 +5,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.onlineshop.dto.orderItem.OrderItemRequestDto;
 import org.onlineshop.dto.orderItem.OrderItemResponseDto;
 import org.onlineshop.dto.orderItem.OrderItemUpdateDto;
 import org.onlineshop.entity.Order;
@@ -27,7 +25,8 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(org.mockito.junit.jupiter.MockitoExtension.class)
 @DisplayName("OrderItemService unit tests")
@@ -84,160 +83,6 @@ class OrderItemServiceTest {
                 .price(new BigDecimal("100"))
                 .discountPrice(BigDecimal.ZERO)
                 .build();
-    }
-
-    @Nested
-    @DisplayName("addItemToOrder() tests")
-    class AddItemToOrderTests {
-
-        @Test
-        @DisplayName("Should throw BadRequestException when request DTO is null")
-        void addItemToOrder_whenRequestNull_shouldThrowBadRequest() {
-            BadRequestException ex = assertThrows(
-                    BadRequestException.class,
-                    () -> orderItemService.addItemToOrder(null)
-            );
-            assertEquals("Request cannot be null", ex.getMessage());
-        }
-
-        @Test
-        @DisplayName("Should throw IllegalArgumentException when productId or quantity are null")
-        void addItemToOrder_whenProductIdOrQuantityNull_shouldThrowIllegalArgument() {
-            OrderItemRequestDto dto1 = OrderItemRequestDto.builder()
-                    .productId(null)
-                    .quantity(1)
-                    .build();
-
-            OrderItemRequestDto dto2 = OrderItemRequestDto.builder()
-                    .productId(1)
-                    .quantity(null)
-                    .build();
-
-            IllegalArgumentException ex1 = assertThrows(
-                    IllegalArgumentException.class,
-                    () -> orderItemService.addItemToOrder(dto1)
-            );
-            assertEquals("Params cannot be null", ex1.getMessage());
-
-            IllegalArgumentException ex2 = assertThrows(
-                    IllegalArgumentException.class,
-                    () -> orderItemService.addItemToOrder(dto2)
-            );
-            assertEquals("Params cannot be null", ex2.getMessage());
-        }
-
-        @Test
-        @DisplayName("Should throw IllegalArgumentException when quantity < 1")
-        void addItemToOrder_whenQuantityLessThanOne_shouldThrowIllegalArgument() {
-            OrderItemRequestDto dto = OrderItemRequestDto.builder()
-                    .productId(1)
-                    .quantity(0)
-                    .build();
-
-            IllegalArgumentException ex = assertThrows(
-                    IllegalArgumentException.class,
-                    () -> orderItemService.addItemToOrder(dto)
-            );
-            assertEquals("Quantity cannot be less than 1", ex.getMessage());
-        }
-
-        @Test
-        @DisplayName("Should throw NotFoundException when no open order exists for current user")
-        void addItemToOrder_whenNoOpenedOrder_shouldThrowNotFound() {
-            User userNoOrders = User.builder()
-                    .userId(20)
-                    .orders(new ArrayList<>())
-                    .build();
-
-            when(userService.getCurrentUser()).thenReturn(userNoOrders);
-
-            OrderItemRequestDto dto = OrderItemRequestDto.builder()
-                    .productId(1)
-                    .quantity(1)
-                    .build();
-
-            NotFoundException ex = assertThrows(
-                    NotFoundException.class,
-                    () -> orderItemService.addItemToOrder(dto)
-            );
-            assertEquals("No opened order found for current user", ex.getMessage());
-        }
-
-        @Test
-        @DisplayName("Should throw NotFoundException when product does not exist")
-        void addItemToOrder_whenProductNotFound_shouldThrowNotFound() {
-            when(userService.getCurrentUser()).thenReturn(currentUser);
-            OrderItemRequestDto dto = OrderItemRequestDto.builder()
-                    .productId(999)
-                    .quantity(1)
-                    .build();
-
-            when(productRepository.findById(999))
-                    .thenReturn(Optional.empty());
-
-            NotFoundException ex = assertThrows(
-                    NotFoundException.class,
-                    () -> orderItemService.addItemToOrder(dto)
-            );
-            assertEquals("Product not found with ID: 999", ex.getMessage());
-        }
-
-        @Test
-        @DisplayName("Should calculate discount price when product has discount")
-        void addItemToOrder_whenProductHasDiscount_shouldCalculateDiscountPrice() {
-            when(userService.getCurrentUser()).thenReturn(currentUser);
-            when(productRepository.findById(1)).thenReturn(Optional.of(productWithDiscount));
-
-            OrderItemRequestDto dto = OrderItemRequestDto.builder()
-                    .productId(1)
-                    .quantity(2)
-                    .build();
-
-            when(orderItemRepository.save(any(OrderItem.class)))
-                    .thenAnswer(inv -> inv.getArgument(0));
-            when(orderItemConverter.toDto(any(OrderItem.class)))
-                    .thenReturn(new OrderItemResponseDto());
-
-            OrderItemResponseDto response = orderItemService.addItemToOrder(dto);
-            assertNotNull(response);
-
-            ArgumentCaptor<OrderItem> captor = ArgumentCaptor.forClass(OrderItem.class);
-            verify(orderItemRepository).save(captor.capture());
-            OrderItem saved = captor.getValue();
-
-            assertEquals(0, saved.getPriceAtPurchase().compareTo(new BigDecimal("20")));
-            assertEquals(openOrder, saved.getOrder());
-            assertEquals(productWithDiscount, saved.getProduct());
-            assertEquals(2, saved.getQuantity());
-            assertTrue(openOrder.getOrderItems().contains(saved));
-        }
-
-        @Test
-        @DisplayName("Should use full price when product has no discount")
-        void addItemToOrder_whenProductWithoutDiscount_shouldUsePrice() {
-            when(userService.getCurrentUser()).thenReturn(currentUser);
-            when(productRepository.findById(2)).thenReturn(Optional.of(productWithoutDiscount));
-
-            OrderItemRequestDto dto = OrderItemRequestDto.builder()
-                    .productId(2)
-                    .quantity(3)
-                    .build();
-
-            when(orderItemRepository.save(any(OrderItem.class)))
-                    .thenAnswer(inv -> inv.getArgument(0));
-            when(orderItemConverter.toDto(any(OrderItem.class)))
-                    .thenReturn(new OrderItemResponseDto());
-
-            OrderItemResponseDto response = orderItemService.addItemToOrder(dto);
-            assertNotNull(response);
-
-            ArgumentCaptor<OrderItem> captor = ArgumentCaptor.forClass(OrderItem.class);
-            verify(orderItemRepository).save(captor.capture());
-            OrderItem saved = captor.getValue();
-
-            assertEquals(0, saved.getPriceAtPurchase().compareTo(new BigDecimal("100")));
-            assertEquals(3, saved.getQuantity());
-        }
     }
 
     @Nested

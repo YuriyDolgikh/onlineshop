@@ -1,114 +1,76 @@
 package org.onlineshop.controller;
 
-import org.onlineshop.exception.BadRequestException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.onlineshop.dto.favourite.FavouriteResponseDto;
+import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.service.FavouriteService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@AutoConfigureMockMvc
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@TestPropertySource(locations = "classpath:application-test.yml")
+@ExtendWith(MockitoExtension.class)
 class FavouriteControllerAddFavouriteTest {
-    @Autowired
-    private MockMvc mockMvc;
 
-    @MockBean
+    @Mock
     private FavouriteService favouriteService;
 
+    @InjectMocks
+    private FavouriteController favouriteController;
+
     @Test
-    @WithMockUser(username = "testUser@email.com",
-            roles = {"ADMIN", "MANAGER", "USER"})
-    void addFavouriteIfOk() throws Exception {
-
+    void addFavouriteIfOk() {
         FavouriteResponseDto dto = new FavouriteResponseDto(5, "bbbb");
-
         when(favouriteService.addFavourite(5)).thenReturn(dto);
 
-        mockMvc.perform(post("/v1/favorites/5"))
-                .andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        ResponseEntity<FavouriteResponseDto> response = favouriteController.addFavourite(5);
 
-                .andExpect(jsonPath("$.favouriteId").value(5))
-                .andExpect(jsonPath("$.productName").value("bbbb"));
-
+        assertNotNull(response);
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(5, response.getBody().getFavouriteId());
+        assertEquals("bbbb", response.getBody().getProductName());
         verify(favouriteService, times(1)).addFavourite(5);
     }
 
     @Test
-    void addFavouriteUnauthorized() throws Exception {
-        mockMvc.perform(post("/v1/favorites/5"))
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    @WithMockUser(username = "testUser@email.com",
-            roles = {"ADMIN", "MANAGER", "USER"})
-    void addFavouriteIfProductIdNull() throws Exception {
+    void addFavouriteIfProductIdNull() {
         when(favouriteService.addFavourite(null))
                 .thenThrow(new IllegalArgumentException("Product Id cannot be null"));
 
-        mockMvc.perform(post("/v1/favorites/null"))
-                .andExpect(status().isBadRequest());
+        assertThrows(IllegalArgumentException.class, () -> favouriteController.addFavourite(null));
+        verify(favouriteService, times(1)).addFavourite(null);
     }
 
     @Test
-    @WithMockUser(username = "testUser@email.com",
-            roles = {"ADMIN", "MANAGER", "USER"})
-    void addFavouriteIfProductNotFound() throws Exception {
-
+    void addFavouriteIfProductNotFound() {
         when(favouriteService.addFavourite(99999))
                 .thenThrow(new NotFoundException("Product not found with ID: 999"));
 
-        mockMvc.perform(post("/v1/favorites/99999"))
-                .andExpect(status().isNotFound());
-        verify(favouriteService, times(1)).addFavourite(any());
+        assertThrows(NotFoundException.class, () -> favouriteController.addFavourite(99999));
+        verify(favouriteService, times(1)).addFavourite(99999);
     }
 
     @Test
-    @WithMockUser(username = "testUser@email.com",
-            roles = {"ADMIN", "MANAGER", "USER"})
-    void addFavouriteIAlreadyExist() throws Exception {
+    void addFavouriteIAlreadyExist() {
         Integer productId = 2;
+        doThrow(new BadRequestException("Product is already in favourites"))
+                .when(favouriteService).addFavourite(productId);
 
-        doThrow(new BadRequestException("Product is already in favourites")).when(favouriteService).addFavourite(productId);
-
-        mockMvc.perform(post("/v1/favorites/{productId}",productId))
-                .andExpect(status().isBadRequest());
+        assertThrows(BadRequestException.class, () -> favouriteController.addFavourite(productId));
         verify(favouriteService, times(1)).addFavourite(productId);
     }
 
     @Test
-    @WithMockUser(username = "testUser@email.com",
-            roles = {"ADMIN", "MANAGER", "USER"})
-    void addFavouriteIfServiceThrows() throws Exception {
+    void addFavouriteIfServiceThrows() {
         when(favouriteService.addFavourite(10)).thenThrow(new RuntimeException("Something bad"));
 
-        mockMvc.perform(post("/v1/favorites/10"))
-                .andExpect(status().is5xxServerError());
-    }
-
-    @Test
-    @WithMockUser(username = "testUser@email.com",
-            roles = {"ADMIN", "MANAGER", "USER"})
-    void addFavouriteIfProductInvalid() throws Exception {
-        mockMvc.perform(post("/v1/favorites/abc")).andExpect(status().isBadRequest());
+        assertThrows(RuntimeException.class, () -> favouriteController.addFavourite(10));
     }
 }

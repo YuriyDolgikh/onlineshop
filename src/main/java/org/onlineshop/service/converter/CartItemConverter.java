@@ -9,6 +9,7 @@ import org.onlineshop.entity.OrderItem;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -51,7 +52,7 @@ public class CartItemConverter {
         return OrderItem.builder()
                 .product(cartItem.getProduct())
                 .quantity(cartItem.getQuantity())
-                .priceAtPurchase(price.subtract(discount))
+                .priceAtPurchase(price.subtract(discount).setScale(2, RoundingMode.CEILING))
                 .build();
     }
 

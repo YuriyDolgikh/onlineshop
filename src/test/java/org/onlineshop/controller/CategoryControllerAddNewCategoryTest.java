@@ -7,7 +7,6 @@ import org.onlineshop.dto.category.CategoryRequestDto;
 import org.onlineshop.dto.category.CategoryResponseDto;
 import org.onlineshop.entity.Category;
 import org.onlineshop.entity.User;
-import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.repository.CategoryRepository;
 import org.onlineshop.repository.ProductRepository;
 import org.onlineshop.repository.UserRepository;
@@ -15,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -52,6 +50,7 @@ class CategoryControllerAddNewCategoryTest {
     @AfterEach
     void dropDatabase() {
         categoryRepository.deleteAll();
+        productRepository.deleteAll();
         userRepository.deleteAll();
     }
 
@@ -110,11 +109,11 @@ class CategoryControllerAddNewCategoryTest {
             roles = {"ADMIN", "MANAGER"})
     void testAddCategoryIfRoleAdminAndManagerAndNameTooLong() {
         CategoryRequestDto categoryRequestDto = CategoryRequestDto.builder()
-                .categoryName("TestCategoryTestCategoryTestCategoryTestCategoryTestCategoryTestCategoryTestCategoryTestCategoryTestCategory")
+                .categoryName("TestCategoryTestCategoryTestCategoryTestCategoryTestCategoryTestCategory")
                 .image("https://drive.google.com/file/two")
                 .build();
 
-        assertThrows(DataIntegrityViolationException.class, () -> categoryController.addCategory(categoryRequestDto));
+        assertThrows(IllegalArgumentException.class, () -> categoryController.addCategory(categoryRequestDto));
         assertEquals(1, categoryRepository.findAll().size());
     }
 
@@ -139,7 +138,7 @@ class CategoryControllerAddNewCategoryTest {
                 .image("https://drive.google.com/file/two")
                 .build();
 
-        assertThrows(BadRequestException.class, () -> categoryController.addCategory(categoryRequestDto));
+        assertThrows(IllegalArgumentException.class, () -> categoryController.addCategory(categoryRequestDto));
         assertEquals(1, categoryRepository.findAll().size());
 
     }

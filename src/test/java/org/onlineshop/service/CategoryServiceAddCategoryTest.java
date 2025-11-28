@@ -47,7 +47,7 @@ class CategoryServiceAddCategoryTest {
     void setUp() {
 
         Category category = Category.builder()
-                .categoryName("testCategoryForOtherTest")
+                .categoryName("categoryForOtherTest")
                 .image("https://drive.google.com/file/d/1y03Ct0ABP1X8O6NFvK6FdqiMacYpLeTs/view?usp=drive_link")
                 .products(new ArrayList<>())
                 .build();
@@ -106,7 +106,7 @@ class CategoryServiceAddCategoryTest {
     @Test
     void testAddCategoryIfCategoryNameIsAlreadyExist() {
         CategoryRequestDto categoryRequestDto = CategoryRequestDto.builder()
-                .categoryName("testCategoryForOtherTest")
+                .categoryName("categoryForOtherTest")
                 .image("https://drive.google.com/file/two")
                 .build();
 
@@ -147,7 +147,7 @@ class CategoryServiceAddCategoryTest {
 
     @Test
     void testAddCategoryIfImageUrlInvalid() {
-        String uniqueName = "testCategoryForImage_" + System.nanoTime();
+        String uniqueName = "testCategory";
 
         CategoryRequestDto dto = CategoryRequestDto.builder()
                 .categoryName(uniqueName)

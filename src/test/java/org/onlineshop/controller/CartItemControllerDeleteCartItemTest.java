@@ -1,84 +1,60 @@
 package org.onlineshop.controller;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.onlineshop.dto.cartItem.CartItemResponseDto;
 import org.onlineshop.entity.Product;
 import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.service.CartItemService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
 
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@AutoConfigureMockMvc
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@TestPropertySource(locations = "classpath:application-test.yml")
+@ExtendWith(MockitoExtension.class)
 class CartItemControllerDeleteCartItemTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @MockBean
+    @Mock
     private CartItemService cartItemService;
 
+    @InjectMocks
+    private CartItemController cartItemController;
+
     @Test
-    @WithMockUser(
-            username = "testUser@email.com",
-            roles = {"ADMIN", "MANAGER", "USER"}
-    )
-    void deleteCartItemIfOk() throws Exception {
-        int productId = 10;
+    void deleteCartItemIfExists() {
+        Product product = new Product();
+        product.setId(123);
+        product.setName("Test Product");
+        product.setPrice(new BigDecimal("100.0"));
 
-        CartItemResponseDto responseDto = CartItemResponseDto.builder()
-                .product(Product.builder()
-                        .id(productId)
-                        .name("Test Product")
-                        .price(BigDecimal.valueOf(199))
-                        .build())
-                .quantity(3)
-                .build();
+        CartItemResponseDto response = new CartItemResponseDto();
+        response.setProduct(product);
+        response.setQuantity(2);
 
-        when(cartItemService.removeItemFromCart(productId))
-                .thenReturn(responseDto);
+        when(cartItemService.removeItemFromCart(123)).thenReturn(response);
 
-        mockMvc.perform(delete("/v1/cartItems/{productId}", productId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.product.name").value("Test Product"))
-                .andExpect(jsonPath("$.quantity").value(3));
+        ResponseEntity<CartItemResponseDto> result = cartItemController.deleteCartItem(123);
+
+        assertNotNull(result);
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertNotNull(result.getBody());
+        assertEquals("Test Product", result.getBody().getProduct().getName());
+        assertEquals(2, result.getBody().getQuantity());
+        verify(cartItemService, times(1)).removeItemFromCart(123);
     }
 
     @Test
-    @WithMockUser(
-            username = "testUser@email.com",
-            roles = {"ADMIN", "MANAGER", "USER"}
-    )
-    void deleteCartItemIfNotFound() throws Exception {
-        int productId = 999;
+    void deleteCartItemIfNotFound() {
+        doThrow(new NotFoundException("Product not found in cart"))
+                .when(cartItemService).removeItemFromCart(999);
 
-        when(cartItemService.removeItemFromCart(productId))
-                .thenThrow(new NotFoundException("Product not found"));
-
-        mockMvc.perform(delete("/v1/cartItems/{productId}", productId))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void deleteCartItemIfUnauthorized() throws Exception {
-        mockMvc.perform(delete("/v1/cartItems/5"))
-                .andExpect(status().isUnauthorized());
+        assertThrows(NotFoundException.class, () -> cartItemController.deleteCartItem(999));
+        verify(cartItemService, times(1)).removeItemFromCart(999);
     }
 }

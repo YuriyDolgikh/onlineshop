@@ -4,9 +4,10 @@ import org.onlineshop.dto.product.ProductRequestDto;
 import org.onlineshop.dto.product.ProductResponseDto;
 import org.onlineshop.dto.product.ProductUpdateDto;
 import org.onlineshop.entity.Product;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Optional;
 
 public interface ProductServiceInterface {
@@ -16,19 +17,19 @@ public interface ProductServiceInterface {
 
     ProductResponseDto deleteProduct(Integer productId);
 
-    List<ProductResponseDto> getProductsByPartOfNameIgnoreCase(String partOfName, String sortDirection);
+    Page<ProductResponseDto> getProductsByPartOfNameIgnoreCase(String partOfName, Pageable pageable);
 
-    List<ProductResponseDto> getProductsByCategory(String categoryNane, String sortDirection);
+    Page<ProductResponseDto> getProductsByCategory(String categoryName, Pageable pageable);
 
-    List<ProductResponseDto> getProductsByPriceRange(BigDecimal minPrice, BigDecimal maxPrice, String sortDirection);
+    Page<ProductResponseDto> getProductsByPriceRange(BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable);
 
-    List<ProductResponseDto> getProductsByDiscount(String sortDirection);
+    Page<ProductResponseDto> getProductsByDiscount(Pageable pageable);
 
-    List<ProductResponseDto> getProductsByCreateDate(String sortDirection);
+    Page<ProductResponseDto> getProductsByCreateDate(Pageable pageable);
 
-    List<ProductResponseDto> getAllProducts();
+    Page<ProductResponseDto> getAllProducts(Pageable pageable);
 
-    List<ProductResponseDto> getProductsByCriteria(String paramName, String paramValue, String sortDirection);
+    Page<ProductResponseDto> getProductsByCriteria(String paramName, String paramValue, Pageable pageable);
 
     Optional<Product> getProductById(Integer productId);
 }

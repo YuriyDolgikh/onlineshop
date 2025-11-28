@@ -9,13 +9,15 @@ import org.onlineshop.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.ArrayList;
-import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -56,10 +58,10 @@ class CategoryServiceGetAllCategoriesTest {
 
     @Test
     void testGetAllCategories() {
-        List<CategoryResponseDto> result = categoryService.getAllCategories();
-        CategoryResponseDto firstCategory = result.get(0);
+        Page<CategoryResponseDto> result = categoryService.getAllCategories(PageRequest.of(0, 2));
+        CategoryResponseDto firstCategory = result.getContent().get(0);
 
-        assertEquals(2, result.size());
+        assertEquals(2, result.getTotalElements());
         assertEquals(CategoryResponseDto.class, firstCategory.getClass());
     }
 }

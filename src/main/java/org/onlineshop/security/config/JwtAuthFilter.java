@@ -50,7 +50,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         } catch (InvalidJwtException e) {
-            System.out.println("ERROR !!! " + e.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
             response.getWriter().write("error: " + e.getMessage());

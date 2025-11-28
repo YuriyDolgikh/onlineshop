@@ -1,5 +1,6 @@
 package org.onlineshop.service;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -12,6 +13,7 @@ import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.repository.FavouriteRepository;
 import org.onlineshop.repository.ProductRepository;
+import org.onlineshop.repository.UserRepository;
 import org.onlineshop.service.converter.FavouriteConverter;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -42,6 +44,9 @@ class FavouriteServiceAddToFavouriteTest {
     private ProductRepository productRepository;
 
     @Mock
+    private UserRepository userRepository;
+
+    @Mock
     private FavouriteConverter favouriteConverter;
 
     private FavouriteService favouriteService;
@@ -70,6 +75,13 @@ class FavouriteServiceAddToFavouriteTest {
         favouriteResponseDto = new FavouriteResponseDto(100, "testProduct");
     }
 
+    @AfterEach
+    void tearDown() {
+        favouriteRepository.deleteAll();
+        productRepository.deleteAll();
+        userRepository.deleteAll();
+    }
+
     @Test
     void addFavourite() {
         when(userService.getCurrentUser()).thenReturn(user);
@@ -94,7 +106,7 @@ class FavouriteServiceAddToFavouriteTest {
     void addFavouriteIfAlreadyInFavourite() {
         when(userService.getCurrentUser()).thenReturn(user);
         when(productRepository.findById(10)).thenReturn(Optional.of(product));
-        when(favouriteRepository.findByUser(user)).thenReturn(java.util.List.of(favourite));
+        when(favouriteRepository.findByUserAndProduct(user, product)).thenReturn(Optional.of(favourite));
 
         assertEquals("Product is already in favourites", assertThrows(BadRequestException.class, () -> favouriteService.addFavourite(10)).getMessage());
     }

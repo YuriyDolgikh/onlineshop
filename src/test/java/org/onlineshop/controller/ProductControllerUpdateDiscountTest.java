@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
@@ -27,6 +26,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
@@ -92,10 +92,10 @@ class ProductControllerUpdateDiscountTest {
 
         productRepository.save(productTestOne);
 
-        ResponseEntity<ProductResponseDto> response = productController.updateProductDiscount(productTestOne.getId(),BigDecimal.valueOf(40));
+        ResponseEntity<ProductResponseDto> response = productController.updateProductDiscount(productTestOne.getId(), BigDecimal.valueOf(40));
 
         assertNotNull(response);
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertNotNull(response.getBody());
         assertEquals(1, productRepository.findAll().size());
         assertEquals("testProductOne", response.getBody().getProductName());
@@ -125,7 +125,7 @@ class ProductControllerUpdateDiscountTest {
 
         productRepository.save(productTestOne);
 
-        assertThrows(AuthorizationDeniedException.class, () -> productController.updateProductDiscount(productTestOne.getId(),BigDecimal.valueOf(4)));
+        assertThrows(AuthorizationDeniedException.class, () -> productController.updateProductDiscount(productTestOne.getId(), BigDecimal.valueOf(4)));
     }
 
     @Test
@@ -153,7 +153,7 @@ class ProductControllerUpdateDiscountTest {
 
         productRepository.save(productTestOne);
 
-        assertThrows(IllegalArgumentException.class, () -> productController.updateProductDiscount(100000,BigDecimal.valueOf(4)));
+        assertThrows(IllegalArgumentException.class, () -> productController.updateProductDiscount(100000, BigDecimal.valueOf(4)));
     }
 
     @Test
@@ -181,7 +181,7 @@ class ProductControllerUpdateDiscountTest {
 
         productRepository.save(productTestOne);
 
-        assertThrows(InvalidDataAccessApiUsageException.class, () -> productController.updateProductDiscount(null,BigDecimal.valueOf(4)));
+        assertThrows(IllegalArgumentException.class, () -> productController.updateProductDiscount(null, BigDecimal.valueOf(4)));
     }
 
     @Test
@@ -207,6 +207,6 @@ class ProductControllerUpdateDiscountTest {
 
         productRepository.save(productTestOne);
 
-        assertThrows(AuthenticationCredentialsNotFoundException.class, () -> productController.updateProductDiscount(productTestOne.getId(),BigDecimal.valueOf(4)));
+        assertThrows(AuthenticationCredentialsNotFoundException.class, () -> productController.updateProductDiscount(productTestOne.getId(), BigDecimal.valueOf(4)));
     }
 }

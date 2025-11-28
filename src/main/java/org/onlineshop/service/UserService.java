@@ -1,6 +1,7 @@
 package org.onlineshop.service;
 
 import jakarta.transaction.Transactional;
+import lombok.Generated;
 import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.user.UserRequestDto;
 import org.onlineshop.dto.user.UserResponseDto;
@@ -13,11 +14,15 @@ import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.repository.UserRepository;
 import org.onlineshop.service.converter.UserConverter;
 import org.onlineshop.service.interfaces.UserServiceInterface;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Optional;
 
 /**
  * Provides services related to user management such as registration, updating user details,
@@ -46,7 +51,7 @@ public class UserService implements UserServiceInterface {
      *                such as name, email, and hashed password
      * @return a UserResponseDto object containing the details of the newly registered user
      * @throws AlreadyExistException if a user with the provided email already exists
-     * @throws BadRequestException if the name or hashed password is missing or blank
+     * @throws BadRequestException   if the name or hashed password is missing or blank
      */
     @Override
     @Transactional
@@ -66,26 +71,26 @@ public class UserService implements UserServiceInterface {
         newUser.setOrders(new ArrayList<>());
         newUser.setFavourites(new HashSet<>());
 
-        User savedUser = userRepository.save(newUser);
-
         Cart newCartForUser = new Cart();
-        newCartForUser.setUser(savedUser);
-        savedUser.setCart(newCartForUser);
+        newCartForUser.setUser(newUser);
+        newUser.setCart(newCartForUser);
 
-        User finalUser = userRepository.save(savedUser);
+        User finalUser = userRepository.save(newUser);
 
         confirmationCodeService.confirmationCodeManager(finalUser);
         return userConverter.toDto(finalUser);
     }
 
     /**
-     * Retrieves a list of all users in the system.
+     * Retrieves a page of all users in the system.
      *
-     * @return a list of UserResponseDto objects containing the details of all users in the system
+     * @param pageable the pagination information
+     * @return a page of UserResponseDto objects containing the details of all users in the system
      */
     @Override
-    public List<UserResponseDto> getAllUsers() {
-        return userConverter.toDtos(userRepository.findAll());
+    public Page<UserResponseDto> getAllUsers(Pageable pageable) {
+        return userRepository.findAll(pageable)
+                .map(userConverter::toDto);
     }
 
     /**
@@ -103,14 +108,27 @@ public class UserService implements UserServiceInterface {
     }
 
     /**
-     * Confirms a user's email by validating the provided confirmation code and updating their status to confirmed.
+     * Confirms the email associated with a given confirmation code.
+     * Verifies the provided confirmation code, checks if it has expired, and updates the user's status accordingly.
+     * If the code is expired, a new code is generated and sent to the user.
      *
-     * @param code the confirmation code associated with the user's email verification
-     * @return a message indicating that the email has been successfully confirmed
+     * @param code the confirmation code associated with the user's email
+     * @return a message indicating success, failure, or additional actions required for email confirmation
      */
     @Override
+    @Transactional
     public String confirmationEmail(String code) {
-        User user = confirmationCodeService.changeConfirmationStatusByCode(code);
+        if (code == null || code.isBlank()) {
+            return "Code is null or blank";
+        }
+        User user = confirmationCodeService.getConfirmationCodeByCode(code).getUser();
+        if (confirmationCodeService.isConfirmationCodeExpired(code)) {
+            confirmationCodeService.deleteConfirmationCodeByUser(user);
+            confirmationCodeService.confirmationCodeManager(user);
+            return "Confirmation code for email: " + user.getEmail() + " is expired. " +
+                    "Please, check your email again for the new one.";
+        }
+        confirmationCodeService.changeConfirmationStatusByCode(code);
         user.setStatus(User.Status.CONFIRMED);
         userRepository.save(user);
         return "Email " + user.getEmail() + " is successfully confirmed";
@@ -120,11 +138,11 @@ public class UserService implements UserServiceInterface {
      * Updates the details of an existing user based on the provided update request. The update
      * is restricted to the currently authenticated user, ensuring users can only modify their own data.
      *
-     * @param userId the ID of the user to be updated
+     * @param userId        the ID of the user to be updated
      * @param updateRequest an object containing the user details to be updated; only the fields that
      *                      are not null or blank will be updated
      * @return a UserResponseDto object containing the updated user details
-     * @throws NotFoundException if the user with the specified ID does not exist
+     * @throws NotFoundException   if the user with the specified ID does not exist
      * @throws BadRequestException if the authenticated user attempts to update another user's details
      */
     @Override
@@ -165,9 +183,9 @@ public class UserService implements UserServiceInterface {
      *
      * @param userId the ID of the user to be deleted
      * @return a UserResponseDto containing information about the deleted user
-     * @throws NotFoundException if the user with the provided ID is not found
+     * @throws NotFoundException   if the user with the provided ID is not found
      * @throws BadRequestException if the current user does not have permission
-     *         to delete the user or if the user to be deleted is an ADMIN
+     *                             to delete the user or if the user to be deleted is an ADMIN
      */
     @Transactional
     @Override
@@ -195,7 +213,7 @@ public class UserService implements UserServiceInterface {
      * @param email the email address of the user to be renewed; must not be null or blank
      * @return a {@link UserResponseDto} containing the updated user information
      * @throws BadRequestException if the email is null, blank, or if the user's status is not DELETED
-     * @throws NotFoundException if no user with the provided email exists
+     * @throws NotFoundException   if no user with the provided email exists
      */
     @Override
     public UserResponseDto renewUser(String email) {
@@ -225,12 +243,13 @@ public class UserService implements UserServiceInterface {
     }
 
     /**
-     * Retrieves a list of all users with their full details.
+     * Retrieves a page of all users with their full details.
      *
-     * @return a list containing all User objects from the data repository.
+     * @param pageable the pagination information
+     * @return a page containing all User objects from the data repository.
      */
-    public List<User> getAllUsersFullDetails() {
-        return userRepository.findAll();
+    public Page<User> getAllUsersFullDetails(Pageable pageable) {
+        return userRepository.findAll(pageable);
     }
 
     /**
@@ -261,7 +280,7 @@ public class UserService implements UserServiceInterface {
 
     /**
      * Retrieves the currently authenticated user.
-     *
+     * <p>
      * This method fetches the user associated with the currently authenticated email address.
      *
      * @return the currently authenticated User object
@@ -285,6 +304,7 @@ public class UserService implements UserServiceInterface {
      * @param user the user entity to be saved
      * @return the saved user entity
      */
+    @Generated
     public User saveUser(User user) {
         userRepository.save(user);
         return user;

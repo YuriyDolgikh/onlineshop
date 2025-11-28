@@ -1,6 +1,7 @@
 package org.onlineshop.controller;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.onlineshop.dto.product.ProductResponseForUserDto;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -23,7 +25,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -122,16 +123,18 @@ class ProductControllerGetAllProductsForUserTest {
 
         productRepository.save(productTestThree);
 
-        ResponseEntity<List<ProductResponseForUserDto>> products = productController.getAllProductForUser();
-        assertEquals(3, products.getBody().size());
+        ResponseEntity<Page<ProductResponseForUserDto>> products = productController.getAllProductForUser(0, 2, "name", "asc");
+        Assertions.assertNotNull(products.getBody());
+        assertEquals(3, products.getBody().getTotalElements());
     }
 
     @Test
     @WithMockUser(username = "testUser@email.com",
             roles = {"ADMIN", "MANAGER", "USER"})
     void testGetAllProductsForUserIfRoleAdminAndManagerIfDateBaseEmpty() {
-        ResponseEntity<List<ProductResponseForUserDto>> products = productController.getAllProductForUser();
-        assertEquals(0, products.getBody().size());
+        ResponseEntity<Page<ProductResponseForUserDto>> products = productController.getAllProductForUser(0, 2, "name", "asc");
+        Assertions.assertNotNull(products.getBody());
+        assertEquals(0, products.getBody().getTotalElements());
     }
 
     @Test

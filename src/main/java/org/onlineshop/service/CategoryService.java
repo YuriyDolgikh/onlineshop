@@ -11,9 +11,10 @@ import org.onlineshop.repository.CategoryRepository;
 import org.onlineshop.service.converter.CategoryConverter;
 import org.onlineshop.service.interfaces.CategoryServiceInterface;
 import org.onlineshop.service.util.CategoryServiceHelper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -46,6 +47,10 @@ public class CategoryService implements CategoryServiceInterface {
         }
         if (categoryRequestDto.getCategoryName() == null || categoryRequestDto.getCategoryName().isBlank()) {
             throw new IllegalArgumentException("Category name must be provided");
+        }
+        String categoryName = categoryRequestDto.getCategoryName().trim();
+        if (categoryName.length() < 3 || categoryName.length() > 20) {
+            throw new IllegalArgumentException("Category name must be between 3 and 20 characters");
         }
         if (categoryRepository.existsByCategoryName(categoryRequestDto.getCategoryName())) {
             throw new BadRequestException("Category with name: " + categoryRequestDto.getCategoryName() + " already exist");
@@ -122,21 +127,23 @@ public class CategoryService implements CategoryServiceInterface {
     }
 
     /**
-     * Retrieves all categories from the database.
+     * Retrieves a page of all categories from the database.
      *
-     * @return a list of CategoryResponseDto objects containing the details of all categories in the database
+     * @param pageable the pagination information
+     * @return a page of CategoryResponseDto objects, each containing details of a category
      */
     @Override
-    public List<CategoryResponseDto> getAllCategories() {
-        return categoryConverter.toDtos(categoryRepository.findAll());
+    public Page<CategoryResponseDto> getAllCategories(Pageable pageable) {
+        return categoryRepository.findAll(pageable)
+                .map(categoryConverter::toDto);
     }
 
     /**
-     * Retrieves a specific category based on the provided category ID.
+     * Retrieves a category from the database based on the provided category ID.
      *
-     * @param categoryId the ID of the category to be retrieved from the database
-     * @return a CategoryResponseDto containing the details of the retrieved category
-     * @throws BadRequestException if the provided category ID is not found in the database
+     * @param categoryId the ID of the category to be retrieved
+     * @return the Category object corresponding to the specified ID
+     * @throws BadRequestException if a category with the specified ID is not found in the database
      */
     @Override
     public Category getCategoryById(Integer categoryId) {
@@ -148,8 +155,8 @@ public class CategoryService implements CategoryServiceInterface {
      * Retrieves a specific category based on the provided category name.
      *
      * @param categoryName the name of the category to be retrieved from the database
-     * @return a CategoryResponseDto containing the details of the retrieved category
-     * @throws BadRequestException if the provided category name is not found in the database
+     * @return the Category object corresponding to the specified name
+     * @throws BadRequestException if a category with the specified name is not found in the database
      */
     public Category getCategoryByName(String categoryName) {
         return categoryRepository.findByCategoryName(categoryName)

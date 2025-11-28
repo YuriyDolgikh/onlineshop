@@ -1,9 +1,6 @@
 package org.onlineshop.dto.product;
 
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Builder;
 import lombok.Data;
 
@@ -26,7 +23,9 @@ public class ProductRequestDto {
     @NotNull(message = "Price cannot be null")
     private BigDecimal productPrice;
 
+    @DecimalMin(value = "0", message = "Discount price cannot be negative")
     private BigDecimal productDiscountPrice;
 
+    @NotNull(message = "Image URL cannot be null")
     private String image;
 }

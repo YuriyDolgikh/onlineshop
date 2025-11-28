@@ -7,8 +7,7 @@ import org.onlineshop.dto.order.OrderStatusResponseDto;
 import java.util.List;
 
 public interface OrderServiceInterface {
-    OrderResponseDto saveOrder(OrderRequestDto orderRequestDto);
-
+//    OrderResponseDto saveOrder(OrderRequestDto orderRequestDto);
     OrderResponseDto getOrderById(Integer orderId);
 
     List<OrderResponseDto> getOrdersByUser(Integer userId);

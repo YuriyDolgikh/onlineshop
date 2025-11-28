@@ -33,4 +33,6 @@ public class OrderResponseDto {
 
     private List<OrderItemResponseDto> items;
 
+    private Double totalPrice;
+
 }

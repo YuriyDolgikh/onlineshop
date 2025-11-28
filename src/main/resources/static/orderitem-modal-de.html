@@ -9,9 +9,9 @@
         <div class="description-section">
             <h3>Allgemeine Beschreibung</h3>
             <p>
-                OrderItemService ist verantwortlich für die Verwaltung von Produkten, die zu Benutzerbestellungen hinzugefügt wurden.
-                Führt Operationen zum Hinzufügen, Löschen und Aktualisieren von Produktmengen in der aktuellen Benutzerbestellung
-                mit PENDING_PAYMENT-Status durch. Bietet flexible Verwaltung des Bestellinhalts bis zum Zahlungszeitpunkt.
+                OrderItemService ist verantwortlich für die Verwaltung einzelner Produkte in Benutzerbestellungen.
+                Führt Operationen zum Löschen und Aktualisieren von Produktmengen in Bestellungen
+                mit PENDING_PAYMENT-Status durch. Bietet Verwaltung des Bestellinhalts bis zum Zahlungszeitpunkt.
             </p>
         </div>
 
@@ -20,25 +20,14 @@
             <h3>Hauptservice-Methoden</h3>
 
             <div class="method-card">
-                <h4>addItemToOrder(OrderItemRequestDto dto)</h4>
-                <p>Fügt Produkt zur aktuellen offenen Bestellung des Benutzers hinzu.</p>
-                <div class="method-steps">
-                    <div>• Validiert Eingabedaten</div>
-                    <div>• Prüft, dass productId und Menge nicht null sind und Menge größer als null ist</div>
-                    <div>• Findet Produkt nach bereitgestellter productId in ProductRepository</div>
-                    <div>• Berechnet Preis zum Kaufzeitpunkt - wenn Produkt Rabatt hat, wird Preis mit Rabatt angewendet</div>
-                    <div>• Erstellt neues OrderItem-Objekt, fügt es zur aktuellen Bestellung hinzu und speichert in Datenbank</div>
-                    <div>• Gibt DTO der hinzugefügten Bestellposition (OrderItemResponseDto) zurück</div>
-                </div>
-            </div>
-
-            <div class="method-card">
                 <h4>deleteItemFromOrder(Integer orderItemId)</h4>
                 <p>Löscht bestimmtes Produkt aus Bestellung nach Bestellpositionsidentifikator.</p>
                 <div class="method-steps">
                     <div>• Prüft, dass orderItemId nicht null ist</div>
                     <div>• Findet entsprechendes Element in OrderItemRepository</div>
-                    <div>• Löscht Element aus orderItems-Sammlung der aktuellen Bestellung (orphanRemoval-Mechanismus enthalten)</div>
+                    <div>• Validiert, dass Bestellung in PENDING_PAYMENT-Status ist</div>
+                    <div>• Prüft, dass Bestellung zum aktuellen Benutzer gehört</div>
+                    <div>• Entfernt Element aus orderItems-Sammlung der Bestellung</div>
                     <div>• Löscht Element aus Datenbank und speichert aktualisierte Bestellung</div>
                 </div>
             </div>
@@ -47,21 +36,13 @@
                 <h4>updateItemQuantityInOrder(OrderItemUpdateDto dto)</h4>
                 <p>Aktualisiert Menge eines bestimmten Produkts in Benutzerbestellung.</p>
                 <div class="method-steps">
-                    <div>• Validiert Eingabedaten (dto != null, Menge > 0)</div>
-                    <div>• Prüft, ob Bestellposition nach orderItemId existiert</div>
-                    <div>• Prüft, ob Bestellung zum aktuellen Benutzer gehört (verhindert Änderung fremder Bestellung)</div>
-                    <div>• Aktualisiert Produktmenge, speichert Änderungen in OrderItemRepository</div>
+                    <div>• Validiert Eingabedaten (dto != null)</div>
+                    <div>• Findet Bestellposition nach orderItemId aus dto</div>
+                    <div>• Validiert, dass Menge mindestens 1 ist</div>
+                    <div>• Prüft, ob Bestellung zum aktuellen Benutzer gehört</div>
+                    <div>• Validiert, dass Bestellung in PENDING_PAYMENT-Status ist</div>
+                    <div>• Aktualisiert Produktmenge und speichert Änderungen</div>
                     <div>• Gibt aktualisierte Bestellposition als DTO (OrderItemResponseDto) zurück</div>
-                </div>
-            </div>
-
-            <div class="method-card">
-                <h4>getCurrentOrder() [private Methode]</h4>
-                <p>Gibt aktuelle offene Bestellung des Benutzers zurück.</p>
-                <div class="method-steps">
-                    <div>• Ruft aktuellen Benutzer über UserService ab</div>
-                    <div>• Sucht unter Benutzerbestellungen nach der mit PENDING_PAYMENT-Status</div>
-                    <div>• Wenn solche Bestellung nicht gefunden - wirft NotFoundException</div>
                 </div>
             </div>
         </div>
@@ -95,11 +76,10 @@
             <div class="method-card">
                 <div class="method-steps">
                     <div>• <strong>Sicherheit:</strong> Überprüfung der Bestellungszugehörigkeit zum aktuellen Benutzer</div>
-                    <div>• <strong>Feste Preise:</strong> Produktpreis wird beim Hinzufügen zur Bestellung festgelegt</div>
-                    <div>• <strong>Rabattberücksichtigung:</strong> Automatische Rabattanwendung bei Preisberechnung</div>
-                    <div>• <strong>Orphan Removal:</strong> Automatisches Löschen von Elementen bei Entfernung aus Sammlung</div>
-                    <div>• <strong>Validierung:</strong> Überprüfung der Mengenkorrektheit und Produktexistenz</div>
-                    <div>• <strong>Einschränkungen:</strong> Änderungen nur für Bestellungen mit PENDING_PAYMENT-Status möglich</div>
+                    <div>• <strong>Statusvalidierung:</strong> Operationen nur für Bestellungen mit PENDING_PAYMENT-Status erlaubt</div>
+                    <div>• <strong>Datenintegrität:</strong> Automatische Entfernung aus Bestellungssammlung beim Löschen von Elementen</div>
+                    <div>• <strong>Validierung:</strong> Überprüfung der Mengenkorrektheit und Bestellpositionsexistenz</div>
+                    <div>• <strong>Fehlerbehandlung:</strong> Detaillierte Ausnahmen für verschiedene Fehlerszenarien</div>
                 </div>
             </div>
         </div>
@@ -109,9 +89,10 @@
             <h3>💼 Geschäftslogik</h3>
             <div class="method-card">
                 <div class="method-steps">
-                    <div>• <strong>Preispolitik:</strong> Preise werden beim Hinzufügen zur Bestellung festgelegt, schützt vor Änderungen</div>
-                    <div>• <strong>Änderungsflexibilität:</strong> Benutzer kann Bestellinhalt bis zum Zahlungszeitpunkt ändern</div>
-                    <div>• <strong>Integritätskontrolle:</strong> Überprüfung der Produktexistenz vor Hinzufügen zur Bestellung</div>
+                    <div>• <strong>Bestellungsänderung:</strong> Benutzer können Bestellinhalt bis zur Zahlungsbestätigung ändern</div>
+                    <div>• <strong>Zugehörigkeitskontrolle:</strong> Benutzer können nur Elemente in eigenen Bestellungen verwalten</div>
+                    <div>• <strong>Status-Workflow:</strong> Bestellpositionen werden nach Zahlungsbestätigung unveränderlich</div>
+                    <div>• <strong>Mengenkontrolle:</strong> Mindestmenge von 1 für alle Bestellpositionen erforderlich</div>
                 </div>
             </div>
         </div>

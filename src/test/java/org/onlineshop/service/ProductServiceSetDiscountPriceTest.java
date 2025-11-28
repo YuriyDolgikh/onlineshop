@@ -1,10 +1,7 @@
 package org.onlineshop.service;
 
-import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.onlineshop.dto.product.ProductRequestDto;
 import org.onlineshop.dto.product.ProductResponseDto;
 import org.onlineshop.entity.Category;
 import org.onlineshop.entity.Product;
@@ -75,9 +72,95 @@ class ProductServiceSetDiscountPriceTest {
 
     @Test
     void testSetDiscountPriceIfProductNotFound() {
-
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> productService.setDiscountPrice(100000,BigDecimal.valueOf(100)));
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> productService.setDiscountPrice(100000, BigDecimal.valueOf(100)));
         String messageException = "Product with id = 100000 not found";
         assertEquals(messageException, exception.getMessage());
+    }
+
+    @Test
+    void testSetDiscountPriceIfNewDiscountPriceIsNull() {
+        Category category = Category.builder()
+                .categoryName("testCategory")
+                .image("https://drive.google.com/file/test")
+                .products(new ArrayList<>())
+                .build();
+
+        categoryRepository.save(category);
+
+        Product product = Product.builder()
+                .name("testProduct")
+                .category(category)
+                .description("testDescription")
+                .price(BigDecimal.valueOf(100))
+                .discountPrice(BigDecimal.valueOf(10))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .image("https://drive.google.com/file/test")
+                .build();
+
+        productRepository.save(product);
+
+        Exception exception = assertThrows(IllegalArgumentException.class,
+                () -> productService.setDiscountPrice(product.getId(), null));
+        String messageException = "New discount price cannot be null";
+        assertEquals(messageException, exception.getMessage());
+    }
+
+    @Test
+    void testSetDiscountPriceIfNewDiscountPriceIsNegative() {
+        Category category = Category.builder()
+                .categoryName("testCategory")
+                .image("https://drive.google.com/file/test")
+                .products(new ArrayList<>())
+                .build();
+
+        categoryRepository.save(category);
+
+        Product product = Product.builder()
+                .name("testProduct")
+                .category(category)
+                .description("testDescription")
+                .price(BigDecimal.valueOf(100))
+                .discountPrice(BigDecimal.valueOf(10))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .image("https://drive.google.com/file/test")
+                .build();
+
+        productRepository.save(product);
+
+        Exception exception = assertThrows(IllegalArgumentException.class,
+                () -> productService.setDiscountPrice(product.getId(), BigDecimal.valueOf(-10)));
+        String messageException = "New discount price cannot be less than 0";
+        assertEquals(messageException, exception.getMessage());
+    }
+
+    @Test
+    void testSetDiscountPriceIfNewDiscountPriceIsZero() {
+        Category category = Category.builder()
+                .categoryName("testCategory")
+                .image("https://drive.google.com/file/test")
+                .products(new ArrayList<>())
+                .build();
+
+        categoryRepository.save(category);
+
+        Product product = Product.builder()
+                .name("testProduct")
+                .category(category)
+                .description("testDescription")
+                .price(BigDecimal.valueOf(100))
+                .discountPrice(BigDecimal.valueOf(10))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .image("https://drive.google.com/file/test")
+                .build();
+
+        productRepository.save(product);
+
+        ProductResponseDto result = productService.setDiscountPrice(product.getId(), BigDecimal.ZERO);
+
+        assertEquals(BigDecimal.ZERO, result.getProductDiscountPrice());
+        assertEquals("testProduct", result.getProductName());
     }
 }

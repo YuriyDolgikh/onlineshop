@@ -11,7 +11,7 @@
             <p>
                 Das Warenkorbmodul ist verantwortlich für die Verwaltung von Produkten, die der Benutzer zu kaufen plant.
                 Enthält Funktionen zum Hinzufügen, Entfernen, Ändern der Produktmengen sowie
-                zum Konvertieren des Warenkorbs in eine Bestellung.
+                zum Konvertieren des Warenkorbs in eine Bestellung. Integriert mit Rabattsystem und Bestellverwaltung.
             </p>
         </div>
 
@@ -34,8 +34,13 @@
                 <p>Überträgt Warenkorbinhalt in neue Bestellung.</p>
                 <div class="method-steps">
                     <div>• Ruft aktuellen Warenkorb und Benutzer ab</div>
-                    <div>• Konvertiert CartItem zu OrderItem</div>
+                    <div>• Prüft, dass Warenkorb nicht leer ist</div>
+                    <div>• Validiert discountPrice-Vorhandensein für alle Produkte</div>
+                    <div>• Prüft Abwesenheit von Bestellungen mit PENDING_PAYMENT-Status</div>
+                    <div>• Konvertiert CartItem zu OrderItem über cartItemConverter</div>
                     <div>• Erstellt neues Order-Objekt mit PENDING_PAYMENT-Status</div>
+                    <div>• Setzt DeliveryMethod.PICKUP als Standard</div>
+                    <div>• Setzt created_at und updated_at Zeitstempel</div>
                     <div>• Speichert Bestellung über OrderRepository</div>
                     <div>• Leert Warenkorb nach erfolgreicher Übertragung</div>
                 </div>
@@ -46,8 +51,10 @@
                 <p>Gibt vollständige Warenkorbinformationen als CartResponseDto zurück.</p>
                 <div class="method-steps">
                     <div>• Ruft aktuellen Benutzer und Warenkorb ab</div>
-                    <div>• Konvertiert Warenkorbpositionen zu DTO</div>
+                    <div>• Konvertiert Warenkorbpositionen zu CartItemResponseDto</div>
                     <div>• Berechnet Gesamtkosten unter Berücksichtigung von Rabatten</div>
+                    <div>• Konvertiert zu CartItemSympleResponseDto für Antwort</div>
+                    <div>• Berechnungsformel: (price * quantity) * (100 - discountPrice) / 100</div>
                     <div>• Gibt DTO mit ID, Produktliste und Gesamtbetrag zurück</div>
                 </div>
             </div>
@@ -57,6 +64,7 @@
                 <p>Gibt Warenkorb des aktuellen Benutzers zurück.</p>
                 <div class="method-steps">
                     <div>• Ruft Benutzer über UserService ab</div>
+                    <div>• Prüft, dass Warenkorb nicht null ist</div>
                     <div>• Sucht Warenkorb über CartRepository</div>
                     <div>• Wenn Warenkorb nicht vorhanden - BadRequestException("Cart is empty")</div>
                 </div>
@@ -83,7 +91,7 @@
                     <span class="endpoint-path">/v1/carts</span>
                     <span class="role-badge role-user">USER</span>
                 </div>
-                <p>Ruft vollständige Informationen über den Warenkorb des aktuellen Benutzers ab</p>
+                <p>Ruft vollständige Informationen über den Warenkorb des aktuellen Benutzers mit Gesamtkostenberechnung inklusive Rabatte ab</p>
             </div>
 
             <div class="endpoint-detail">
@@ -101,7 +109,37 @@
                     <span class="endpoint-path">/v1/carts/toOrder</span>
                     <span class="role-badge role-user">USER</span>
                 </div>
-                <p>Konvertiert Warenkorb in Bestellung mit anschließender Warenkorbleerung</p>
+                <p>Konvertiert Warenkorb in Bestellung mit anschließender Warenkorbleerung. Prüft Abwesenheit ausstehender Bestellungen.</p>
+            </div>
+        </div>
+
+        <!-- Implementierungsmerkmale -->
+        <div class="features-section">
+            <h3>🔧 Implementierungsmerkmale</h3>
+            <div class="method-card">
+                <div class="method-steps">
+                    <div>• <strong>Rabattsystem:</strong> Automatische Kostenberechnung unter Berücksichtigung von discountPrice</div>
+                    <div>• <strong>Datenvalidierung:</strong> Prüfung erforderlicher Felder vor Operationen</div>
+                    <div>• <strong>Datenkonvertierung:</strong> Verwendung von CartItemConverter für Transformation zwischen DTO und Entity</div>
+                    <div>• <strong>Bestellverwaltung:</strong> Integration mit OrderRepository für Bestellerstellung</div>
+                    <div>• <strong>Bestellstatus:</strong> Unterstützung für PENDING_PAYMENT-Status für neue Bestellungen</div>
+                    <div>• <strong>Liefermethoden:</strong> Verwendung von DeliveryMethod.PICKUP als Standard</div>
+                    <div>• <strong>Transaktionssicherheit:</strong> Alle kritischen Operationen werden innerhalb von Transaktionen durchgeführt</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Geschäftslogik -->
+        <div class="business-logic-section">
+            <h3>💼 Geschäftslogik</h3>
+            <div class="method-card">
+                <div class="method-steps">
+                    <div>• <strong>Einkaufswagen:</strong> Temporäre Speicherung von Produkten vor Bestellabschluss</div>
+                    <div>• <strong>Bestellabwicklung:</strong> Konvertierung des Warenkorbs in Bestellung mit Validierungen</div>
+                    <div>• <strong>Rabattsystem:</strong> Automatische Anwendung von Rabatten auf Produkte</div>
+                    <div>• <strong>Zustandsverwaltung:</strong> Verhinderung doppelter Bestellerstellung</div>
+                    <div>• <strong>Kostenberechnung:</strong> Genaue Berechnung des Gesamtbetrags unter Berücksichtigung von Menge und Rabatten</div>
+                </div>
             </div>
         </div>
     </div>

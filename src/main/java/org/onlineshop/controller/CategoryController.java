@@ -12,12 +12,13 @@ import org.onlineshop.dto.category.CategoryRequestDto;
 import org.onlineshop.dto.category.CategoryResponseDto;
 import org.onlineshop.dto.category.CategoryUpdateDto;
 import org.onlineshop.service.CategoryService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -52,7 +53,7 @@ public class CategoryController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<CategoryResponseDto> addCategory(
             @Parameter(description = "Category creation data", required = true)
-            @RequestBody CategoryRequestDto categoryRequestDto) {
+            @Valid @RequestBody CategoryRequestDto categoryRequestDto) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(categoryService.addCategory(categoryRequestDto));
@@ -88,9 +89,9 @@ public class CategoryController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<CategoryResponseDto> updateCategory(
             @Parameter(description = "ID of the category to update", required = true)
-            @PathVariable Integer categoryId,
+            @Valid @PathVariable Integer categoryId,
             @Parameter(description = "Updated category data", required = true)
-            @RequestBody CategoryUpdateDto categoryUpdateDto) {
+            @Valid @RequestBody CategoryUpdateDto categoryUpdateDto) {
         return ResponseEntity.ok(categoryService.updateCategory(categoryId, categoryUpdateDto));
     }
 
@@ -123,30 +124,37 @@ public class CategoryController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<CategoryResponseDto> deleteCategory(
             @Parameter(description = "ID of the category to delete", required = true)
-            @PathVariable Integer categoryId) {
+            @Valid @PathVariable Integer categoryId) {
         return ResponseEntity.ok(categoryService.deleteCategory(categoryId));
     }
 
     /**
-     * Retrieves all categories from the system.
+     * Retrieves all categories from the system with pagination.
      *
-     * @return a {@code ResponseEntity} containing a {@code List<CategoryResponseDto>}
+     * @param page the page number (0-based)
+     * @param size the page size
+     * @return a {@code ResponseEntity} containing a {@code Page<CategoryResponseDto>}
      * containing all categories available in the system
      */
     @Operation(
             summary = "Get all categories",
-            description = "Retrieves a list of all categories available in the system."
+            description = "Retrieves a paginated list of all categories available in the system."
     )
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
                     description = "Categories retrieved successfully",
-                    content = @Content(schema = @Schema(implementation = CategoryResponseDto.class))
+                    content = @Content(schema = @Schema(implementation = Page.class))
             )
     })
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'USER')")
-    public ResponseEntity<List<CategoryResponseDto>> getAllCategories() {
-        return ResponseEntity.ok(categoryService.getAllCategories());
+    public ResponseEntity<Page<CategoryResponseDto>> getAllCategories(
+            @Parameter(description = "Page number (0-based)", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size", example = "20")
+            @RequestParam(defaultValue = "20") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(categoryService.getAllCategories(pageable));
     }
 }

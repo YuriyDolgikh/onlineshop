@@ -1,3 +1,4 @@
+# docker-compose.yml
 services:
   db:
     image: postgres:17
@@ -25,12 +26,10 @@ services:
       db:
         condition: service_healthy
     environment:
+      # Все переменные теперь берутся из .env через IDEA
       SPRING_PROFILES_ACTIVE: docker
+      # URL БД для Docker сети
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/onlineshop
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: 1111
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
     ports:
       - "8080:8080"
     tty: true
