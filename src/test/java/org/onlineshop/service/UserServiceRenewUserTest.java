@@ -13,6 +13,7 @@ import org.onlineshop.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
@@ -22,11 +23,15 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @TestPropertySource(locations = "classpath:application-test.yml")
 class UserServiceRenewUserTest {
+
     @Autowired
     private UserRepository userRepository;
 
@@ -36,6 +41,9 @@ class UserServiceRenewUserTest {
     @Autowired
     private UserService userService;
 
+    @MockBean
+    private ConfirmationCodeService confirmationCodeService;
+
     @AfterEach
     void dropDatabase() {
         confirmationCodeRepository.deleteAll();
@@ -43,7 +51,6 @@ class UserServiceRenewUserTest {
     }
 
     private String userEmailDeleted;
-
     private String userConfirmedEmail;
 
     @BeforeEach
@@ -84,14 +91,16 @@ class UserServiceRenewUserTest {
                 .build();
 
         confirmationCodeRepository.save(confirmationCode);
+
+        doNothing().when(confirmationCodeService).confirmationCodeManager(any(User.class));
     }
 
     @Test
     @WithMockUser(username = "testUser@email.com", roles = "USER")
     void testRenewUserIfOk() {
-        UserResponseDto renewUser =  userService.renewUser(userEmailDeleted);
+        UserResponseDto renewUser = userService.renewUser(userEmailDeleted);
 
-        assertEquals(renewUser.getStatus(), "NOT_CONFIRMED");
+        assertEquals("NOT_CONFIRMED", renewUser.getStatus());
     }
 
     @Test
@@ -111,5 +120,4 @@ class UserServiceRenewUserTest {
     void testRenewUserIfUserNull() {
         assertThrows(BadRequestException.class, () -> userService.renewUser(null));
     }
-
 }

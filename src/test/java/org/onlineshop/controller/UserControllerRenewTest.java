@@ -1,6 +1,7 @@
 package org.onlineshop.controller;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.onlineshop.dto.user.UserResponseDto;
@@ -10,11 +11,12 @@ import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.repository.ConfirmationCodeRepository;
 import org.onlineshop.repository.UserRepository;
+import org.onlineshop.service.ConfirmationCodeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -25,6 +27,8 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -32,6 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @TestPropertySource(locations = "classpath:application-test.yml")
 class UserControllerRenewTest {
+
     @Autowired
     private UserRepository userRepository;
 
@@ -40,6 +45,9 @@ class UserControllerRenewTest {
 
     @Autowired
     private UserController userController;
+
+    @MockBean
+    private ConfirmationCodeService confirmationCodeService;
 
     @AfterEach
     void dropDatabase() {
@@ -63,6 +71,8 @@ class UserControllerRenewTest {
         userRepository.save(userConfirmed);
 
         userEmailTwo = userConfirmed.getEmail();
+
+        doNothing().when(confirmationCodeService).confirmationCodeManager(any(User.class));
     }
 
     @Test
@@ -70,6 +80,7 @@ class UserControllerRenewTest {
     void testRenewUserIfOkAndRoleUser() {
         ResponseEntity<UserResponseDto> response = userController.renewUser(userEmailTwo);
 
+        Assertions.assertNotNull(response.getBody());
         assertEquals("NOT_CONFIRMED", response.getBody().getStatus());
     }
 
@@ -101,7 +112,6 @@ class UserControllerRenewTest {
 
         confirmationCodeRepository.save(confirmationCode);
 
-
         assertThrows(BadRequestException.class, () -> userController.renewUser(userTwoConfirmed.getEmail()));
     }
 
@@ -115,5 +125,4 @@ class UserControllerRenewTest {
     void testRenewUserIfUserNotRegistered() {
         assertThrows(AuthenticationCredentialsNotFoundException.class, () -> userController.renewUser("another@email.com"));
     }
-
 }

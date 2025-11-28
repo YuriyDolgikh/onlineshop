@@ -4,7 +4,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.onlineshop.entity.ConfirmationCode;
 import org.onlineshop.entity.User;
-import org.onlineshop.exception.NotFoundException;
+import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.repository.ConfirmationCodeRepository;
 import org.onlineshop.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,17 +74,17 @@ class UserServiceConfirmationEmailTest {
     @Test
     void testConfirmationEmailInvalidCode() {
         String invalidCode = "InvalidCode";
-        assertThrows(NotFoundException.class, () -> userService.confirmationEmail(invalidCode));
+        assertThrows(BadRequestException.class, () -> userService.confirmationEmail(invalidCode));
     }
 
     @Test
     void testConfirmationEmailNullCode() {
-        assertThrows(NotFoundException.class, () -> userService.confirmationEmail(null));
+        assertThrows(BadRequestException.class, () -> userService.confirmationEmail(null));
     }
 
     @Test
     void testConfirmationEmailEmptyCode() {
-        assertThrows(NotFoundException.class, () -> userService.confirmationEmail(" "));
+        assertThrows(BadRequestException.class, () -> userService.confirmationEmail(" "));
     }
 
     @Test

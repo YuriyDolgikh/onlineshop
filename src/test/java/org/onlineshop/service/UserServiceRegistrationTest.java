@@ -15,6 +15,7 @@ import org.onlineshop.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
@@ -22,6 +23,8 @@ import org.springframework.test.context.TestPropertySource;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -37,6 +40,9 @@ class UserServiceRegistrationTest {
 
     @Autowired
     private UserService userService;
+
+    @MockBean
+    private ConfirmationCodeService confirmationCodeService;
 
     @AfterEach
     void dropDatabase() {
@@ -64,6 +70,8 @@ class UserServiceRegistrationTest {
                 .build();
 
         confirmationCodeRepository.save(confirmationCode);
+
+        doNothing().when(confirmationCodeService).confirmationCodeManager(any(User.class));
     }
 
     @Test
@@ -77,8 +85,7 @@ class UserServiceRegistrationTest {
 
         UserResponseDto responseDto = userService.registration(request);
         assertNotNull(responseDto);
-        assertEquals(userRepository.findAll().size(), 2);
-
+        assertEquals(2, userRepository.findAll().size());
     }
 
     @Test
