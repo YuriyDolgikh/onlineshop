@@ -71,7 +71,6 @@ public class ProductService implements ProductServiceInterface {
             Product savedProduct = productRepository.save(productToSave);
             return productConverter.toDto(savedProduct);
         } catch (DataIntegrityViolationException e) {
-            // Защита от Race Condition - если уникальный индекс сработал
             throw new IllegalArgumentException("Product with name: " + productRequestDto.getProductName()
                     + " already exist in category: " + category.getCategoryName());
         }
@@ -195,9 +194,9 @@ public class ProductService implements ProductServiceInterface {
     /**
      * Retrieves a paginated list of products based on the specified search criteria.
      *
-     * @param paramName the name of the search parameter to filter products, such as "price", "discount", "category", "name", or "createDate"
+     * @param paramName  the name of the search parameter to filter products, such as "price", "discount", "category", "name", or "createDate"
      * @param paramValue the value of the search parameter to apply, such as a price range for "price" or a category name for "category"
-     * @param pageable the pagination information, including page number and size
+     * @param pageable   the pagination information, including page number and size
      * @return a paginated list of products that match the specified search criteria
      */
     @Transactional(readOnly = true)
@@ -227,7 +226,7 @@ public class ProductService implements ProductServiceInterface {
      * of a name, ignoring case.
      *
      * @param partOfName the partial name used to search products
-     * @param pageable the pagination information including page size and page number
+     * @param pageable   the pagination information including page size and page number
      * @return a paginated list of ProductResponseDto containing the matching products
      */
     @Transactional(readOnly = true)
@@ -241,7 +240,7 @@ public class ProductService implements ProductServiceInterface {
      * Retrieves a paginated list of products that belong to the specified category.
      *
      * @param categoryName the name of the category whose products are to be retrieved
-     * @param pageable the pagination and sorting information
+     * @param pageable     the pagination and sorting information
      * @return a paginated list of product response DTOs belonging to the specified category
      */
     @Transactional(readOnly = true)
