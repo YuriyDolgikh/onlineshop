@@ -1,5 +1,6 @@
 package org.onlineshop.service;
 
+import lombok.Generated;
 import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.product.ProductRequestDto;
 import org.onlineshop.dto.product.ProductResponseDto;
@@ -266,11 +267,7 @@ public class ProductService implements ProductServiceInterface {
         if (minPrice == null || maxPrice == null) {
             throw new IllegalArgumentException("Min price and max price must be provided");
         }
-        if (minPrice.compareTo(maxPrice) > 0) {
-            BigDecimal temp = minPrice;
-            minPrice = maxPrice;
-            maxPrice = temp;
-        }
+        normalizeMinMax(minPrice, maxPrice);
         return productRepository.findByPriceBetween(minPrice, maxPrice, pageable)
                 .map(productConverter::toDto);
     }
@@ -399,6 +396,15 @@ public class ProductService implements ProductServiceInterface {
         }
         if (productDiscountPrice.compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("Product discount price must be greater than 0");
+        }
+    }
+
+    @Generated
+    private void normalizeMinMax(BigDecimal min, BigDecimal max) {
+        if (min.compareTo(max) > 0) {
+            BigDecimal temp = min;
+            min = max;
+            max = temp;
         }
     }
 }
