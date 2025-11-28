@@ -79,12 +79,14 @@ class UserServiceConfirmationEmailTest {
 
     @Test
     void testConfirmationEmailNullCode() {
-        assertThrows(BadRequestException.class, () -> userService.confirmationEmail(null));
+        String result = userService.confirmationEmail(null);
+        assertEquals("Code is null or blank", result);
     }
 
     @Test
     void testConfirmationEmailEmptyCode() {
-        assertThrows(BadRequestException.class, () -> userService.confirmationEmail(" "));
+        String result = userService.confirmationEmail(" ");
+        assertEquals("Code is null or blank", result);
     }
 
     @Test
