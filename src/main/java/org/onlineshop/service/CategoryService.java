@@ -43,6 +43,10 @@ public class CategoryService implements CategoryServiceInterface {
         if (categoryRequestDto.getCategoryName() == null || categoryRequestDto.getCategoryName().isBlank()) {
             throw new IllegalArgumentException("Category name must be provided");
         }
+        String categoryName = categoryRequestDto.getCategoryName().trim();
+        if (categoryName.length() < 3 || categoryName.length() > 20) {
+            throw new IllegalArgumentException("Category name must be between 3 and 20 characters");
+        }
         if (categoryRepository.existsByCategoryName(categoryRequestDto.getCategoryName())) {
             throw new BadRequestException("Category with name: " + categoryRequestDto.getCategoryName() + " already exist");
         }

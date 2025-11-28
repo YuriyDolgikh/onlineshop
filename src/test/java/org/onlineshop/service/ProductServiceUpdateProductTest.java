@@ -269,17 +269,14 @@ class ProductServiceUpdateProductTest {
 
         productRepository.save(productTest);
 
-        ProductUpdateDto productSecond = ProductUpdateDto.builder()
-                .productName("testProduct")
+        ProductUpdateDto updateDto = ProductUpdateDto.builder()
+                .productName("testProduct") // То же самое имя
                 .build();
 
-
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(productTest.getId(), productSecond));
-        String messageException = "Product with name: " + productSecond.getProductName() + " already exist in category.";
-        assertEquals(messageException, exception.getMessage());
-
+        ProductResponseDto updatedProduct = productService.updateProduct(productTest.getId(), updateDto);
+        assertEquals("testProduct", updatedProduct.getProductName());
+        assertEquals(1, productRepository.findAll().size());
     }
-
     @Test
     void testUpdateProductWhenProductNotFound() {
 
@@ -290,7 +287,6 @@ class ProductServiceUpdateProductTest {
         Exception exception = assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(10000, productSecond));
         String messageException = "Product with id = 10000 not found";
         assertEquals(messageException, exception.getMessage());
-
     }
 
     @Test

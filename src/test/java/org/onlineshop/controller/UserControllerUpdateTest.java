@@ -50,7 +50,7 @@ class UserControllerUpdateTest {
                 .username("admin")
                 .email("admin@example.com")
                 .hashPassword("$2a$10$WiAt7dmC1vLIxjY9/9n7P.I5RQU1MKKSOI1Dy1pNLPPIts7K5RJR2")
-                .phoneNumber("+494949494949")
+                .phoneNumber("+49494949")
                 .status(User.Status.CONFIRMED)
                 .role(User.Role.ADMIN)
                 .build();

@@ -51,6 +51,7 @@ class CategoryControllerGetAllCategoriesTest {
     void dropDatabase() {
         categoryRepository.deleteAll();
         userRepository.deleteAll();
+        productRepository.deleteAll();
     }
 
     @BeforeEach

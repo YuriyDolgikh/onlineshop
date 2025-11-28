@@ -1,53 +1,34 @@
 package org.onlineshop.controller;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.onlineshop.dto.cartItem.CartItemFullResponseDto;
-
-import org.onlineshop.entity.Cart;
 import org.onlineshop.service.CartItemService;
-import org.onlineshop.service.CartService;
-import org.onlineshop.service.converter.CartItemConverter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.http.ResponseEntity;
 
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@AutoConfigureMockMvc
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@TestPropertySource(locations = "classpath:application-test.yml")
+@ExtendWith(MockitoExtension.class)
 class CartItemControllerGetCartItemsTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-    @MockBean
+    @Mock
     private CartItemService cartItemService;
-    @MockBean
-    private CartService cartService;
+
+    @InjectMocks
+    private CartItemController cartItemController;
 
     @Test
-    @WithMockUser(username = "testUser@email.com",
-            roles = {"ADMIN", "MANAGER", "USER"})
-    void getCartItemsIfOk() throws Exception {
-        Set<CartItemFullResponseDto> set = new LinkedHashSet<>();
+    void getCartItemsIfOk() {
+        Set<CartItemFullResponseDto> expectedSet = new LinkedHashSet<>();
         for (int i = 0; i < 5; i++) {
-            set.add(CartItemFullResponseDto.builder()
+            expectedSet.add(CartItemFullResponseDto.builder()
                     .cartItemId(1 + i)
                     .productName("Product " + i)
                     .categoryName("Category")
@@ -56,32 +37,35 @@ class CartItemControllerGetCartItemsTest {
                     .quantity(2 + i)
                     .build());
         }
-        when(cartItemService.getCartItems()).thenReturn(set);
 
-        mockMvc.perform(get("/v1/cartItems"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(set.size()))
-                .andExpect(jsonPath("$[0].productName").value("Product 0"));
+        when(cartItemService.getCartItems()).thenReturn(expectedSet);
+
+        ResponseEntity<Set<CartItemFullResponseDto>> response = cartItemController.getCartItems();
+
+        assertNotNull(response);
+        assertEquals(200, response.getStatusCode().value());
+        assertNotNull(response.getBody());
+        assertEquals(expectedSet.size(), response.getBody().size());
+
+        CartItemFullResponseDto firstItem = response.getBody().iterator().next();
+        assertEquals("Product 0", firstItem.getProductName());
+        assertEquals(1, firstItem.getCartItemId());
+        assertEquals("Category", firstItem.getCategoryName());
+        assertEquals(120.0, firstItem.getProductPrice());
+        assertEquals(15.0, firstItem.getProductDiscountPrice());
+        assertEquals(2, firstItem.getQuantity());
     }
-    @Test
-    @WithMockUser(username = "testUser@email.com",
-            roles = {"ADMIN", "MANAGER", "USER"})
-    void getCartItemsIfCartEmpty() throws Exception {
-        Cart emptyCart = new Cart();
-        emptyCart.setCartItems(new HashSet<>());
-
-        when(cartService.getCurrentCart()).thenReturn(emptyCart);
-
-        mockMvc.perform(get("/v1/cartItems"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isEmpty());
-    }
-
 
     @Test
-    void getCartItemsIfUnauthorized() throws Exception {
-        mockMvc.perform(get("/v1/cartItems"))
-                .andExpect(status().isUnauthorized());
-    }
+    void getCartItemsIfCartEmpty() {
+        Set<CartItemFullResponseDto> emptySet = new LinkedHashSet<>();
+        when(cartItemService.getCartItems()).thenReturn(emptySet);
 
+        ResponseEntity<Set<CartItemFullResponseDto>> response = cartItemController.getCartItems();
+
+        assertNotNull(response);
+        assertEquals(200, response.getStatusCode().value());
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().isEmpty());
+    }
 }

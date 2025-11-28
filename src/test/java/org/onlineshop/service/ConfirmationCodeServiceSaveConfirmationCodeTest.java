@@ -83,8 +83,15 @@ class ConfirmationCodeServiceSaveConfirmationCodeTest {
         assert codes[0].getUser().equals(newTestUserOne);
         assert !codes[0].isConfirmed();
         assert codes[0].getExpireDataTime() != null;
-        LocalDateTime dateForTest = LocalDateTime.now().plusDays(179);
-        assert codes[0].getExpireDataTime().isAfter(dateForTest);
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime expectedMinExpiration = now.plusDays(179).minusMinutes(1);
+        LocalDateTime expectedMaxExpiration = now.plusDays(179).plusMinutes(1);
+
+        assert codes[0].getExpireDataTime().isAfter(expectedMinExpiration) :
+                "Expiration time should be after " + expectedMinExpiration + ", but was " + codes[0].getExpireDataTime();
+        assert codes[0].getExpireDataTime().isBefore(expectedMaxExpiration) :
+                "Expiration time should be before " + expectedMaxExpiration + ", but was " + codes[0].getExpireDataTime();
     }
 
     @Test
