@@ -94,7 +94,7 @@ class CartServiceGetCartFullDataTest {
 
         CartResponseDto result = cartService.getCartFullData();
 
-        assertEquals(BigDecimal.valueOf(180), result.getTotalPrice());
+        assertEquals(BigDecimal.valueOf(180.00), result.getTotalPrice());
         assertEquals(userTest.getUserId(), result.getUserId());
 
         assertEquals(1, result.getCartSympleItems().size());

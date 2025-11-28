@@ -11,15 +11,20 @@ import org.onlineshop.exception.AlreadyExistException;
 import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.repository.ConfirmationCodeRepository;
 import org.onlineshop.repository.UserRepository;
+import org.onlineshop.service.ConfirmationCodeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -34,6 +39,9 @@ class UserControllerRegisterTest {
 
     @Autowired
     private UserController userController;
+
+    @MockBean
+    private ConfirmationCodeService confirmationCodeService;
 
     @AfterEach
     void dropDatabase() {
@@ -53,6 +61,8 @@ class UserControllerRegisterTest {
                 .build();
 
         userRepository.save(newTestUser);
+
+        doNothing().when(confirmationCodeService).confirmationCodeManager(any(User.class));
     }
 
     @Test
@@ -67,7 +77,8 @@ class UserControllerRegisterTest {
         ResponseEntity<UserResponseDto> responseDto = userController.register(userRequestDto);
 
         assertNotNull(responseDto);
-        assertEquals(responseDto.getBody().getUsername(), userRequestDto.getName());
+        assertNotNull(responseDto.getBody());
+        assertEquals(userRequestDto.getName(), responseDto.getBody().getUsername());
     }
 
     @Test
@@ -165,7 +176,6 @@ class UserControllerRegisterTest {
 
         assertThrows(ConstraintViolationException.class, () -> userController.register(userRequestDto));
     }
-
 
     @Test
     void testRegisterIfPhoneAlreadyExists() {
