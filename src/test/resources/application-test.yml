@@ -5,13 +5,17 @@ spring:
     password: 1111
 
   liquibase:
-    enabled: false  # Отключаем Liquibase для тестов
+    enabled: false
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     show-sql: true
     hibernate:
-      ddl-auto: create-drop  # Hibernate будет создавать схему
+      ddl-auto: create-drop
     properties:
       hibernate:
         format_sql: true
+
+confirmation:
+  expiration-period: 180
+  link-path: "http://localhost:8080/v1/users/confirmation?code="

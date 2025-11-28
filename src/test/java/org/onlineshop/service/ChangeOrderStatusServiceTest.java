@@ -45,6 +45,7 @@ class ChangeOrderStatusServiceTest {
 
     @AfterEach
     void tearDown() {
+        confirmationCodeRepository.deleteAll();
         orderRepository.deleteAll();
         userRepository.deleteAll();
     }
@@ -84,8 +85,6 @@ class ChangeOrderStatusServiceTest {
                 .build();
 
         orderRepository.save(order);
-
-
     }
 
     @Test

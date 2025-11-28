@@ -19,6 +19,9 @@ abstract class OrderServiceBaseTest {
     protected UserService userService;
 
     @Mock
+    CartService cartService;
+
+    @Mock
     protected UserRepository userRepository;
 
     @Mock

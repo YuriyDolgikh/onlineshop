@@ -1,30 +1,22 @@
 package org.onlineshop.service;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.onlineshop.entity.User;
 import org.onlineshop.repository.ConfirmationCodeRepository;
 import org.onlineshop.service.mail.MailUtil;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.transaction.annotation.Transactional;
+
+import java.lang.reflect.Field;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@Transactional
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@TestPropertySource(locations = "classpath:application-test.yml")
+@ExtendWith(MockitoExtension.class)
 class ConfirmationCodeServiceSendCodeByEmailTest {
-
-    String linkPrefix = "http://localhost:8080/v1/users/confirmation?code=";
 
     @Mock
     private ConfirmationCodeRepository confirmationCodeRepository;
@@ -35,13 +27,17 @@ class ConfirmationCodeServiceSendCodeByEmailTest {
     @InjectMocks
     private ConfirmationCodeService confirmationCodeService;
 
-    @AfterEach
-    void tearDown() {
-        confirmationCodeRepository.deleteAll();
-    }
-
     @Test
     void testSendCodeByEmailIsCallMailUtilWithCorrectParameters() {
+        String linkPath = "http://localhost:8080/v1/users/confirmation?code=";
+        try {
+            Field field = ConfirmationCodeService.class.getDeclaredField("LINK_PATH");
+            field.setAccessible(true);
+            field.set(confirmationCodeService, linkPath);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
         String code = "test-uuid-code-12345678";
         User newTestUserOne = User.builder()
                 .username("newTestUser")
@@ -51,7 +47,7 @@ class ConfirmationCodeServiceSendCodeByEmailTest {
                 .role(User.Role.USER)
                 .build();
 
-        String expectedLink = linkPrefix + code;
+        String expectedLink = linkPath + code;
 
         confirmationCodeService.sendCodeByEmail(code, newTestUserOne);
 

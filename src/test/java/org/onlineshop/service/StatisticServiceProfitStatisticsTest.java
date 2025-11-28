@@ -3,9 +3,6 @@ package org.onlineshop.service;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
-import org.onlineshop.dto.statistic.GroupByPeriod;
 import org.onlineshop.dto.statistic.ProfitStatisticRequestDto;
 import org.onlineshop.dto.statistic.ProfitStatisticsResponseDto;
 import org.onlineshop.entity.*;
@@ -24,7 +21,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -47,8 +43,8 @@ class StatisticServiceProfitStatisticsTest {
 
     @BeforeEach
     void setUp() {
-        User user = User.builder().
-                username("user1")
+        User user = User.builder()
+                .username("user1")
                 .email("user@example.com")
                 .hashPassword("hashpass12345")
                 .phoneNumber("+123456789")
@@ -59,12 +55,15 @@ class StatisticServiceProfitStatisticsTest {
         categoryRepository.save(category);
 
         List<Product> products = new ArrayList<>();
-        for (int i = 0; i <= 15; i++) {
-            products.add(Product.builder().name("Product " + i).price(new BigDecimal(100 + i * 10)).discountPrice(new BigDecimal(80 + i * 5)).category(category).build());
+        for (int i = 0; i <= 50; i++) {
+            products.add(Product.builder()
+                    .name("Product " + i)
+                    .price(new BigDecimal(100 + i * 10))
+                    .discountPrice(new BigDecimal(80 + i * 5))
+                    .category(category)
+                    .build());
         }
-        List<Product> savedProducts = products.stream()
-                .map(productRepository::save)
-                .collect(Collectors.toList());
+        List<Product> savedProducts = productRepository.saveAll(products);
 
         List<Order> orders = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
@@ -77,9 +76,16 @@ class StatisticServiceProfitStatisticsTest {
             order.setCreatedAt(LocalDateTime.now().minusDays(3 - i));
 
             List<OrderItem> items = new ArrayList<>();
-            for (Product p : savedProducts) {
+            int startIndex = i * 10;
+            for (int j = 0; j < 10; j++) {
+                Product p = savedProducts.get(startIndex + j);
                 int quantity = (i + p.getName().length()) % 3 + 1;
-                OrderItem orderItem = OrderItem.builder().product(p).quantity(quantity).priceAtPurchase(p.getDiscountPrice()).order(order).build();
+                OrderItem orderItem = OrderItem.builder()
+                        .product(p)
+                        .quantity(quantity)
+                        .priceAtPurchase(p.getDiscountPrice())
+                        .order(order)
+                        .build();
                 items.add(orderItem);
             }
             order.setOrderItems(items);
@@ -141,5 +147,4 @@ class StatisticServiceProfitStatisticsTest {
 
         assertThrows(BadRequestException.class, () -> statisticService.getProfitStatistics(request));
     }
-
 }
