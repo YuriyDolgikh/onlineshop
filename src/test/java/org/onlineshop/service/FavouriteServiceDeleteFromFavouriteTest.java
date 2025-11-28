@@ -1,5 +1,6 @@
 package org.onlineshop.service;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -11,6 +12,7 @@ import org.onlineshop.entity.User;
 import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.repository.FavouriteRepository;
 import org.onlineshop.repository.ProductRepository;
+import org.onlineshop.repository.UserRepository;
 import org.onlineshop.service.converter.FavouriteConverter;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,6 +20,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -31,6 +34,9 @@ import static org.mockito.Mockito.when;
 class FavouriteServiceDeleteFromFavouriteTest {
     @Mock
     private FavouriteRepository favouriteRepository;
+
+    @Mock
+    private UserRepository userRepository;
 
     @Mock
     private UserService userService;
@@ -67,10 +73,18 @@ class FavouriteServiceDeleteFromFavouriteTest {
         favouriteResponseDto = new FavouriteResponseDto(100, "testProduct");
     }
 
+    @AfterEach
+    void tearDown() {
+        favouriteRepository.deleteAll();
+        productRepository.deleteAll();
+        userRepository.deleteAll();
+    }
+
     @Test
     void deleteFavourite() {
         when(userService.getCurrentUser()).thenReturn(user);
-        when(favouriteRepository.findByUser(user)).thenReturn(List.of(favourite));
+        when(favouriteRepository.findByUserAndProduct(user, product)).thenReturn(Optional.of(favourite));
+        when(productRepository.findById(10)).thenReturn(Optional.of(product));
         when(favouriteConverter.toDto(favourite)).thenReturn(favouriteResponseDto);
 
         FavouriteResponseDto result = favouriteService.deleteFavourite(10);
