@@ -1,6 +1,7 @@
 package org.onlineshop.service;
 
 import jakarta.transaction.Transactional;
+import lombok.Generated;
 import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.user.UserRequestDto;
 import org.onlineshop.dto.user.UserResponseDto;
@@ -294,6 +295,7 @@ public class UserService implements UserServiceInterface {
      * @param user the user entity to be saved
      * @return the saved user entity
      */
+    @Generated
     public User saveUser(User user) {
         userRepository.save(user);
         return user;
