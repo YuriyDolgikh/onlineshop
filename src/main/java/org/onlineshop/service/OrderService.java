@@ -149,10 +149,10 @@ public class OrderService implements OrderServiceInterface {
         User currentUser = userService.getCurrentUser();
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Order not found with ID: " + orderId));
-        recalculateOrderPrice(order);
         if (!order.getUser().getUserId().equals(currentUser.getUserId())) {
             throw new AccessDeniedException("Access denied");
         }
+        recalculateOrderPrice(order);
         if (paymentMethod == null || paymentMethod.isBlank()) {
             throw new BadRequestException("PaymentMethod cannot be null or blank");
         }
@@ -184,20 +184,24 @@ public class OrderService implements OrderServiceInterface {
         if (!isAccessToOrderAllowed(orderId)) {
             throw new AccessDeniedException("Access denied");
         }
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
-        if (order.getStatus() != Order.Status.PENDING_PAYMENT && order.getStatus() != Order.Status.PAID) {
-            throw new RuntimeException("You can't update delivery details for an order that is not in PENDING_PAYMENT or PAID status");
-        }
+
         if (orderRequestDto == null) {
             throw new IllegalArgumentException("OrderRequestDto cannot be null");
         }
+
         if (orderRequestDto.getDeliveryAddress() == null || orderRequestDto.getDeliveryAddress().isBlank()) {
             throw new IllegalArgumentException("Delivery address cannot be null or empty");
         }
 
         if (orderRequestDto.getContactPhone() == null || orderRequestDto.getContactPhone().isBlank()) {
-            throw new IllegalArgumentException("Contact phone cannot be null empty");
+            throw new IllegalArgumentException("Contact phone cannot be null or empty");
+        }
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        if (order.getStatus() != Order.Status.PENDING_PAYMENT && order.getStatus() != Order.Status.PAID) {
+            throw new RuntimeException("You can't update delivery details for an order that is not in PENDING_PAYMENT or PAID status");
         }
 
         try {

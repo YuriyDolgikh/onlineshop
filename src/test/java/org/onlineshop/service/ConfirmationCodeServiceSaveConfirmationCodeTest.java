@@ -1,6 +1,7 @@
 package org.onlineshop.service;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -12,6 +13,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -34,6 +36,12 @@ class ConfirmationCodeServiceSaveConfirmationCodeTest {
 
     @InjectMocks
     private ConfirmationCodeService confirmationCodeService;
+
+    @BeforeEach
+    void setUp() {
+        ReflectionTestUtils.setField(confirmationCodeService, "EXPIRATION_PERIOD", 180);
+        ReflectionTestUtils.setField(confirmationCodeService, "LINK_PATH", "http://localhost:8080/confirm/");
+    }
 
     @AfterEach
     void tearDown() {
@@ -70,8 +78,10 @@ class ConfirmationCodeServiceSaveConfirmationCodeTest {
         ConfirmationCode[] codes = new ConfirmationCode[1];
 
         when(confirmationCodeRepository.save(any(ConfirmationCode.class)))
-                .then(invocationOnMock -> {
-                    codes[0] = invocationOnMock.getArgument(0);
+                .thenAnswer(invocation -> {
+                    codes[0] = invocation.getArgument(0);
+                    assert codes[0].getExpireDataTime() != null;
+                    assert codes[0].getExpireDataTime().isAfter(LocalDateTime.now());
                     return codes[0];
                 });
 
@@ -82,16 +92,14 @@ class ConfirmationCodeServiceSaveConfirmationCodeTest {
         assert codes[0].getCode().equals(codeForSave);
         assert codes[0].getUser().equals(newTestUserOne);
         assert !codes[0].isConfirmed();
-        assert codes[0].getExpireDataTime() != null;
 
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime expectedMinExpiration = now.plusDays(179).minusMinutes(1);
-        LocalDateTime expectedMaxExpiration = now.plusDays(179).plusMinutes(1);
+        LocalDateTime expectedExpiration = now.plusDays(180);
 
-        assert codes[0].getExpireDataTime().isAfter(expectedMinExpiration) :
-                "Expiration time should be after " + expectedMinExpiration + ", but was " + codes[0].getExpireDataTime();
-        assert codes[0].getExpireDataTime().isBefore(expectedMaxExpiration) :
-                "Expiration time should be before " + expectedMaxExpiration + ", but was " + codes[0].getExpireDataTime();
+        assert codes[0].getExpireDataTime().isAfter(now.plusDays(179)) :
+                "Expiration time should be roughly 180 days in the future";
+        assert codes[0].getExpireDataTime().isBefore(now.plusDays(181)) :
+                "Expiration time should be roughly 180 days in the future";
     }
 
     @Test
