@@ -19,7 +19,7 @@ public class UserRequestDto {
     @Size(min = 3, max = 15)
     private String name;
 
-    @Email(regexp = "^[A-Za-z0-9.-]+@[A-Za-z0-9]+\\.[A-Za-z]{2,}$", message = "Invalid email")  //TODO review regexp, need point in the address before @
+    @Email(regexp = "^[A-Za-z0-9.-]+@[A-Za-z0-9]+\\.[A-Za-z]{2,}$", message = "Invalid email")
     @NotBlank
     private String email;
 

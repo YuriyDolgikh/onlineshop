@@ -8,7 +8,7 @@ import org.mockito.Mock;
 import org.onlineshop.entity.ConfirmationCode;
 import org.onlineshop.entity.User;
 import org.onlineshop.repository.ConfirmationCodeRepository;
-import org.onlineshop.service.mail.MailUtil;
+import org.onlineshop.service.util.MailUtil;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;

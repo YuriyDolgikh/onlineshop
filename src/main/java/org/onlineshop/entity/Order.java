@@ -43,7 +43,6 @@ public class Order {
             regexp = "^\\+?[0-9]{7,15}$",
             message = "Phone number must contain only digits and may start with +, length 7–15"
     )
-//    @Column(nullable = false)
     private String contactPhone;
 
     //    @Column(nullable = false)
@@ -59,6 +58,7 @@ public class Order {
 
     @Builder.Default
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<OrderItem> orderItems = new ArrayList<>();
 
     public enum Status {

@@ -13,31 +13,18 @@ import java.time.Duration;
 import java.util.Locale;
 import java.util.Optional;
 
+/**
+ * Service class for validating URLs based on a set of rules such as length,
+ * format, domain/extension restrictions, and reachability.
+ *
+ * This class uses the {@link ImageServiceConfig} for configuration settings
+ * and the {@link HttpClient} for handling HTTP requests.
+ *
+ * Thread-safety is ensured as the class is immutable and all state is final.
+ */
 @Generated
 @Service
 public final class ValidationUrlService {
-
-    private interface HttpConstants {
-        String HEAD_METHOD = "HEAD";
-        int HTTP_OK = 200;
-        int HTTP_BAD_REQUEST = 400;
-        String USER_AGENT = "OnlineShopImageValidator/1.0";
-        String USER_AGENT_HEADER = "User-Agent";
-    }
-
-    private enum SupportedProtocol {
-        HTTP, HTTPS;
-
-        static boolean isSupported(String scheme) {
-            if (scheme == null) return false;
-            try {
-                valueOf(scheme.toUpperCase(Locale.ROOT));
-                return true;
-            } catch (IllegalArgumentException e) {
-                return false;
-            }
-        }
-    }
 
     private final ImageServiceConfig config;
     private final HttpClient httpClient;
@@ -58,7 +45,6 @@ public final class ValidationUrlService {
                 .orElse(false);
     }
 
-    // in ValidationUrlService
     public boolean isWellFormedHttpUrl(final String url) {
         return toUri(url)
                 .filter(uri -> SupportedProtocol.isSupported(uri.getScheme()))
@@ -147,5 +133,27 @@ public final class ValidationUrlService {
     private boolean isSuccessStatusCode(final HttpResponse<Void> response) {
         int code = response.statusCode();
         return code >= HttpConstants.HTTP_OK && code < HttpConstants.HTTP_BAD_REQUEST;
+    }
+
+    private enum SupportedProtocol {
+        HTTP, HTTPS;
+
+        static boolean isSupported(String scheme) {
+            if (scheme == null) return false;
+            try {
+                valueOf(scheme.toUpperCase(Locale.ROOT));
+                return true;
+            } catch (IllegalArgumentException e) {
+                return false;
+            }
+        }
+    }
+
+    private interface HttpConstants {
+        String HEAD_METHOD = "HEAD";
+        int HTTP_OK = 200;
+        int HTTP_BAD_REQUEST = 400;
+        String USER_AGENT = "OnlineShopImageValidator/1.0";
+        String USER_AGENT_HEADER = "User-Agent";
     }
 }

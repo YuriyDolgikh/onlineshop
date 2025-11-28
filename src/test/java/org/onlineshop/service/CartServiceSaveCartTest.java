@@ -71,13 +71,4 @@ class CartServiceSaveCartTest {
                 .build();
         assertThrows(IllegalArgumentException.class, () -> cartService.saveCart(cart));
     }
-
-    @Test
-    void testSaveCartIfCartItemsNull() {
-        Cart cart = Cart.builder()
-                .user(userTest)
-                .build();
-        assertThrows(IllegalArgumentException.class, () -> cartService.saveCart(cart));
-    }
-
 }

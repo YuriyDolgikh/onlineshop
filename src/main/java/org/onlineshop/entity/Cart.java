@@ -27,5 +27,6 @@ public class Cart {
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL,orphanRemoval = true)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
+    @Builder.Default
     private Set<CartItem> cartItems = new HashSet<>();
 }

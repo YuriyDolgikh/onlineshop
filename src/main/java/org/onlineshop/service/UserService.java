@@ -24,6 +24,15 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Optional;
 
+/**
+ * Provides services related to user management such as registration, updating user details,
+ * email confirmation, deleting users, and other user management tasks.
+ *
+ * This class interacts with the data layer using {@link UserRepository} for data persistence,
+ * performs entity-to-DTO conversions via {@link UserConverter}, and manages confirmation codes using
+ * {@link ConfirmationCodeService}. It also enforces business rules such as ensuring only authorized
+ * updates or deletions can be performed.
+ */
 @Service
 @RequiredArgsConstructor
 public class UserService implements UserServiceInterface {

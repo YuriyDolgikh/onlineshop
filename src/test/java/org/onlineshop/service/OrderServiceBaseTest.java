@@ -8,7 +8,7 @@ import org.onlineshop.entity.User;
 import org.onlineshop.repository.OrderRepository;
 import org.onlineshop.repository.UserRepository;
 import org.onlineshop.service.converter.OrderConverter;
-import org.onlineshop.service.mail.MailUtil;
+import org.onlineshop.service.util.MailUtil;
 
 abstract class OrderServiceBaseTest {
 

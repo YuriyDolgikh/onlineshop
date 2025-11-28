@@ -20,5 +20,4 @@ public class ProductResponseForUserDto {
     private BigDecimal productDiscountPrice;
 
     private String image;
-
 }

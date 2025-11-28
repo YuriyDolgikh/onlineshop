@@ -31,6 +31,15 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Configures the security filter chain for the application, defining how requests are authenticated
+     * and authorized. Includes configurations for CORS, CSRF, session management, request authorization,
+     * exception handling, and JWT token-based authentication.
+     *
+     * @param http the {@link HttpSecurity} object used to configure the security settings.
+     * @return a {@link SecurityFilterChain} object representing the application's security filter chain.
+     * @throws Exception if an error occurs during the security configuration.
+     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -43,20 +52,18 @@ public class SecurityConfig {
                         .requestMatchers("/index.html").permitAll()
                         .requestMatchers("/css/**").permitAll()
                         .requestMatchers("/js/**").permitAll()
-                        .requestMatchers("/images/**").permitAll()
 
-                        .requestMatchers("/modal/**").permitAll()
                         .requestMatchers("/*.html").permitAll()
 
                         .requestMatchers("/v1/users/**").permitAll()
-                        .requestMatchers("/v1/products/**").hasAnyRole("ADMIN", "MANAGER", "USER")
+                        .requestMatchers("/v1/categories/**").permitAll()
+                        .requestMatchers("/v1/products/**").permitAll()
                         .requestMatchers("/v1/carts/**").hasAnyRole("ADMIN", "MANAGER", "USER")
                         .requestMatchers("/v1/cartItems/**").hasAnyRole("ADMIN", "MANAGER", "USER")
                         .requestMatchers("/v1/favorites/**").hasAnyRole("ADMIN", "MANAGER", "USER")
                         .requestMatchers("/v1/orders/**").hasAnyRole("ADMIN", "MANAGER", "USER")
                         .requestMatchers("/v1/orderItems/**").hasAnyRole("ADMIN", "MANAGER", "USER")
                         .requestMatchers("/v1/statistics/**").hasRole("ADMIN")
-                        .requestMatchers("/v1/categories/**").hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .anyRequest().authenticated()
@@ -69,6 +76,13 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /**
+     * Configures CORS (Cross-Origin Resource Sharing) settings for the application.
+     * It allows all origins, methods, and headers to ensure that cross-origin requests
+     * are handled accordingly.
+     *
+     * @return a {@link CorsConfigurationSource} object with the configured CORS settings.
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
