@@ -5,17 +5,20 @@ import org.junit.jupiter.api.Test;
 import org.onlineshop.entity.ConfirmationCode;
 import org.onlineshop.entity.User;
 import org.onlineshop.exception.BadRequestException;
+import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.repository.ConfirmationCodeRepository;
 import org.onlineshop.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -31,6 +34,9 @@ class UserServiceConfirmationEmailTest {
 
     @Autowired
     private ConfirmationCodeRepository confirmationCodeRepository;
+
+    @Autowired
+    private ConfirmationCodeService confirmationCodeService;
 
     @AfterEach
     void dropDatabase() {
