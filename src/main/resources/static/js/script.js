@@ -1,6 +1,7 @@
 // Проверка статуса API
 async function checkApiStatus() {
     const statusElement = document.getElementById('status');
+    const lang = localStorage.getItem('preferred-language') || 'ru';
 
     try {
         const response = await fetch('/v3/api-docs', {
@@ -11,17 +12,45 @@ async function checkApiStatus() {
         });
 
         if (response.ok) {
-            statusElement.innerHTML = '✅ API работает корректно';
-            statusElement.style.background = '#e8f5e8';
-            statusElement.style.color = '#2d5016';
+            setApiStatus('success', lang);
         } else {
             throw new Error('API не отвечает');
         }
     } catch (error) {
-        statusElement.innerHTML = '❌ Ошибка подключения к API';
+        setApiStatus('error', lang);
+        console.error('API status check failed:', error);
+    }
+}
+
+// Установка статуса API с учетом языка
+function setApiStatus(status, lang) {
+    const statusElement = document.getElementById('status');
+    const statusMessages = {
+        en: {
+            success: '✅ API is working correctly',
+            error: '❌ API connection error'
+        },
+        de: {
+            success: '✅ API funktioniert korrekt',
+            error: '❌ API-Verbindungsfehler'
+        },
+        ru: {
+            success: '✅ API работает корректно',
+            error: '❌ Ошибка подключения к API'
+        }
+    };
+
+    // Сохраняем текущее состояние в data-атрибут
+    statusElement.dataset.apiStatus = status;
+
+    if (status === 'success') {
+        statusElement.textContent = statusMessages[lang].success;
+        statusElement.style.background = '#e8f5e8';
+        statusElement.style.color = '#2d5016';
+    } else {
+        statusElement.textContent = statusMessages[lang].error;
         statusElement.style.background = '#ffebee';
         statusElement.style.color = '#c62828';
-        console.error('API status check failed:', error);
     }
 }
 

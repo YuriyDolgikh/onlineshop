@@ -109,52 +109,55 @@ function changeLanguage(lang) {
     // Сохраняем выбор языка
     localStorage.setItem('preferred-language', lang);
 
+    // Обновляем статус API с сохранением текущего состояния
+    updateApiStatus(lang);
+
     // Обновляем модальные окна, если они открыты
     updateModalLanguage(lang);
-
-    // Обновляем статус API
-    updateApiStatus(lang);
 }
 
-// Функция обновления статуса API
+// Функция обновления статуса API с сохранением состояния
 function updateApiStatus(lang) {
     const statusElement = document.getElementById('status');
-    const statusMessages = {
-        en: {
-            checking: '🔄 Checking API status...',
-            success: '✅ API is working correctly',
-            error: '❌ API connection error'
-        },
-        de: {
-            checking: '🔄 API-Status wird überprüft...',
-            success: '✅ API funktioniert korrekt',
-            error: '❌ API-Verbindungsfehler'
-        },
-        ru: {
-            checking: '🔄 Проверка статуса API...',
-            success: '✅ API работает корректно',
-            error: '❌ Ошибка подключения к API'
+    const currentStatus = statusElement.dataset.apiStatus; // Получаем сохраненное состояние
+
+    // Если состояние уже определено (success или error), обновляем текст
+    if (currentStatus === 'success' || currentStatus === 'error') {
+        const statusMessages = {
+            en: {
+                success: '✅ API is working correctly',
+                error: '❌ API connection error'
+            },
+            de: {
+                success: '✅ API funktioniert korrekt',
+                error: '❌ API-Verbindungsfehler'
+            },
+            ru: {
+                success: '✅ API работает корректно',
+                error: '❌ Ошибка подключения к API'
+            }
+        };
+
+        if (currentStatus === 'success') {
+            statusElement.textContent = statusMessages[lang].success;
+            statusElement.style.background = '#e8f5e8';
+            statusElement.style.color = '#2d5016';
+        } else {
+            statusElement.textContent = statusMessages[lang].error;
+            statusElement.style.background = '#ffebee';
+            statusElement.style.color = '#c62828';
         }
-    };
-
-    // Сохраняем текущее состояние статуса
-    const currentStatus = statusElement.textContent;
-    const currentStyle = {
-        background: statusElement.style.background,
-        color: statusElement.style.color
-    };
-
-    // Обновляем текст в соответствии с языком
-    if (currentStatus.includes('Checking') || currentStatus.includes('überprüft') || currentStatus.includes('Проверка')) {
-        statusElement.textContent = statusMessages[lang].checking;
-    } else if (currentStatus.includes('working') || currentStatus.includes('funktioniert') || currentStatus.includes('работает')) {
-        statusElement.textContent = statusMessages[lang].success;
-        statusElement.style.background = '#e8f5e8';
-        statusElement.style.color = '#2d5016';
-    } else if (currentStatus.includes('error') || currentStatus.includes('Fehler') || currentStatus.includes('Ошибка')) {
-        statusElement.textContent = statusMessages[lang].error;
-        statusElement.style.background = '#ffebee';
-        statusElement.style.color = '#c62828';
+    }
+    // Если состояние не определено, просто устанавливаем текст проверки
+    else {
+        const checkingMessages = {
+            en: '🔄 Checking API status...',
+            de: '🔄 API-Status wird überprüft...',
+            ru: '🔄 Проверка статуса API...'
+        };
+        statusElement.textContent = checkingMessages[lang];
+        statusElement.style.background = '';
+        statusElement.style.color = '';
     }
 }
 
