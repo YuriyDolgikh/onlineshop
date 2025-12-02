@@ -34,8 +34,8 @@ public class StatisticService implements StatisticServiceInterface {
      * Retrieves a list of top ten purchased products based on completed (paid) orders.
      *
      * @return a list of {@code ProductStatisticResponseDto} objects containing details of the
-     *         top ten most purchased products, including their name, category, price, discount price,
-     *         and total purchased quantity.
+     * top ten most purchased products, including their name, category, price, discount price,
+     * and total purchased quantity.
      */
     @Override
     public List<ProductStatisticResponseDto> getTopTenPurchasedProducts() {
@@ -47,8 +47,8 @@ public class StatisticService implements StatisticServiceInterface {
      * associated with canceled orders.
      *
      * @return a list of ProductStatisticResponseDto objects containing details of the top ten
-     *         most canceled products, including their name, category, price, discount price,
-     *         and total canceled quantity.
+     * most canceled products, including their name, category, price, discount price,
+     * and total canceled quantity.
      */
     @Override
     public List<ProductStatisticResponseDto> getTenCanceledProducts() {
@@ -56,14 +56,13 @@ public class StatisticService implements StatisticServiceInterface {
     }
 
     /**
-     * Retrieves a list of products that are in the "Pending Payment" status within the specified number of days.
-     * This method calculates the total quantity of each product included in orders with the "Pending Payment" status
-     * created after a given date, and returns a list of product statistics.
+     * Retrieves a list of products that are in a pending payment status within the specified number of days.
      *
-     * @param days the number of days in the past from which orders should be considered. Orders created
-     *             after (current date - days) and in "Pending Payment" status will be processed.
-     * @return a list of {@code ProductStatisticResponseDto} objects containing details about the products
-     *         in "Pending Payment" status and their respective total quantities.
+     * @param days the number of days in the past from the current date to consider for finding orders with pending payment status;
+     *             must be between 1 and 365. Cannot be null.
+     * @return a list of {@code ProductStatisticResponseDto} containing product details and their respective quantities
+     *         from orders with pending payment status within the specified time frame.
+     * @throws BadRequestException if the provided {@code days} is null or not in the range of 1 to 365.
      */
     @Transactional
     @Override
@@ -71,8 +70,8 @@ public class StatisticService implements StatisticServiceInterface {
         if (days == null) {
             throw new BadRequestException("Day number can't be null");
         }
-        if (days <= 0) {
-            throw new BadRequestException("Day number must be greater than 0");
+        if (days <= 0 || days > 365) {
+            throw new BadRequestException("Invalid day number: " + days + ". Day number must be between 1 and 365");
         }
         LocalDateTime since = LocalDateTime.now().minusDays(days);
         Map<Product, Integer> productQuantityMap = new LinkedHashMap<>();
@@ -91,16 +90,16 @@ public class StatisticService implements StatisticServiceInterface {
      *
      * @param request the {@link ProfitStatisticRequestDto} containing the request parameters:
      *                <lo>
-     *                  <li> - periodCount: the number of time periods to analyze</li>
-     *                  <li> - periodUnit: the unit of time (e.g., DAYS, WEEKS, MONTHS, YEARS)</li>
-     *                  <li> - groupBy: the grouping unit for profit calculation (e.g., HOUR, DAY, WEEK, MONTH)</li>
+     *                <li> - periodCount: the number of time periods to analyze</li>
+     *                <li> - periodUnit: the unit of time (e.g., DAYS, WEEKS, MONTHS, YEARS)</li>
+     *                <li> - groupBy: the grouping unit for profit calculation (e.g., HOUR, DAY, WEEK, MONTH)</li>
      *                </lo>
      * @return a {@link ProfitStatisticsResponseDto} containing:
-     *         - the start date of the analysis period
-     *         - the end date of the analysis period
-     *         - the grouping identifier (groupBy unit)
-     *         - a map of profits per period grouped by the specified unit
-     *         - the total profit for the analysis period
+     * - the start date of the analysis period
+     * - the end date of the analysis period
+     * - the grouping identifier (groupBy unit)
+     * - a map of profits per period grouped by the specified unit
+     * - the total profit for the analysis period
      * @throws BadRequestException if the provided periodUnit or groupBy values are invalid
      */
     @Transactional
