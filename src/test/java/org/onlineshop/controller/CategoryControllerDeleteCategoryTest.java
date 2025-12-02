@@ -20,9 +20,9 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -70,7 +70,7 @@ class CategoryControllerDeleteCategoryTest {
             roles = {"ADMIN", "MANAGER"})
     void testDeleteCategoryIfRoleAdminAndManagerAndIfOk() {
         Category category = Category.builder()
-                .categoryName("testCategoryForOtherTest")
+                .categoryName("testCategoryOther")
                 .image("https://drive.google.com/file/d/1y03Ct0ABP1X8O6NFvK6FdqiMacYpLeTs/view?usp=drive_link")
                 .products(new ArrayList<>())
                 .build();
@@ -100,7 +100,7 @@ class CategoryControllerDeleteCategoryTest {
     @WithMockUser(username = "testUser@email.com", roles = "USER")
     void testDeleteCategoryIfRoleUser() throws Exception {
         Category category = Category.builder()
-                .categoryName("testCategoryForOtherTest")
+                .categoryName("testCategoryOther")
                 .image("https://drive.google.com/file/d/1y03Ct0ABP1X8O6NFvK6FdqiMacYpLeTs/view?usp=drive_link")
                 .products(new ArrayList<>())
                 .build();
@@ -113,7 +113,7 @@ class CategoryControllerDeleteCategoryTest {
     @Test
     void testDeleteCategoryIfUserNotRegistered() throws Exception {
         Category category = Category.builder()
-                .categoryName("testCategoryForOtherTest")
+                .categoryName("testCategoryOther")
                 .image("https://drive.google.com/file/d/1y03Ct0ABP1X8O6NFvK6FdqiMacYpLeTs/view?usp=drive_link")
                 .products(new ArrayList<>())
                 .build();

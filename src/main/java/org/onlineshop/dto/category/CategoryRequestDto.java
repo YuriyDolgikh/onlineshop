@@ -19,5 +19,6 @@ public class CategoryRequestDto {
     @Size(min = 3, max = 20, message = "Category name must be between 3 and 20 characters")
     private String categoryName;
 
+    @Size(max = 256, message = "Image URL must be less than 256 characters")
     private String image;
 }

@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class CartItemRequestDto {
     @NotNull
+    @Min(value = 1, message = "Product ID must be at least 1")
     private Integer productId;
 
     @NotNull

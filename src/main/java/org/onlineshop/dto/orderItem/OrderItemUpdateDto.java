@@ -2,10 +2,7 @@ package org.onlineshop.dto.orderItem;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -14,9 +11,10 @@ import lombok.NoArgsConstructor;
 public class OrderItemUpdateDto {
 
     @NotNull
-    private Integer orderItemId; // конкретный элемент заказа
+    @Min(value = 1, message = "Order item ID must be at least 1")
+    private Integer orderItemId;
 
     @NotNull
-    @Min(1)
+    @Min(value = 1, message = "Quantity must be at least 1")
     private Integer quantity;
 }

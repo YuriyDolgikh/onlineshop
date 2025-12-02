@@ -14,6 +14,7 @@ public class ProductRequestDto {
     @Size(min = 3, max = 20, message = "Product title must be between 3 and 20 characters")
     private String productName;
 
+    @Size(max = 500, message = "Product description must be less than 500 characters")
     private String productDescription;
 
     @NotBlank(message = "Product category is required and must be not blank")
@@ -27,5 +28,6 @@ public class ProductRequestDto {
     private BigDecimal productDiscountPrice;
 
     @NotNull(message = "Image URL cannot be null")
+    @Size(max = 256, message = "Image URL must be less than 256 characters")
     private String image;
 }

@@ -34,6 +34,7 @@ public class Product {
     private String name;
 
     @Column(columnDefinition = "TEXT")
+    @Size(max = 500)
     private String description;
 
     @Column(precision = 10, scale = 2, nullable = false)
@@ -56,5 +57,6 @@ public class Product {
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
+    @Column(nullable = false)
     private LocalDateTime updatedAt;
 }

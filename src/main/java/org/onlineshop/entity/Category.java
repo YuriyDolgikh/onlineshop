@@ -1,6 +1,7 @@
 package org.onlineshop.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,6 +23,7 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer categoryId;
 
+    @Size(min = 3, max = 20, message = "Category name must be between 3 and 20 characters")
     @Column(nullable = false, unique = true)
     public String categoryName;
 

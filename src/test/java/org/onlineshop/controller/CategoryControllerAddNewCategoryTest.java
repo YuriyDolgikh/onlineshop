@@ -7,6 +7,7 @@ import org.onlineshop.dto.category.CategoryRequestDto;
 import org.onlineshop.dto.category.CategoryResponseDto;
 import org.onlineshop.entity.Category;
 import org.onlineshop.entity.User;
+import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.repository.CategoryRepository;
 import org.onlineshop.repository.ProductRepository;
 import org.onlineshop.repository.UserRepository;
@@ -68,7 +69,7 @@ class CategoryControllerAddNewCategoryTest {
         userRepository.save(newTestUser);
 
         Category category = Category.builder()
-                .categoryName("testCategoryForOtherTest")
+                .categoryName("testCategoryOther")
                 .image("https://drive.google.com/file/d/1y03Ct0ABP1X8O6NFvK6FdqiMacYpLeTs/view?usp=drive_link")
                 .products(new ArrayList<>())
                 .build();
@@ -88,6 +89,7 @@ class CategoryControllerAddNewCategoryTest {
 
         ResponseEntity<CategoryResponseDto> category = categoryController.addCategory(categoryRequestDto);
         assertNotNull(category);
+        assertNotNull(category.getBody());
         assertEquals(categoryRequestDto.getCategoryName(), category.getBody().getCategoryName());
         assertEquals(categoryRequestDto.getImage(), category.getBody().getImage());
         assertEquals(2, categoryRepository.findAll().size());
@@ -134,11 +136,11 @@ class CategoryControllerAddNewCategoryTest {
             roles = {"ADMIN", "MANAGER"})
     void testAddCategoryIfRoleAdminAndManagerAndNameCategoryIsAlreadyExist() {
         CategoryRequestDto categoryRequestDto = CategoryRequestDto.builder()
-                .categoryName("testCategoryForOtherTest")
+                .categoryName("testCategoryOther")
                 .image("https://drive.google.com/file/two")
                 .build();
 
-        assertThrows(IllegalArgumentException.class, () -> categoryController.addCategory(categoryRequestDto));
+        assertThrows(BadRequestException.class, () -> categoryController.addCategory(categoryRequestDto));
         assertEquals(1, categoryRepository.findAll().size());
 
     }
