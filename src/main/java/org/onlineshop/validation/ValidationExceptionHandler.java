@@ -18,25 +18,18 @@ public class ValidationExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ValidationErrorsDto> handlerValidationException(MethodArgumentNotValidException e) {
         List<ValidationErrorDto> validationErrors = new ArrayList<>();
-
         List<ObjectError> objectErrors = e.getBindingResult().getAllErrors();
-
         for (ObjectError currentError : objectErrors) {
-
             FieldError fieldError = (FieldError) currentError;
-
             ValidationErrorDto errorDto = ValidationErrorDto.builder()
                     .field(fieldError.getField())
                     .message(fieldError.getDefaultMessage())
                     .build();
-
             if (fieldError.getRejectedValue() != null) {
                 errorDto.setRejectedValue(fieldError.getRejectedValue().toString());
             }
-
             validationErrors.add(errorDto);
         }
-
         return ResponseEntity
                 .badRequest()
                 .body(ValidationErrorsDto.builder()
