@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -60,22 +59,14 @@ public class GlobalExceptionHandler {
                 constraintViolation -> {
                     String currentField = constraintViolation.getPropertyPath().toString();
                     String currentMessage = constraintViolation.getMessage();
-                    responseMessage.append("Field : " + currentField + " : " + currentMessage);
+                    responseMessage.append("Field : ")
+                            .append(currentField)
+                            .append(" : ")
+                            .append(currentMessage);
                     responseMessage.append("\n");
                 }
         );
         return new ResponseEntity<>(responseMessage.toString(), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException ex) {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("message", "Validation failed");
-        Map<String, String> errors = new LinkedHashMap<>();
-        ex.getBindingResult().getFieldErrors()
-                .forEach(err -> errors.put(err.getField(), err.getDefaultMessage()));
-        body.put("errors", errors);
-        return ResponseEntity.badRequest().body(body);
     }
 
     @ExceptionHandler(UsernameNotFoundException.class)

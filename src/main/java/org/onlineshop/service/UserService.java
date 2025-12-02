@@ -211,6 +211,10 @@ public class UserService implements UserServiceInterface {
         if (email == null || email.isBlank()) {
             throw new BadRequestException("Email must be provided to renew user");
         }
+        String emailRegex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
+        if (!email.matches(emailRegex)) {
+            throw new BadRequestException("Invalid email format");
+        }
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("User with email: " + email + " not found"));
         if (!user.getStatus().equals(User.Status.DELETED)) {

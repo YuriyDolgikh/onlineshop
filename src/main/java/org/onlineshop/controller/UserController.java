@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.user.UserRequestDto;
 import org.onlineshop.dto.user.UserResponseDto;
@@ -211,7 +210,7 @@ public class UserController {
     })
     @PreAuthorize("hasAnyRole('USER', 'MANAGER', 'ADMIN')")
     @GetMapping("/renew/{email}")
-    public ResponseEntity<UserResponseDto> renewUser(@Email @PathVariable String email) {
+    public ResponseEntity<UserResponseDto> renewUser(@Valid @PathVariable String email) {
         return ResponseEntity.ok(userService.renewUser(email));
     }
 
