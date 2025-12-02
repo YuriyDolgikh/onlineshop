@@ -31,5 +31,4 @@ public class CategoryServiceHelper {
         }
         return url.trim();
     }
-
 }

@@ -6,8 +6,6 @@ import org.onlineshop.dto.statistic.ProductStatisticResponseDto;
 import org.onlineshop.entity.Product;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Generated
 @Service
 @RequiredArgsConstructor
@@ -17,7 +15,7 @@ public class StatisticConverter {
             throw new IllegalArgumentException("Product must not be null");
         }
         if (quantity == null || quantity < 0) {
-            quantity = 0; // можно установить 0 по умолчанию
+            quantity = 0;
         }
 
         return ProductStatisticResponseDto.builder()
@@ -28,5 +26,4 @@ public class StatisticConverter {
                 .productQuantity(quantity)
                 .build();
     }
-
 }

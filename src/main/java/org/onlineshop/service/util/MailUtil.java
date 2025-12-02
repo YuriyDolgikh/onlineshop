@@ -1,4 +1,4 @@
-package org.onlineshop.service.mail;
+package org.onlineshop.service.util;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -25,8 +25,6 @@ public class MailUtil {
     private final JavaMailSender mailSender;
     private final Configuration freemakerConfiguration;
     private final String messageSubject = "Code confirmation email";
-
-    // http://localhost:8080/api/public/confirmation?code=f9fcc1ec-6d34-4fbe-9367-69378ae89d70
 
     /**
      * Sends a confirmation email to the specified user with the provided confirmation link.

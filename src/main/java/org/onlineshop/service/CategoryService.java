@@ -17,6 +17,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+/**
+ * Service class for managing Category entities. This class provides operations
+ * for adding, updating, deleting, and retrieving category information while
+ * ensuring business rules and validations are enforced.
+ */
 @Service
 @RequiredArgsConstructor
 public class CategoryService implements CategoryServiceInterface {

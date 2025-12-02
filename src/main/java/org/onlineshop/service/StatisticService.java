@@ -1,7 +1,7 @@
 package org.onlineshop.service;
 
 import lombok.RequiredArgsConstructor;
-import org.onlineshop.dto.statistic.GroupByPeriod;
+import org.onlineshop.entity.GroupByPeriod;
 import org.onlineshop.dto.statistic.ProductStatisticResponseDto;
 import org.onlineshop.dto.statistic.ProfitStatisticRequestDto;
 import org.onlineshop.dto.statistic.ProfitStatisticsResponseDto;
@@ -23,6 +23,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Service class responsible for generating statistics related to orders and products.
+ * Implements {@link StatisticServiceInterface}.
+ *
+ * This service provides various functionalities such as retrieving top purchased or canceled products,
+ * generating profit statistics, and analyzing product statistics for orders in specific statuses.
+ */
 @RequiredArgsConstructor
 @Service
 public class StatisticService implements StatisticServiceInterface {

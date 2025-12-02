@@ -26,6 +26,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Service class for managing products within the application. It provides
+ * methods for adding, updating, deleting, and retrieving products based on
+ * various criteria. The service ensures validation and compliance with
+ * business constraints for product operations.
+ */
 @RequiredArgsConstructor
 @Service
 public class ProductService implements ProductServiceInterface {

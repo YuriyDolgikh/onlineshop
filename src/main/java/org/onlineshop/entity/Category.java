@@ -34,6 +34,4 @@ public class Category {
     @OneToMany(mappedBy = "category", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
     @Builder.Default
     private List<Product> products = new ArrayList<>();
-
-
 }

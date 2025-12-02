@@ -9,7 +9,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.onlineshop.entity.Order;
 import org.onlineshop.entity.User;
 import org.onlineshop.exception.MailSendingException;
-import org.onlineshop.service.mail.MailUtil;
 import org.springframework.mail.javamail.JavaMailSender;
 
 import static org.junit.jupiter.api.Assertions.*;

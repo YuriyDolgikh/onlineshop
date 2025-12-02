@@ -1,4 +1,4 @@
-package org.onlineshop.dto.statistic;
+package org.onlineshop.entity;
 
 import lombok.Getter;
 

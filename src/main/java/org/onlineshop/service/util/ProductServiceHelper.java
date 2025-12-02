@@ -31,5 +31,4 @@ public class ProductServiceHelper {
         }
         return url.trim();
     }
-
 }

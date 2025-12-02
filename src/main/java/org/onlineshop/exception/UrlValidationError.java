@@ -2,7 +2,6 @@ package org.onlineshop.exception;
 
 import lombok.Getter;
 
-
 @Getter
 public enum UrlValidationError {
 

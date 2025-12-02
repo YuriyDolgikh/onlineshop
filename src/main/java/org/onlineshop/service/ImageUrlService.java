@@ -9,6 +9,10 @@ import org.onlineshop.service.util.UrlDriveLinkNormalizer;
 import org.onlineshop.validation.ValidationUrlService;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service responsible for handling and processing image URLs. This includes
+ * validation, normalization, and conversion to direct access URLs.
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor

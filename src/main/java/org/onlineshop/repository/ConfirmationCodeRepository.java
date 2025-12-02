@@ -11,5 +11,5 @@ public interface ConfirmationCodeRepository extends JpaRepository<ConfirmationCo
 
     Optional<ConfirmationCode> findByUser(User user);
 
-    void deleteByUser(User user);
+//    void deleteByUser(User user);
 }

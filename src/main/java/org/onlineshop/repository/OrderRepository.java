@@ -8,13 +8,14 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Order, Integer> {
 
     List<Order> findByUser(User user);
+
     List<Order> findByStatus(Order.Status status);
-    Optional<Order> findByOrderIdAndUser(Integer orderId, User user);
+
+    //    Optional<Order> findByOrderIdAndUser(Integer orderId, User user);
     @Query("SELECT o FROM Order o WHERE o.status IN :statuses AND o.createdAt > :createdAt")
     List<Order> findByStatusAndCreatedAtAfter(@Param("statuses") List<Order.Status> statuses,
                                                 @Param("createdAt") LocalDateTime createdAt);

@@ -28,5 +28,4 @@ public class ProductUpdateDto {
 
     @Size(max = 256, message = "Image URL must be less than 256 characters")
     private String image;
-
 }

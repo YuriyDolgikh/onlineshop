@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.category.CategoryRequestDto;
 import org.onlineshop.dto.category.CategoryResponseDto;
@@ -18,6 +17,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -50,6 +50,7 @@ public class CategoryController {
             )
     })
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<CategoryResponseDto> addCategory(
             @Parameter(description = "Category creation data", required = true)
             @Valid @RequestBody CategoryRequestDto categoryRequestDto) {
@@ -85,6 +86,7 @@ public class CategoryController {
             )
     })
     @PutMapping("/{categoryId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<CategoryResponseDto> updateCategory(
             @Parameter(description = "ID of the category to update", required = true)
             @Valid @PathVariable Integer categoryId,
@@ -119,6 +121,7 @@ public class CategoryController {
             )
     })
     @DeleteMapping("/{categoryId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<CategoryResponseDto> deleteCategory(
             @Parameter(description = "ID of the category to delete", required = true)
             @Valid @PathVariable Integer categoryId) {
