@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 public class OrderItemRequestDto {
 
     @NotNull
+    @Min(value = 1, message = "Product ID must be at least 1")
     private Integer productId;
 
     @NotNull

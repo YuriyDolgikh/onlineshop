@@ -67,7 +67,7 @@ class CategoryControllerUpdateCategoryTest {
         userRepository.save(newTestUser);
 
         Category category = Category.builder()
-                .categoryName("testCategoryForOtherTest")
+                .categoryName("testCategoryOther")
                 .image("https://drive.google.com/file/d/1y03Ct0ABP1X8O6NFvK6FdqiMacYpLeTs/view?usp=drive_link")
                 .products(new ArrayList<>())
                 .build();
@@ -94,6 +94,7 @@ class CategoryControllerUpdateCategoryTest {
 
         ResponseEntity<CategoryResponseDto> updateCategory = categoryController.updateCategory(category.getCategoryId(), categoryUpdateDto);
         assertNotNull(updateCategory);
+        assertNotNull(updateCategory.getBody());
         assertEquals(categoryUpdateDto.getCategoryName(), updateCategory.getBody().getCategoryName());
         assertEquals(2, categoryRepository.findAll().size());
     }
@@ -116,6 +117,7 @@ class CategoryControllerUpdateCategoryTest {
 
         ResponseEntity<CategoryResponseDto> updateCategory = categoryController.updateCategory(category.getCategoryId(), categoryUpdateDto);
         assertNotNull(updateCategory);
+        assertNotNull(updateCategory.getBody());
         assertEquals(categoryUpdateDto.getImage(), updateCategory.getBody().getImage());
         assertEquals(2, categoryRepository.findAll().size());
     }
