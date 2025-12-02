@@ -7,7 +7,6 @@ import org.onlineshop.dto.user.UserResponseDto;
 import org.onlineshop.entity.ConfirmationCode;
 import org.onlineshop.entity.User;
 import org.onlineshop.exception.BadRequestException;
-import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.repository.ConfirmationCodeRepository;
 import org.onlineshop.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +21,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 
@@ -43,15 +43,14 @@ class UserServiceRenewUserTest {
 
     @MockBean
     private ConfirmationCodeService confirmationCodeService;
+    private String userEmailDeleted;
+    private String userConfirmedEmail;
 
     @AfterEach
     void dropDatabase() {
         confirmationCodeRepository.deleteAll();
         userRepository.deleteAll();
     }
-
-    private String userEmailDeleted;
-    private String userConfirmedEmail;
 
     @BeforeEach
     void setUp() {
@@ -112,7 +111,7 @@ class UserServiceRenewUserTest {
     @Test
     @WithMockUser(username = "testUser@email.com", roles = "USER")
     void testRenewUserIfUserNotFound() {
-        assertThrows(NotFoundException.class, () -> userService.renewUser("notFound.company.com"));
+        assertThrows(BadRequestException.class, () -> userService.renewUser("notFound.company.com"));
     }
 
     @Test
