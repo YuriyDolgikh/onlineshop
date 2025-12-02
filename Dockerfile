@@ -14,11 +14,5 @@ WORKDIR /app
 # Копируем только готовый jar из предыдущего этапа
 COPY --from=build /app/target/*.jar app.jar
 
-# Переменные по умолчанию (можно переопределять в docker-compose)
-ENV SPRING_PROFILES_ACTIVE=docker
-ENV SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/onlineshop
-ENV SPRING_DATASOURCE_USERNAME=postgres
-ENV SPRING_DATASOURCE_PASSWORD=1111
-
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]

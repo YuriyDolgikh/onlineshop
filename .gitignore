@@ -34,4 +34,32 @@ build/
 
 # .gitignore
 .env
-*.env
+.env.local
+.env.development
+.env.production
+
+# Секретные ключи
+*.key
+*.pem
+*.jks
+
+# Системные файлы
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+
+# Логи
+*.log
+logs/
+
+# Бинарные файлы
+*.class
+*.jar
+*.war
+*.ear
+
+# Базы данных
+*.db
+*.sqlite
