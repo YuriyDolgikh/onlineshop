@@ -7,6 +7,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import lombok.Generated;
 import org.onlineshop.security.exception.InvalidJwtException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
@@ -15,8 +16,10 @@ import java.util.Date;
 @Service
 public class JwtTokenProvider {
 
-    private final String jwtSecret = "ksdjbvlerbvleiaurhfliuefgewriu37845ty7cno8734tycn8yfnsirefhkhireufh"; // Must be a minimum 32 bytes
-    private final long jwtLifeTime = 3600000; // 60 minutes
+    @Value("${jwt.secret}")
+    private String jwtSecret;
+    @Value("${jwt.life.time}")
+    private long jwtLifeTime; // 60 minutes
 
     /**
      * Creates a JWT token for the specified username.
@@ -66,7 +69,11 @@ public class JwtTokenProvider {
     @Generated
     public String getUsernameFromJwt(String token) {
         Key key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
-        Claims claimsPayload = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+        Claims claimsPayload = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
         return claimsPayload.getSubject();
     }
 }
