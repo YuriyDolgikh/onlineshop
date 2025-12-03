@@ -13,7 +13,6 @@ import org.onlineshop.repository.ProductRepository;
 import org.onlineshop.service.converter.ProductConverter;
 import org.onlineshop.service.interfaces.ProductServiceInterface;
 import org.onlineshop.service.util.ProductServiceHelper;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -382,6 +381,14 @@ public class ProductService implements ProductServiceInterface {
         }
     }
 
+    /**
+     * Adjusts the provided minimum and maximum values to ensure that the minimum value
+     * is not greater than the maximum value. If the minimum value is greater than the
+     * maximum value, their values are swapped.
+     *
+     * @param min the minimum value to be normalized
+     * @param max the maximum value to be normalized
+     */
     @Generated
     private void normalizeMinMax(BigDecimal min, BigDecimal max) {
         if (min.compareTo(max) > 0) {

@@ -105,7 +105,7 @@ public class CartService implements CartServiceInterface {
      * @return a {@link CartResponseDto} containing the user ID, a list of cart item details,
      * and the total price of the items in the cart with discounts applied.
      */
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public CartResponseDto getCartFullData() {
         User user = userService.getCurrentUser();
@@ -132,7 +132,7 @@ public class CartService implements CartServiceInterface {
         }
 
         List<CartItemSympleResponseDto> cartItemSimpleDtos = cartItemDtos
-                .stream().map(o -> cartItemConverter.toSympleDtoFromDto(o)).toList();
+                .stream().map(cartItemConverter::toSympleDtoFromDto).toList();
 
         return CartResponseDto.builder()
                 .userId(user.getUserId())
@@ -147,7 +147,7 @@ public class CartService implements CartServiceInterface {
      *
      * @return the current user's shopping cart object, or an exception if the cart is empty
      */
-    @Transactional
+    @Transactional(readOnly = true)
     public Cart getCurrentCart() {
         User user = userService.getCurrentUser();
         if (user.getCart() == null) {

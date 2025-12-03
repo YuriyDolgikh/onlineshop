@@ -1,11 +1,11 @@
 package org.onlineshop.service;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.onlineshop.entity.Order;
 import org.onlineshop.repository.OrderRepository;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -50,7 +50,8 @@ public class ChangeOrderStatusService {
      *
      * @return a list of orders that have a status of PAID or IN_TRANSIT
      */
-    private List<Order> getOrdersForChangeStatus() {
+    @Transactional(readOnly = true)
+    protected List<Order> getOrdersForChangeStatus() {
         return orderRepository.findAll()
                 .stream()
                 .filter(order ->

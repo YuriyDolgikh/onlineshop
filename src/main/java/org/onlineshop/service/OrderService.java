@@ -65,7 +65,7 @@ public class OrderService implements OrderServiceInterface {
      */
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public List<OrderResponseDto> getOrdersByUser(Integer userId) {
         if (userId == null) {
             throw new IllegalArgumentException("UserId cannot be null");
@@ -268,7 +268,7 @@ public class OrderService implements OrderServiceInterface {
      * @throws BadRequestException if the provided order is null, or if the order status is not PENDING_PAYMENT.
      * @throws NotFoundException   if the order does not contain any order items.
      */
-    @Transactional(readOnly = true)
+    @Transactional
     public void recalculateOrderPrice(Order order) {
         if (order == null) {
             throw new BadRequestException("Order cannot be null");

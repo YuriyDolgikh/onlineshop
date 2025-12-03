@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -91,7 +90,7 @@ public class FavouriteService implements FavouriteServiceInterface {
      *
      * @return a list of FavouriteResponseDto objects representing the user's favourite products.
      */
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public List<FavouriteResponseDto> getFavourites() {
         User user = userService.getCurrentUser();

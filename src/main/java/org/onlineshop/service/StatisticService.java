@@ -38,6 +38,7 @@ public class StatisticService implements StatisticServiceInterface {
      * and total purchased quantity.
      */
     @Override
+    @Transactional(readOnly = true)
     public List<ProductStatisticResponseDto> getTopTenPurchasedProducts() {
         return getTopTenProducts(Order.Status.PAID);
     }
@@ -51,6 +52,7 @@ public class StatisticService implements StatisticServiceInterface {
      * and total canceled quantity.
      */
     @Override
+    @Transactional(readOnly = true)
     public List<ProductStatisticResponseDto> getTenCanceledProducts() {
         return getTopTenProducts(Order.Status.CANCELLED);
     }
@@ -64,7 +66,7 @@ public class StatisticService implements StatisticServiceInterface {
      *         from orders with pending payment status within the specified time frame.
      * @throws BadRequestException if the provided {@code days} is null or not in the range of 1 to 365.
      */
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public List<ProductStatisticResponseDto> getProductsInPendingPaymentStatus(Integer days) {
         if (days == null) {
@@ -102,7 +104,7 @@ public class StatisticService implements StatisticServiceInterface {
      * - the total profit for the analysis period
      * @throws BadRequestException if the provided periodUnit or groupBy values are invalid
      */
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public ProfitStatisticsResponseDto getProfitStatistics(ProfitStatisticRequestDto request) {
 
@@ -171,7 +173,8 @@ public class StatisticService implements StatisticServiceInterface {
      * @param orderStatus the order status used to filter the orders for calculating top products
      * @return a list of ProductStatisticResponseDto representing the top ten products and their statistics
      */
-    private List<ProductStatisticResponseDto> getTopTenProducts(Order.Status orderStatus) {
+    @Transactional(readOnly = true)
+    protected List<ProductStatisticResponseDto> getTopTenProducts(Order.Status orderStatus) {
         Map<Product, Integer> productTopTenProducts = new HashMap<>();
 
         orderRepository.findByStatus(orderStatus)
