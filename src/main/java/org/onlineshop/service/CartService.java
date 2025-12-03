@@ -6,6 +6,7 @@ import org.onlineshop.dto.cartItem.CartItemResponseDto;
 import org.onlineshop.dto.cartItem.CartItemSympleResponseDto;
 import org.onlineshop.entity.*;
 import org.onlineshop.exception.BadRequestException;
+import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.repository.CartRepository;
 import org.onlineshop.repository.OrderRepository;
 import org.onlineshop.service.converter.CartItemConverter;
@@ -74,6 +75,9 @@ public class CartService implements CartServiceInterface {
             }
             OrderItem orderItem = cartItemConverter.cartItemToOrderItem(cartItem);
             orderItems.add(orderItem);
+        }
+        if (orderItems.isEmpty()) {
+            throw new NotFoundException("Product list is empty. Unable to create empty order.");
         }
         Order currentOrder = orderRepository.findByUserAndStatus(user, Order.Status.PENDING_PAYMENT);
         if (currentOrder != null) {
