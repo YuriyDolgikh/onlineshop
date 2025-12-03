@@ -150,7 +150,7 @@ public class CartItemService implements CartItemServiceInterface {
      *
      * @return a set of CartItemResponseDto representing the items in the cart
      */
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     @Lazy
     public Set<CartItemFullResponseDto> getCartItems() {
@@ -165,6 +165,7 @@ public class CartItemService implements CartItemServiceInterface {
      * @param productId the ID of the product to search for within the user's cart
      * @return an Optional containing the CartItem if found; otherwise, an empty Optional
      */
+    @Transactional(readOnly = true)
      public Optional<CartItem> getCartItemFromCart(Integer productId) {
         User user = userService.getCurrentUser();
         Cart userCart = user.getCart();

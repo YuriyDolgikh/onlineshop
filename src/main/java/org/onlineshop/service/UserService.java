@@ -1,6 +1,5 @@
 package org.onlineshop.service;
 
-import jakarta.transaction.Transactional;
 import lombok.Generated;
 import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.user.UserRequestDto;
@@ -19,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -79,6 +79,7 @@ public class UserService implements UserServiceInterface {
      * @return a page of UserResponseDto objects containing the details of all users in the system
      */
     @Override
+    @Transactional(readOnly = true)
     public Page<UserResponseDto> getAllUsers(Pageable pageable) {
         return userRepository.findAll(pageable)
                 .map(userConverter::toDto);
@@ -92,6 +93,7 @@ public class UserService implements UserServiceInterface {
      * @throws NotFoundException if the user with the specified ID is not found
      */
     @Override
+    @Transactional(readOnly = true)
     public UserResponseDto getUserById(Integer id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User with id = " + id + " not found"));
@@ -137,6 +139,7 @@ public class UserService implements UserServiceInterface {
      * @throws BadRequestException if the authenticated user attempts to update another user's details
      */
     @Override
+    @Transactional
     public UserResponseDto updateUser(Integer userId, UserUpdateRequestDto updateRequest) {
 
         Optional<User> userToUpdateOptional = userRepository.findById(userId);
@@ -207,6 +210,7 @@ public class UserService implements UserServiceInterface {
      * @throws NotFoundException   if no user with the provided email exists
      */
     @Override
+    @Transactional
     public UserResponseDto renewUser(String email) {
         if (email == null || email.isBlank()) {
             throw new BadRequestException("Email must be provided to renew user");
@@ -232,6 +236,7 @@ public class UserService implements UserServiceInterface {
      * @param id - user id to retrieve
      * @return - user object
      */
+    @Transactional(readOnly = true)
     public User getUserByIdForAdmin(Integer id) {
         Optional<User> user = userRepository.findById(id);
         return user.orElseThrow(() -> new NotFoundException("User with id = " + id + " not found"));
@@ -243,6 +248,7 @@ public class UserService implements UserServiceInterface {
      * @param pageable the pagination information
      * @return a page containing all User objects from the data repository.
      */
+    @Transactional(readOnly = true)
     public Page<User> getAllUsersFullDetails(Pageable pageable) {
         return userRepository.findAll(pageable);
     }
@@ -254,6 +260,7 @@ public class UserService implements UserServiceInterface {
      * @return a UserResponseDto object containing the details of the retrieved user
      * @throws NotFoundException if no user with the specified email is found
      */
+    @Transactional(readOnly = true)
     public UserResponseDto getUserByEmail(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("User with email: " + email + " not found"));
@@ -268,6 +275,7 @@ public class UserService implements UserServiceInterface {
      * @return the User object associated with the specified email
      * @throws NotFoundException if no user is found with the specified email
      */
+    @Transactional(readOnly = true)
     public User getUserByEmailOrThrow(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("User with email: " + email + " not found"));
@@ -280,6 +288,7 @@ public class UserService implements UserServiceInterface {
      *
      * @return the currently authenticated User object
      */
+    @Transactional(readOnly = true)
     public User getCurrentUser() {
         return getUserByEmailOrThrow(getCurrentUserEmail());
     }
@@ -300,6 +309,7 @@ public class UserService implements UserServiceInterface {
      * @return the saved user entity
      */
     @Generated
+    @Transactional
     public User saveUser(User user) {
         userRepository.save(user);
         return user;

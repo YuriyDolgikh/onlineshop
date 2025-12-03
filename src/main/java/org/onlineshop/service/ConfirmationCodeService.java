@@ -46,6 +46,7 @@ public class ConfirmationCodeService implements ConfirmationCodeServiceInterface
      * @param user the user for whom the confirmation code will be generated and sent
      */
     @Override
+    @Transactional
     public void confirmationCodeManager(User user) {
         String code = generateCode();
         saveConfirmationCode(code, user);
@@ -115,7 +116,6 @@ public class ConfirmationCodeService implements ConfirmationCodeServiceInterface
     @Transactional
     @Override
     public User changeConfirmationStatusByCode(String code) {
-        LocalDateTime now = LocalDateTime.now();
         ConfirmationCode confirmationCode = repository.findByCode(code)
                 .orElseThrow(() -> new NotFoundException("Confirmation code: " + code + " not found"));
         User user = confirmationCode.getUser();
@@ -136,13 +136,13 @@ public class ConfirmationCodeService implements ConfirmationCodeServiceInterface
      * @throws NotFoundException        if no confirmation code is found for the specified user
      */
     @Override
+    @Transactional(readOnly = true)
     public ConfirmationCode findCodeByUser(User user) {
         if (user == null) {
             throw new IllegalArgumentException("User must be provided");
         }
-        ConfirmationCode confirmationCode = repository.findByUser(user)
+        return repository.findByUser(user)
                 .orElseThrow(() -> new NotFoundException("Confirmation code for user: " + user.getUsername() + " not found"));
-        return confirmationCode;
     }
 
     /**
@@ -154,6 +154,7 @@ public class ConfirmationCodeService implements ConfirmationCodeServiceInterface
      * @throws NotFoundException        if no confirmation code is found for the specified user
      */
     @Override
+    @Transactional
     public void deleteConfirmationCodeByUser(User user) {
         if (user == null) {
             throw new IllegalArgumentException("User must be provided");
@@ -176,7 +177,7 @@ public class ConfirmationCodeService implements ConfirmationCodeServiceInterface
      * @throws BadCredentialsException if the confirmation code is not found
      */
     @Generated
-    @Transactional
+    @Transactional( readOnly = true)
     protected boolean isConfirmationCodeExpired(String code) {
         Optional<ConfirmationCode> confirmationCodeOptional = repository.findByCode(code);
         if (confirmationCodeOptional.isEmpty()) {
@@ -195,7 +196,7 @@ public class ConfirmationCodeService implements ConfirmationCodeServiceInterface
      * @throws BadRequestException if the confirmation code is not found in the repository
      */
     @Generated
-    @Transactional
+    @Transactional( readOnly = true)
     protected ConfirmationCode getConfirmationCodeByCode(String code) {
         return repository.findByCode(code)
                 .orElseThrow(() -> new BadRequestException("Confirmation code not found"));

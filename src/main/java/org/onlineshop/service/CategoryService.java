@@ -1,24 +1,19 @@
 package org.onlineshop.service;
 
-import jakarta.transaction.Transactional;
-import jakarta.validation.ConstraintDeclarationException;
 import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.category.CategoryRequestDto;
 import org.onlineshop.dto.category.CategoryResponseDto;
 import org.onlineshop.dto.category.CategoryUpdateDto;
 import org.onlineshop.entity.Category;
-import org.onlineshop.entity.Favourite;
 import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.repository.CategoryRepository;
 import org.onlineshop.service.converter.CategoryConverter;
 import org.onlineshop.service.interfaces.CategoryServiceInterface;
 import org.onlineshop.service.util.CategoryServiceHelper;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -124,6 +119,7 @@ public class CategoryService implements CategoryServiceInterface {
      * @return a page of CategoryResponseDto objects, each containing details of a category
      */
     @Override
+    @Transactional(readOnly = true)
     public Page<CategoryResponseDto> getAllCategories(Pageable pageable) {
         return categoryRepository.findAll(pageable)
                 .map(categoryConverter::toDto);
@@ -137,6 +133,7 @@ public class CategoryService implements CategoryServiceInterface {
      * @throws BadRequestException if a category with the specified ID is not found in the database
      */
     @Override
+    @Transactional(readOnly = true)
     public Category getCategoryById(Integer categoryId) {
         return categoryRepository.findByCategoryId(categoryId)
                 .orElseThrow(() -> new BadRequestException("Category with id: " + categoryId + " not found"));
@@ -149,6 +146,7 @@ public class CategoryService implements CategoryServiceInterface {
      * @return the Category object corresponding to the specified name
      * @throws BadRequestException if a category with the specified name is not found in the database
      */
+    @Transactional(readOnly = true)
     public Category getCategoryByName(String categoryName) {
         return categoryRepository.findByCategoryName(categoryName)
                 .orElseThrow(() -> new BadRequestException("Category with name: " + categoryName + " not found"));
