@@ -1232,6 +1232,21 @@ databaseChangeLog:
                   name: discount_price
                   # Speeds up fetching discounted products within a category
 
+  - changeSet:
+      id: 44
+      author: 050525group
+      comment: "Create unique index for category to prevent race conditions"
+      changes:
+        - createIndex:
+            indexName: idx_category_name_category_unique
+            tableName: category
+            unique: true
+            columns:
+              - column:
+                  name: category_name
+            #                 Note: PostgreSQL automatically creates an index for a unique constraint
+            #                 This prevents creating duplicate category with the same category name
+
 
             
 

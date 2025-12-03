@@ -11,6 +11,7 @@ import org.onlineshop.repository.FavouriteRepository;
 import org.onlineshop.repository.ProductRepository;
 import org.onlineshop.service.converter.FavouriteConverter;
 import org.onlineshop.service.interfaces.FavouriteServiceInterface;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,8 +32,8 @@ public class FavouriteService implements FavouriteServiceInterface {
      * @param productId the ID of the product to be added to the favourites. Must not be null.
      * @return a FavouriteResponseDto containing details about the newly added favourite.
      * @throws IllegalArgumentException if the provided productId is null.
-     * @throws NotFoundException if the product with the given ID is not found.
-     * @throws BadRequestException if the product is already in the user's favourites.
+     * @throws NotFoundException        if the product with the given ID is not found.
+     * @throws BadRequestException      if the product is already in the user's favourites.
      */
     @Transactional
     @Override
@@ -45,20 +46,17 @@ public class FavouriteService implements FavouriteServiceInterface {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new NotFoundException("Product not found with ID: " + productId));
 
-        Optional<Favourite> existingFavourite = favouriteRepository
-                .findByUserAndProduct(user, product);
-
-        if (existingFavourite.isPresent()) {
-            throw new BadRequestException("Product is already in favourites");
-        }
-
         Favourite favourite = Favourite.builder()
                 .user(user)
                 .product(product)
                 .build();
 
-        Favourite savedFavourite = favouriteRepository.save(favourite);
-        return favouriteConverter.toDto(savedFavourite);
+        try {
+            Favourite savedFavourite = favouriteRepository.save(favourite);
+            return favouriteConverter.toDto(savedFavourite);
+        } catch (DataIntegrityViolationException exception) {
+            throw new BadRequestException("Product is already in favourites");
+        }
     }
 
     /**
@@ -68,7 +66,7 @@ public class FavouriteService implements FavouriteServiceInterface {
      * @param productId the ID of the product to be deleted from the favourites. Must not be null.
      * @return a FavouriteResponseDto containing details about the deleted favourite.
      * @throws IllegalArgumentException if the provided productId is null.
-     * @throws NotFoundException if the product with the given ID is not found in the user's favourites.
+     * @throws NotFoundException        if the product with the given ID is not found in the user's favourites.
      */
     @Transactional
     @Override

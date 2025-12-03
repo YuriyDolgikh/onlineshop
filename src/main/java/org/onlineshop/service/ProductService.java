@@ -48,12 +48,6 @@ public class ProductService implements ProductServiceInterface {
     public ProductResponseDto addProduct(ProductRequestDto productRequestDto) {
         validateProductRequestDto(productRequestDto);
         Category category = categoryService.getCategoryByName(productRequestDto.getProductCategory());
-
-        if (productRepository.existsByNameIgnoreCaseAndCategory(productRequestDto.getProductName().trim(), category)) {
-            throw new IllegalArgumentException("Product with name: " + productRequestDto.getProductName()
-                    + " already exist in category: " + category.getCategoryName());
-        }
-
         LocalDateTime now = LocalDateTime.now();
         final String finalImage = helper.resolveImageUrl(productRequestDto.getImage());
 
@@ -101,17 +95,12 @@ public class ProductService implements ProductServiceInterface {
                 ? productUpdateDto.getProductName().trim()
                 : productToUpdate.getName();
 
-        if (targetName.length() < 3 || targetName.length() > 20) {
-            throw new IllegalArgumentException("Product title must be between 3 and 20 characters");
-        }
 
-        if (!targetName.equalsIgnoreCase(productToUpdate.getName()) || !targetCategory.equals(productToUpdate.getCategory())) {
-            boolean nameExists = productRepository.existsByNameIgnoreCaseAndCategoryAndIdNot(targetName, targetCategory, productId);
-            if (nameExists) {
-                throw new IllegalArgumentException("Another product with the same name already exists in the category: "
-                        + targetCategory.getCategoryName());
+
+        if (productUpdateDto.getProductName() != null && !productUpdateDto.getProductName().isBlank()) {
+            if (targetName.length() < 3 || targetName.length() > 20) {
+                throw new IllegalArgumentException("Product title must be between 3 and 20 characters");
             }
-
             productToUpdate.setName(targetName);
             productToUpdate.setCategory(targetCategory);
         }
