@@ -274,7 +274,7 @@ public class OrderService implements OrderServiceInterface {
             throw new BadRequestException("Order cannot be null");
         }
         if (order.getStatus() != Order.Status.PENDING_PAYMENT) {
-            throw new BadRequestException("The price can't be recalculated for this order");
+            throw new BadRequestException("The price can't be recalculated for the order not in PENDING_PAYMENT status");
         }
         List<OrderItem> orderItemList = order.getOrderItems();
         if (orderItemList == null || orderItemList.isEmpty()) {
