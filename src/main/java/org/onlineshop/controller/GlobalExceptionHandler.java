@@ -1,6 +1,7 @@
 package org.onlineshop.controller;
 
 
+import jakarta.persistence.OptimisticLockException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.Generated;
 import org.onlineshop.dto.ApiError;
@@ -19,7 +20,6 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -200,20 +200,25 @@ public class GlobalExceptionHandler {
 
         if (message.contains("idx_category_name_category_unique")) {
             userMessage = "Category with this name already exists";
-        }
-        else if (message.contains("idx_product_name_category_unique")) {
+        } else if (message.contains("idx_product_name_category_unique")) {
             userMessage = "Product with this name already exists in this category";
-        }
-        else if (message.contains("idx_favourites_user_product_unique")) {
+        } else if (message.contains("idx_favourites_user_product_unique")) {
             userMessage = "This product is already in your favourites";
-        }
-        else {
+        } else {
             userMessage = "Duplicate value: this record already exists";
         }
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(Map.of("message:", userMessage));
+    }
+
+    @ExceptionHandler(OptimisticLockException.class)
+    public ResponseEntity<Map<String, String>> handleOptimisticLockException(OptimisticLockException ex) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(Map.of("message:", "Another user has updated this record since you last retrieved it. " +
+                        "Please refresh your page and try again."));
     }
 
 }

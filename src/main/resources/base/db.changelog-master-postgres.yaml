@@ -53,6 +53,13 @@ databaseChangeLog:
                   constraints:
                     nullable: false
 
+              - column:
+                  name: version
+                  type: INT
+                  defaultValue: 0
+                  constraints:
+                    nullable: false
+
   - changeSet:
       id: 2
       author: 050525group
@@ -115,6 +122,13 @@ databaseChangeLog:
                   type: BOOLEAN
                   defaultValueBoolean: false
 
+              - column:
+                  name: version
+                  type: INT
+                  defaultValue: 0
+                  constraints:
+                    nullable: false
+
   - changeSet:
       id: 4
       author: 050525group
@@ -134,6 +148,13 @@ databaseChangeLog:
               - column:
                   name: quantity
                   type: INT
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: version
+                  type: INT
+                  defaultValue: 0
                   constraints:
                     nullable: false
 
@@ -160,6 +181,13 @@ databaseChangeLog:
               - column:
                   name: image
                   type: VARCHAR(256)
+
+              - column:
+                  name: version
+                  type: INT
+                  defaultValue: 0
+                  constraints:
+                    nullable: false
 
 
   - changeSet:
@@ -226,6 +254,13 @@ databaseChangeLog:
                   constraints:
                     nullable: false
 
+              - column:
+                  name: version
+                  type: INT
+                  defaultValue: 0
+                  constraints:
+                    nullable: false
+
   - changeSet:
       id: 8
       author: 050525group
@@ -249,6 +284,13 @@ databaseChangeLog:
               - column:
                   name: price_at_purchase
                   type: DECIMAL(10,2)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: version
+                  type: INT
+                  defaultValue: 0
                   constraints:
                     nullable: false
 
@@ -302,6 +344,13 @@ databaseChangeLog:
               - column:
                   name: updated_at
                   type: TIMESTAMP WITH TIME ZONE
+
+              - column:
+                  name: version
+                  type: INT
+                  defaultValue: 0
+                  constraints:
+                    nullable: false
 
   - changeSet:
       id: 10
@@ -926,7 +975,7 @@ databaseChangeLog:
             columns:
               - column:
                   name: email
-#                 Speeds up user lookup by email (used during authentication)
+  #                 Speeds up user lookup by email (used during authentication)
 
   - changeSet:
       id: 23
@@ -942,8 +991,8 @@ databaseChangeLog:
                   name: name
               - column:
                   name: category_id
-#                 Note: PostgreSQL automatically creates an index for a unique constraint
-#                 This prevents creating duplicate products within the same category
+  #                 Note: PostgreSQL automatically creates an index for a unique constraint
+  #                 This prevents creating duplicate products within the same category
 
   - changeSet:
       id: 24
@@ -959,7 +1008,7 @@ databaseChangeLog:
                   name: user_id
               - column:
                   name: product_id
-#                 Prevents adding the same product to favourites twice
+  #                 Prevents adding the same product to favourites twice
 
   - changeSet:
       id: 25
@@ -973,7 +1022,7 @@ databaseChangeLog:
             columns:
               - column:
                   name: phone_number
-#                  Speeds up user lookup by phone number
+  #                  Speeds up user lookup by phone number
 
   - changeSet:
       id: 26
@@ -1246,7 +1295,6 @@ databaseChangeLog:
                   name: category_name
             #                 Note: PostgreSQL automatically creates an index for a unique constraint
             #                 This prevents creating duplicate category with the same category name
-
 
             
 
