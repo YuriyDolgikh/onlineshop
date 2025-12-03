@@ -62,13 +62,8 @@ public class ProductService implements ProductServiceInterface {
                 .updatedAt(now)
                 .build();
 
-        try {
-            Product savedProduct = productRepository.save(productToSave);
-            return productConverter.toDto(savedProduct);
-        } catch (DataIntegrityViolationException e) {
-            throw new IllegalArgumentException("Product with name: " + productRequestDto.getProductName()
-                    + " already exist in category: " + category.getCategoryName());
-        }
+        Product savedProduct = productRepository.save(productToSave);
+        return productConverter.toDto(savedProduct);
     }
 
     /**
@@ -94,7 +89,6 @@ public class ProductService implements ProductServiceInterface {
         String targetName = (productUpdateDto.getProductName() != null && !productUpdateDto.getProductName().isBlank())
                 ? productUpdateDto.getProductName().trim()
                 : productToUpdate.getName();
-
 
 
         if (productUpdateDto.getProductName() != null && !productUpdateDto.getProductName().isBlank()) {

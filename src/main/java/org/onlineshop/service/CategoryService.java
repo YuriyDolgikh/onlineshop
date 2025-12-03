@@ -58,12 +58,8 @@ public class CategoryService implements CategoryServiceInterface {
                 .image(finalImage)
                 .build();
 
-        try {
-            Category savedCategory = categoryRepository.save(category);
-            return categoryConverter.toDto(savedCategory);
-        } catch (DataIntegrityViolationException exception) {
-            throw new BadRequestException("Category with this name already exists");
-        }
+        Category savedCategory = categoryRepository.save(category);
+        return categoryConverter.toDto(savedCategory);
     }
 
     /**
@@ -87,20 +83,15 @@ public class CategoryService implements CategoryServiceInterface {
             if (categoryUpdateDto.getCategoryName().length() < 3 || categoryUpdateDto.getCategoryName().length() > 20) {
                 throw new IllegalArgumentException("Category name must be between 3 and 20 characters");
             }
-            try{
-                categoryForUpdate.setCategoryName(categoryUpdateDto.getCategoryName().trim());
-            }catch (ConstraintDeclarationException exception) {
-                throw new BadRequestException("Category with this name already exists");
-            }
-
+            categoryForUpdate.setCategoryName(categoryUpdateDto.getCategoryName().trim());
         }
 
         if (categoryUpdateDto.getImage() != null && !categoryUpdateDto.getImage().isBlank()) {
             String newImage = helper.resolveImageUrl(categoryUpdateDto.getImage());
             categoryForUpdate.setImage(newImage);
         }
-            Category savedCategory = categoryRepository.save(categoryForUpdate);
-            return categoryConverter.toDto(savedCategory);
+        Category savedCategory = categoryRepository.save(categoryForUpdate);
+        return categoryConverter.toDto(savedCategory);
     }
 
     /**
