@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +43,7 @@ public class CartService implements CartServiceInterface {
     /**
      * Transfers the contents of the current user's shopping cart to a new order
      * and updates the order repository and user information.
-     *
+     * <p>
      * This method performs the following steps:
      * 1. Retrieves the current cart and validates it is not empty.
      * 2. Converts cart items to order items while validating the presence of product discounts.
@@ -69,7 +70,7 @@ public class CartService implements CartServiceInterface {
 
         for (CartItem cartItem : cartItems) {
             if (cartItem.getProduct().getDiscountPrice() == null) {
-                throw  new BadRequestException("Product discount cannot be null.");
+                throw new BadRequestException("Product discount cannot be null.");
             }
             OrderItem orderItem = cartItemConverter.cartItemToOrderItem(cartItem);
             orderItems.add(orderItem);
@@ -112,19 +113,26 @@ public class CartService implements CartServiceInterface {
         BigDecimal totalPrice = BigDecimal.ZERO;
         for (CartItemResponseDto item : cartItemDtos) {
             Product product = item.getProduct();
-            BigDecimal itemTotal = product.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
-            BigDecimal itemTotalWithDiscount = itemTotal
-                    .multiply(BigDecimal.valueOf(100).subtract(product.getDiscountPrice()))
-                                                    .setScale(2, BigDecimal.ROUND_CEILING)
-                    .divide(BigDecimal.valueOf(100)).setScale(2, BigDecimal.ROUND_CEILING);
-            totalPrice = totalPrice.add(itemTotalWithDiscount);
+
+            BigDecimal quantity = BigDecimal.valueOf(item.getQuantity());
+
+            BigDecimal price = product.getPrice();
+
+            BigDecimal discount = product.getDiscountPrice();
+
+            BigDecimal discountedPrice = price.subtract(discount).setScale(2, RoundingMode.HALF_UP);
+
+            BigDecimal itemTotal = discountedPrice.multiply(quantity).setScale(2, RoundingMode.HALF_UP);
+
+            totalPrice = totalPrice.add(itemTotal);
         }
-        List<CartItemSympleResponseDto> cartItemSympleDtos = cartItemDtos
+
+        List<CartItemSympleResponseDto> cartItemSimpleDtos = cartItemDtos
                 .stream().map(o -> cartItemConverter.toSympleDtoFromDto(o)).toList();
 
         return CartResponseDto.builder()
                 .userId(user.getUserId())
-                .cartSympleItems(cartItemSympleDtos)
+                .cartSympleItems(cartItemSimpleDtos)
                 .totalPrice(totalPrice)
                 .build();
     }

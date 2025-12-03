@@ -6,6 +6,7 @@ import lombok.Generated;
 import org.onlineshop.dto.ApiError;
 import org.onlineshop.exception.*;
 import org.onlineshop.security.exception.InvalidJwtException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -18,6 +19,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -188,4 +190,30 @@ public class GlobalExceptionHandler {
         body.put("errors", Map.of("image", ex.getError().getMessage()));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
+
+    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, String>> handleSqlErrors(DataIntegrityViolationException ex) {
+
+        String message = ex.getMostSpecificCause().getMessage().toLowerCase();
+
+        String userMessage;
+
+        if (message.contains("idx_category_name_category_unique")) {
+            userMessage = "Category with this name already exists";
+        }
+        else if (message.contains("idx_product_name_category_unique")) {
+            userMessage = "Product with this name already exists in this category";
+        }
+        else if (message.contains("idx_favourites_user_product_unique")) {
+            userMessage = "This product is already in your favourites";
+        }
+        else {
+            userMessage = "Duplicate value: this record already exists";
+        }
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("message:", userMessage));
+    }
+
 }
