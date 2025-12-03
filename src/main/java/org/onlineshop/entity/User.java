@@ -68,6 +68,9 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Favourite> favourites = new HashSet<>();
 
+    @Version
+    private Integer version;
+
     public enum Role {
         ADMIN,
         MANAGER,

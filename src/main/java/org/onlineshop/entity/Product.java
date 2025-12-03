@@ -59,4 +59,7 @@ public class Product {
     @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+
+    @Version
+    private Integer version;
 }

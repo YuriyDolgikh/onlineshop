@@ -30,4 +30,7 @@ public class CartItem {
     @Column(nullable = false)
     @Min(1)
     private Integer quantity;
+
+    @Version
+    private Integer version;
 }

@@ -35,4 +35,7 @@ public class ConfirmationCode {
     private LocalDateTime expireDataTime;
 
     private boolean isConfirmed;
+
+    @Version
+    private Integer version;
 }
