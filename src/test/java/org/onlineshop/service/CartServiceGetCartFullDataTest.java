@@ -9,7 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.onlineshop.dto.cart.CartResponseDto;
 import org.onlineshop.dto.cartItem.CartItemResponseDto;
-import org.onlineshop.dto.cartItem.CartItemSympleResponseDto;
+import org.onlineshop.dto.cartItem.CartItemSimpleResponseDto;
 import org.onlineshop.entity.Cart;
 import org.onlineshop.entity.CartItem;
 import org.onlineshop.entity.Product;
@@ -43,7 +43,7 @@ class CartServiceGetCartFullDataTest {
     private Cart cartTest;
     private CartItem cartItemTest;
     private CartItemResponseDto cartItemDto;
-    private CartItemSympleResponseDto simpleDto;
+    private CartItemSimpleResponseDto simpleDto;
 
     @BeforeEach
     void setUp() {
@@ -79,7 +79,7 @@ class CartServiceGetCartFullDataTest {
                 .quantity(2)
                 .build();
 
-        simpleDto = CartItemSympleResponseDto.builder()
+        simpleDto = CartItemSimpleResponseDto.builder()
                 .productName("TestProduct")
                 .quantity(2)
                 .build();
@@ -95,7 +95,7 @@ class CartServiceGetCartFullDataTest {
         when(userService.getCurrentUser()).thenReturn(userTest);
         when(cartRepository.findByUser(userTest)).thenReturn(Optional.of(cartTest));
         when(cartItemConverter.toDto(cartItemTest)).thenReturn(cartItemDto);
-        when(cartItemConverter.toSympleDtoFromDto(cartItemDto)).thenReturn(simpleDto);
+        when(cartItemConverter.toSimpleDtoFromDto(cartItemDto)).thenReturn(simpleDto);
 
         CartResponseDto result = cartService.getCartFullData();
 
@@ -109,6 +109,6 @@ class CartServiceGetCartFullDataTest {
         verify(userService, times(2)).getCurrentUser();
         verify(cartRepository).findByUser(userTest);
         verify(cartItemConverter).toDto(cartItemTest);
-        verify(cartItemConverter).toSympleDtoFromDto(cartItemDto);
+        verify(cartItemConverter).toSimpleDtoFromDto(cartItemDto);
     }
 }

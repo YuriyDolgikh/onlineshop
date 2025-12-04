@@ -450,9 +450,13 @@ public class OrderService implements OrderServiceInterface {
         for (OrderItem oi : orderItemList) {
             Product product = oi.getProduct();
             BigDecimal price = product.getPrice();
-            BigDecimal discont = product.getDiscountPrice();
-            BigDecimal priceAtPurchase = price.subtract(price.multiply(discont.divide(new BigDecimal(100)))).setScale(2, RoundingMode.CEILING);
-            oi.setPriceAtPurchase(priceAtPurchase);
+            BigDecimal discountPercent = product.getDiscountPrice();
+
+            BigDecimal discountValue = price.multiply(discountPercent).divide(new BigDecimal(100),4, RoundingMode.HALF_UP);
+
+            BigDecimal finalPrice = price.subtract(discountValue).setScale(2, RoundingMode.HALF_UP);
+
+            oi.setPriceAtPurchase(finalPrice);
         }
         orderRepository.save(order);
     }

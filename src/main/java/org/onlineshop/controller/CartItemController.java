@@ -47,7 +47,7 @@ public class CartItemController {
             )
     })
     @PostMapping
-    public ResponseEntity<CartItemSympleResponseDto> createCartItem(
+    public ResponseEntity<CartItemSimpleResponseDto> createCartItem(
             @Parameter(description = "Cart item creation data", required = true)
             @Valid @RequestBody CartItemRequestDto cartItemRequestDto) {
         return ResponseEntity

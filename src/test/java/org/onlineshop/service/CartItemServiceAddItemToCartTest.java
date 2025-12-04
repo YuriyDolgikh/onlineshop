@@ -4,7 +4,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.onlineshop.dto.cartItem.CartItemRequestDto;
-import org.onlineshop.dto.cartItem.CartItemSympleResponseDto;
+import org.onlineshop.dto.cartItem.CartItemSimpleResponseDto;
 import org.onlineshop.entity.Cart;
 import org.onlineshop.entity.CartItem;
 import org.onlineshop.entity.Product;
@@ -15,7 +15,6 @@ import org.onlineshop.repository.CartRepository;
 import org.onlineshop.repository.ProductRepository;
 import org.onlineshop.repository.UserRepository;
 import org.onlineshop.service.converter.CartItemConverter;
-import org.onlineshop.service.converter.ProductConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -119,9 +118,9 @@ class CartItemServiceAddItemToCartTest {
         when(userService.getCurrentUser()).thenReturn(user);
         when(productService.getProductById(5)).thenReturn(Optional.of(product));
         when(cartItemRepository.save(any(CartItem.class))).thenAnswer(i -> i.getArgument(0));
-        when(cartItemConverter.toSympleDto(any(CartItem.class))).thenAnswer(i -> {
+        when(cartItemConverter.toSimpleDto(any(CartItem.class))).thenAnswer(i -> {
             CartItem item = i.getArgument(0);
-            CartItemSympleResponseDto dto = new CartItemSympleResponseDto();
+            CartItemSimpleResponseDto dto = new CartItemSimpleResponseDto();
             dto.setQuantity(item.getQuantity());
             if (item.getProduct() != null) {
                 dto.setProductName(item.getProduct().getName());
@@ -130,7 +129,7 @@ class CartItemServiceAddItemToCartTest {
         });
 
         CartItemRequestDto request = new CartItemRequestDto(5, 3);
-        CartItemSympleResponseDto response = cartItemService.addItemToCart(request);
+        CartItemSimpleResponseDto response = cartItemService.addItemToCart(request);
 
         assertEquals("Quantity should be 5", 5, response.getQuantity());
         org.junit.jupiter.api.Assertions.assertEquals("Test Product", response.getProductName(), "Product name should match");
@@ -138,7 +137,7 @@ class CartItemServiceAddItemToCartTest {
         verify(userService, times(2)).getCurrentUser();
         verify(productService, times(1)).getProductById(5);
         verify(cartItemRepository, times(1)).save(existingItem);
-        verify(cartItemConverter, times(1)).toSympleDto(existingItem);
+        verify(cartItemConverter, times(1)).toSimpleDto(existingItem);
     }
 
     @Test

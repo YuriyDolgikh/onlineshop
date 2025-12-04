@@ -3,11 +3,8 @@ package org.onlineshop.service;
 import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.cart.CartResponseDto;
 import org.onlineshop.dto.cartItem.CartItemResponseDto;
-import org.onlineshop.dto.cartItem.CartItemSympleResponseDto;
-import org.onlineshop.entity.Cart;
-import org.onlineshop.entity.CartItem;
-import org.onlineshop.entity.Product;
-import org.onlineshop.entity.User;
+import org.onlineshop.dto.cartItem.CartItemSimpleResponseDto;
+import org.onlineshop.entity.*;
 import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.repository.CartRepository;
 import org.onlineshop.service.converter.CartItemConverter;
@@ -134,8 +131,8 @@ public class CartService implements CartServiceInterface {
             totalPrice = totalPrice.add(itemTotal);
         }
 
-        List<CartItemSympleResponseDto> cartItemSimpleDtos = cartItemDtos
-                .stream().map(cartItemConverter::toSympleDtoFromDto).toList();
+        List<CartItemSimpleResponseDto> cartItemSimpleDtos = cartItemDtos
+                .stream().map(cartItemConverter::toSimpleDtoFromDto).toList();
 
         return CartResponseDto.builder()
                 .userId(user.getUserId())

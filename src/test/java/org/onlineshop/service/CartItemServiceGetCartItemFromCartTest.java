@@ -4,7 +4,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.onlineshop.dto.cartItem.CartItemRequestDto;
-import org.onlineshop.dto.cartItem.CartItemSympleResponseDto;
+import org.onlineshop.dto.cartItem.CartItemSimpleResponseDto;
 import org.onlineshop.entity.Cart;
 import org.onlineshop.entity.CartItem;
 import org.onlineshop.entity.Product;
@@ -114,16 +114,16 @@ class CartItemServiceGetCartItemFromCartTest {
         when(userService.getCurrentUser()).thenReturn(user);
         when(productService.getProductById(1)).thenReturn(Optional.of(product));
         when(cartItemRepository.save(any(CartItem.class))).thenAnswer(i -> i.getArgument(0));
-        when(cartItemConverter.toSympleDto(any(CartItem.class)))
+        when(cartItemConverter.toSimpleDto(any(CartItem.class)))
                 .thenAnswer(i -> {
                     CartItem item = i.getArgument(0);
-                    CartItemSympleResponseDto dto = new CartItemSympleResponseDto();
+                    CartItemSimpleResponseDto dto = new CartItemSimpleResponseDto();
                     dto.setQuantity(item.getQuantity());
                     return dto;
                 });
 
         CartItemRequestDto request = new CartItemRequestDto(1, 3);
-        CartItemSympleResponseDto response = cartItemService.addItemToCart(request);
+        CartItemSimpleResponseDto response = cartItemService.addItemToCart(request);
 
         // Проверяем, что количество увеличилось на 3
         assertEquals("Quantity should be 5", 5, response.getQuantity());
@@ -131,7 +131,7 @@ class CartItemServiceGetCartItemFromCartTest {
         verify(userService, times(2)).getCurrentUser();
         verify(productService, times(1)).getProductById(1);
         verify(cartItemRepository, times(1)).save(existingItem);
-        verify(cartItemConverter, times(1)).toSympleDto(existingItem);
+        verify(cartItemConverter, times(1)).toSimpleDto(existingItem);
     }
 
     @Test
@@ -148,15 +148,15 @@ class CartItemServiceGetCartItemFromCartTest {
         when(userService.getCurrentUser()).thenReturn(user);
         when(productService.getProductById(3)).thenReturn(Optional.of(product));
         when(cartItemRepository.save(any(CartItem.class))).thenAnswer(i -> i.getArgument(0));
-        when(cartItemConverter.toSympleDto(any(CartItem.class))).thenAnswer(i -> {
+        when(cartItemConverter.toSimpleDto(any(CartItem.class))).thenAnswer(i -> {
             CartItem item = i.getArgument(0);
-            CartItemSympleResponseDto dto = new CartItemSympleResponseDto();
+            CartItemSimpleResponseDto dto = new CartItemSimpleResponseDto();
             dto.setQuantity(item.getQuantity());
             return dto;
         });
 
         CartItemRequestDto request = new CartItemRequestDto(3, 4);
-        CartItemSympleResponseDto response = cartItemService.addItemToCart(request);
+        CartItemSimpleResponseDto response = cartItemService.addItemToCart(request);
 
         assertEquals("Quantity should be 4", 4, response.getQuantity());
         assertEquals("Cart should contain 1 item", 1, user.getCart().getCartItems().size());
@@ -168,6 +168,6 @@ class CartItemServiceGetCartItemFromCartTest {
         verify(userService, times(2)).getCurrentUser();
         verify(productService, times(2)).getProductById(3);
         verify(cartItemRepository, times(1)).save(addedItem);
-        verify(cartItemConverter, times(1)).toSympleDto(addedItem);
+        verify(cartItemConverter, times(1)).toSimpleDto(addedItem);
     }
 }
