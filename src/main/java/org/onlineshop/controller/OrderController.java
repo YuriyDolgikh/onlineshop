@@ -141,6 +141,31 @@ public class OrderController {
     }
 
     /**
+     * Transfers the current user's cart to an order.
+     *
+     * @return a response entity with HTTP status 200 (OK) to indicate the cart was transferred successfully.
+     */
+    @Operation(
+            summary = "Transfer cart to order",
+            description = "Converts the current user's cart items into a new order and clears the cart."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Cart successfully transferred to order"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Bad request - cart is empty or user data is invalid"
+            )
+    })
+    @GetMapping("/toOrder")
+    public ResponseEntity<Void> transferToOrder() {
+        orderService.transferCartToOrder();
+        return ResponseEntity.ok().build();
+    }
+
+    /**
      * Confirms payment for an order and sends a confirmation email with a PDF invoice to the user.
      * Users can only confirm payment for orders they own.
      * Different payment methods can be used, such as Credit Card, PayPal, or Bank Transfer.

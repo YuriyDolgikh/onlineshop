@@ -15,4 +15,6 @@ public interface OrderServiceInterface {
     OrderResponseDto confirmPayment(Integer orderId, String paymentMethod);
     OrderResponseDto updateOrderDelivery(Integer orderId, OrderRequestDto orderRequestDto);
     OrderStatusResponseDto getOrderStatusDto(Integer orderId);
+    void transferCartToOrder();
+
 }

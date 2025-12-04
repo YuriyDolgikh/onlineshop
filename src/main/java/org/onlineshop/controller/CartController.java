@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.cart.CartResponseDto;
-import org.onlineshop.dto.cartItem.CartItemSympleResponseDto;
 import org.onlineshop.service.CartService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,31 +42,6 @@ public class CartController {
     @DeleteMapping
     public ResponseEntity<Void> clearCart() {
         cartService.clearCart();
-        return ResponseEntity.ok().build();
-    }
-
-    /**
-     * Transfers the current user's cart to an order.
-     *
-     * @return a response entity with HTTP status 200 (OK) to indicate the cart was transferred successfully.
-     */
-    @Operation(
-            summary = "Transfer cart to order",
-            description = "Converts the current user's cart items into a new order and clears the cart."
-    )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Cart successfully transferred to order"
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Bad request - cart is empty or user data is invalid"
-            )
-    })
-    @GetMapping("/toOrder")
-    public ResponseEntity<Void> transferToOrder() {
-        cartService.transferCartToOrder();
         return ResponseEntity.ok().build();
     }
 

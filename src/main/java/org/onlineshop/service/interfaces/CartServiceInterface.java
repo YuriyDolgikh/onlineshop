@@ -6,7 +6,7 @@ import org.onlineshop.entity.Cart;
 public interface CartServiceInterface {
     void clearCart();
 
-    void transferCartToOrder();
+//    void transferCartToOrder();
 
     CartResponseDto getCartFullData();
 
