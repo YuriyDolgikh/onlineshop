@@ -46,31 +46,6 @@ public class CartController {
     }
 
     /**
-     * Transfers the current user's cart to an order.
-     *
-     * @return a response entity with HTTP status 200 (OK) to indicate the cart was transferred successfully.
-     */
-    @Operation(
-            summary = "Transfer cart to order",
-            description = "Converts the current user's cart items into a new order and clears the cart."
-    )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Cart successfully transferred to order"
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Bad request - cart is empty or user data is invalid"
-            )
-    })
-    @GetMapping("/toOrder")
-    public ResponseEntity<Void> transferToOrder() {
-        cartService.transferCartToOrder();
-        return ResponseEntity.ok().build();
-    }
-
-    /**
      * Retrieves the full details of the current user's cart.
      *
      * @return a response entity containing a CartResponseDto object with the full details of the cart,

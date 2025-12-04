@@ -6,9 +6,7 @@ import org.onlineshop.dto.cartItem.CartItemResponseDto;
 import org.onlineshop.dto.cartItem.CartItemSimpleResponseDto;
 import org.onlineshop.entity.*;
 import org.onlineshop.exception.BadRequestException;
-import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.repository.CartRepository;
-import org.onlineshop.repository.OrderRepository;
 import org.onlineshop.service.converter.CartItemConverter;
 import org.onlineshop.service.interfaces.CartServiceInterface;
 import org.onlineshop.service.interfaces.UserServiceInterface;
@@ -17,21 +15,23 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class CartService implements CartServiceInterface {
-    private final OrderRepository orderRepository;
     private final UserServiceInterface userService;
     private final CartItemConverter cartItemConverter;
     private final CartRepository cartRepository;
 
     /**
-     * Clears the current user's shopping cart.
+     * Clears the current user's shopping cart by removing all cart items.
+     * <p>
+     * </p>
+     * This method retrieves the current user, accesses their cart, and removes
+     * all associated cart items. The updated user data is then saved to persist
+     * the changes in the database.
      */
     @Transactional
     @Override
@@ -41,62 +41,62 @@ public class CartService implements CartServiceInterface {
         userService.saveUser(user);
     }
 
-    /**
-     * Transfers the contents of the current user's shopping cart to a new order
-     * and updates the order repository and user information.
-     * <p>
-     * This method performs the following steps:
-     * 1. Retrieves the current cart and validates it is not empty.
-     * 2. Converts cart items to order items while validating the presence of product discounts.
-     * 3. Checks that the user does not already have an order in the PENDING_PAYMENT status.
-     * 4. Creates a new order with the appropriate status and delivery method and saves it to the repository.
-     * 5. Associates the converted order items with the newly created order.
-     * 6. Updates the user's order list and persists the changes.
-     *
-     * @throws BadRequestException if the cart is empty, any product lacks a discount price,
-     *                             or if the user already has an order in PENDING_PAYMENT status.
-     */
-    @Transactional
-    @Override
-    public void transferCartToOrder() {
-
-        Cart cart = getCurrentCart();
-        Set<CartItem> cartItems = cart.getCartItems();
-        if (cartItems.isEmpty()) {
-            throw new BadRequestException("User's cart is empty. Nothing to transfer.");
-        }
-        User user = userService.getCurrentUser();
-
-        List<OrderItem> orderItems = new ArrayList<>();
-
-        for (CartItem cartItem : cartItems) {
-            if (cartItem.getProduct().getDiscountPrice() == null) {
-                throw new BadRequestException("Product discount cannot be null.");
-            }
-            OrderItem orderItem = cartItemConverter.cartItemToOrderItem(cartItem);
-            orderItems.add(orderItem);
-        }
-        if (orderItems.isEmpty()) {
-            throw new NotFoundException("Product list is empty. Unable to create empty order.");
-        }
-        Order currentOrder = orderRepository.findByUserAndStatus(user, Order.Status.PENDING_PAYMENT);
-        if (currentOrder != null) {
-            throw new BadRequestException("User already has an order in PENDING_PAYMENT status.");
-        }
-        Order newOrder = new Order();
-        LocalDateTime now = LocalDateTime.now();
-        newOrder.setUser(user);
-        newOrder.setStatus(Order.Status.PENDING_PAYMENT);
-        newOrder.setDeliveryMethod(Order.DeliveryMethod.PICKUP);
-        newOrder.setCreatedAt(now);
-        newOrder.setUpdatedAt(now);
-        Order savedOrder = orderRepository.save(newOrder);
-        orderItems.forEach(oi -> oi.setOrder(savedOrder));
-        savedOrder.setOrderItems(orderItems);
-        orderRepository.save(savedOrder);
-        user.getOrders().add(savedOrder);
-        userService.saveUser(user);
-    }
+//    /**
+//     * Transfers the contents of the current user's shopping cart to a new order
+//     * and updates the order repository and user information.
+//     * <p>
+//     * This method performs the following steps:
+//     * 1. Retrieves the current cart and validates it is not empty.
+//     * 2. Converts cart items to order items while validating the presence of product discounts.
+//     * 3. Checks that the user does not already have an order in the PENDING_PAYMENT status.
+//     * 4. Creates a new order with the appropriate status and delivery method and saves it to the repository.
+//     * 5. Associates the converted order items with the newly created order.
+//     * 6. Updates the user's order list and persists the changes.
+//     *
+//     * @throws BadRequestException if the cart is empty, any product lacks a discount price,
+//     *                             or if the user already has an order in PENDING_PAYMENT status.
+//     */
+//    @Transactional
+//    @Override
+//    public void transferCartToOrder() {
+//
+//        Cart cart = getCurrentCart();
+//        Set<CartItem> cartItems = cart.getCartItems();
+//        if (cartItems.isEmpty()) {
+//            throw new BadRequestException("User's cart is empty. Nothing to transfer.");
+//        }
+//        User user = userService.getCurrentUser();
+//
+//        List<OrderItem> orderItems = new ArrayList<>();
+//
+//        for (CartItem cartItem : cartItems) {
+//            if (cartItem.getProduct().getDiscountPrice() == null) {
+//                throw new BadRequestException("Product discount cannot be null.");
+//            }
+//            OrderItem orderItem = cartItemConverter.cartItemToOrderItem(cartItem);
+//            orderItems.add(orderItem);
+//        }
+//        if (orderItems.isEmpty()) {
+//            throw new NotFoundException("Product list is empty. Unable to create empty order.");
+//        }
+//        Order currentOrder = orderRepository.findByUserAndStatus(user, Order.Status.PENDING_PAYMENT);
+//        if (currentOrder != null) {
+//            throw new BadRequestException("User already has an order in PENDING_PAYMENT status.");
+//        }
+//        Order newOrder = new Order();
+//        LocalDateTime now = LocalDateTime.now();
+//        newOrder.setUser(user);
+//        newOrder.setStatus(Order.Status.PENDING_PAYMENT);
+//        newOrder.setDeliveryMethod(Order.DeliveryMethod.PICKUP);
+//        newOrder.setCreatedAt(now);
+//        newOrder.setUpdatedAt(now);
+//        Order savedOrder = orderRepository.save(newOrder);
+//        orderItems.forEach(oi -> oi.setOrder(savedOrder));
+//        savedOrder.setOrderItems(orderItems);
+//        orderRepository.save(savedOrder);
+//        user.getOrders().add(savedOrder);
+//        userService.saveUser(user);
+//    }
 
     /**
      * Retrieves the full data of the current user's shopping cart, including cart items

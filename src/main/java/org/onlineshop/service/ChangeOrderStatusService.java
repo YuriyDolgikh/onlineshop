@@ -1,6 +1,7 @@
 package org.onlineshop.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.onlineshop.entity.Order;
 import org.onlineshop.repository.OrderRepository;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -10,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ChangeOrderStatusService {
@@ -85,5 +87,6 @@ public class ChangeOrderStatusService {
         }
         order.setUpdatedAt(LocalDateTime.now());
         orderRepository.save(order);
+        log.info("Order {} status updated to {}", order.getOrderId(), order.getStatus());
     }
 }
