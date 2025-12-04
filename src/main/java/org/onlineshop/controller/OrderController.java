@@ -205,7 +205,6 @@ public class OrderController {
             @Valid @PathVariable String payMethod) {
 
         OrderResponseDto orderResponse = orderService.confirmPayment(orderId, payMethod);
-        orderService.sendOrderConfirmationEmail(orderId);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
