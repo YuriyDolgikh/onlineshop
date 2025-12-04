@@ -4,7 +4,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.onlineshop.dto.cart.CartResponseDto;
-import org.onlineshop.dto.cartItem.CartItemSympleResponseDto;
+import org.onlineshop.dto.cartItem.CartItemSimpleResponseDto;
 import org.onlineshop.entity.User;
 import org.onlineshop.repository.UserRepository;
 import org.onlineshop.service.CartService;
@@ -67,7 +67,7 @@ class CartControllerGetFullDataTest {
                 .userId(userTest.getUserId())
                 .totalPrice(BigDecimal.valueOf(200))
                 .cartSympleItems(List.of(
-                        CartItemSympleResponseDto.builder()
+                        CartItemSimpleResponseDto.builder()
                                 .productName("TestProduct")
                                 .quantity(2)
                                 .build()

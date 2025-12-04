@@ -4,8 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.onlineshop.dto.cartItem.CartItemResponseDto;
-import org.onlineshop.dto.cartItem.CartItemSympleResponseDto;
+import org.onlineshop.dto.cartItem.CartItemSimpleResponseDto;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -17,7 +16,7 @@ public class CartResponseDto {
 
     private Integer userId;
 
-    private List<CartItemSympleResponseDto> cartSympleItems;
+    private List<CartItemSimpleResponseDto> cartSympleItems;
 
     private BigDecimal totalPrice;
 }

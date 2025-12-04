@@ -2,7 +2,7 @@ package org.onlineshop.controller;
 
 import org.junit.jupiter.api.Test;
 import org.onlineshop.dto.cartItem.CartItemRequestDto;
-import org.onlineshop.dto.cartItem.CartItemSympleResponseDto;
+import org.onlineshop.dto.cartItem.CartItemSimpleResponseDto;
 import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.service.CartItemService;
 import org.onlineshop.service.UserService;
@@ -43,7 +43,7 @@ class CartItemControllerCreateCartItemTest {
             roles = {"ADMIN", "MANAGER","USER"})
             void createCartItemTestIfOk() throws Exception{
         CartItemRequestDto request = new CartItemRequestDto(10,3);
-        CartItemSympleResponseDto response = CartItemSympleResponseDto.builder()
+        CartItemSimpleResponseDto response = CartItemSimpleResponseDto.builder()
                 .productName("product")
                 .quantity(request.getQuantity())
                 .build();

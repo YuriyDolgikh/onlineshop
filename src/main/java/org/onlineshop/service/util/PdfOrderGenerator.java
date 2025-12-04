@@ -55,8 +55,9 @@ public class PdfOrderGenerator {
 
             DecimalFormat df = new DecimalFormat("#0.00");
 
-            BigDecimal totalSumm = BigDecimal.ZERO;
+            BigDecimal totalSum = BigDecimal.ZERO;
             for (OrderItem item : order.getOrderItems()) {
+
                 String product = item.getProduct().getName();
                 Integer quantity = item.getQuantity();
                 BigDecimal price = item.getProduct().getPrice();
@@ -64,13 +65,15 @@ public class PdfOrderGenerator {
 
                 BigDecimal finalPrice;
                 if (discount != null && discount.compareTo(BigDecimal.ZERO) > 0) {
-                    finalPrice = price.subtract(price.multiply(discount).divide(BigDecimal.valueOf(100)).setScale(2, RoundingMode.CEILING));
+                    BigDecimal discountValue = price.multiply(discount).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+
+                    finalPrice = price.subtract(discountValue).setScale(2, RoundingMode.HALF_UP);
                 } else {
-                    finalPrice = price.setScale(2, RoundingMode.CEILING);
+                    finalPrice = price.setScale(2, RoundingMode.HALF_UP);
                 }
 
-                BigDecimal total = finalPrice.multiply(BigDecimal.valueOf(quantity));
-                totalSumm = totalSumm.add(total).setScale(2, RoundingMode.CEILING);
+                BigDecimal total = finalPrice.multiply(BigDecimal.valueOf(quantity)).setScale(2, RoundingMode.HALF_UP);
+                totalSum = totalSum.add(total).setScale(2, RoundingMode.HALF_UP);
 
                 addTableRow(table,
                         product,
@@ -85,7 +88,7 @@ public class PdfOrderGenerator {
             document.add(Chunk.NEWLINE);
 
             Font boldFont = new Font(Font.HELVETICA, 13, Font.BOLD);
-            Paragraph totalParagraph = new Paragraph("Total amount: " + df.format(totalSumm), boldFont);
+            Paragraph totalParagraph = new Paragraph("Total amount: " + df.format(totalSum), boldFont);
             totalParagraph.setAlignment(Element.ALIGN_RIGHT);
             document.add(totalParagraph);
 

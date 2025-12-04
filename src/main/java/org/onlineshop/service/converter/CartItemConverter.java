@@ -3,9 +3,10 @@ package org.onlineshop.service.converter;
 import lombok.Generated;
 import org.onlineshop.dto.cartItem.CartItemFullResponseDto;
 import org.onlineshop.dto.cartItem.CartItemResponseDto;
-import org.onlineshop.dto.cartItem.CartItemSympleResponseDto;
+import org.onlineshop.dto.cartItem.CartItemSimpleResponseDto;
 import org.onlineshop.entity.CartItem;
 import org.onlineshop.entity.OrderItem;
+import org.onlineshop.entity.Product;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -47,23 +48,31 @@ public class CartItemConverter {
     }
 
     public OrderItem cartItemToOrderItem(CartItem cartItem) {
-        BigDecimal price = cartItem.getProduct().getPrice();
-        BigDecimal discount = price.multiply(cartItem.getProduct().getDiscountPrice()).divide(new BigDecimal(100));
+        Product product = cartItem.getProduct();
+
+        BigDecimal quantity = BigDecimal.valueOf(cartItem.getQuantity());
+        BigDecimal price = product.getPrice();
+        BigDecimal discount = product.getDiscountPrice();
+
+        BigDecimal priceWithDiscount = price.subtract(discount).setScale(2, RoundingMode.HALF_UP);
+
+        BigDecimal totalPrice = priceWithDiscount.multiply(quantity).setScale(2, RoundingMode.HALF_UP);
+
         return OrderItem.builder()
-                .product(cartItem.getProduct())
+                .product(product)
                 .quantity(cartItem.getQuantity())
-                .priceAtPurchase(price.subtract(discount).setScale(2, RoundingMode.CEILING))
+                .priceAtPurchase(totalPrice)
                 .build();
     }
 
-    public CartItemSympleResponseDto toSympleDto(CartItem cartItem) {
-        return CartItemSympleResponseDto.builder()
+    public CartItemSimpleResponseDto toSimpleDto(CartItem cartItem) {
+        return CartItemSimpleResponseDto.builder()
                 .productName(cartItem.getProduct().getName())
                 .quantity(cartItem.getQuantity())
                 .build();    }
 
-    public CartItemSympleResponseDto toSympleDtoFromDto(CartItemResponseDto cartItemResponseDto) {
-        return CartItemSympleResponseDto.builder()
+    public CartItemSimpleResponseDto toSimpleDtoFromDto(CartItemResponseDto cartItemResponseDto) {
+        return CartItemSimpleResponseDto.builder()
                 .productName(cartItemResponseDto.getProduct().getName())
                 .quantity(cartItemResponseDto.getQuantity())
                 .build();    }

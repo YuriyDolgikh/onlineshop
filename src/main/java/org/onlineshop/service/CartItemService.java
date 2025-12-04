@@ -46,7 +46,7 @@ public class CartItemService implements CartItemServiceInterface {
      */
     @Transactional
     @Override
-    public CartItemSympleResponseDto addItemToCart(CartItemRequestDto cartItemRequestDto) {
+    public CartItemSimpleResponseDto addItemToCart(CartItemRequestDto cartItemRequestDto) {
         if (cartItemRequestDto.getProductId() == null) {
             throw new IllegalArgumentException("Product Id cannot be null");
         }
@@ -83,7 +83,7 @@ public class CartItemService implements CartItemServiceInterface {
         }
 
         cartService.saveCart(cart);
-        return cartItemConverter.toSympleDto(savedCartItem);
+        return cartItemConverter.toSimpleDto(savedCartItem);
     }
 
     /**

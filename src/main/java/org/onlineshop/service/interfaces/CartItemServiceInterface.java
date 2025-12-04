@@ -5,7 +5,7 @@ import org.onlineshop.dto.cartItem.*;
 import java.util.Set;
 
 public interface CartItemServiceInterface {
-    CartItemSympleResponseDto addItemToCart(CartItemRequestDto cartItemRequestDto);
+    CartItemSimpleResponseDto addItemToCart(CartItemRequestDto cartItemRequestDto);
 
     CartItemResponseDto removeItemFromCart(Integer productId);
 
