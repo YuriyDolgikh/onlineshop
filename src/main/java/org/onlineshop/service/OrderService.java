@@ -1,6 +1,8 @@
 package org.onlineshop.service;
 
+import lombok.Generated;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.onlineshop.dto.order.OrderRequestDto;
 import org.onlineshop.dto.order.OrderResponseDto;
 import org.onlineshop.dto.order.OrderStatusResponseDto;
@@ -9,7 +11,6 @@ import org.onlineshop.entity.OrderItem;
 import org.onlineshop.entity.Product;
 import org.onlineshop.entity.User;
 import org.onlineshop.exception.BadRequestException;
-import org.onlineshop.exception.MailSendingException;
 import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.repository.OrderRepository;
 import org.onlineshop.repository.UserRepository;
@@ -27,6 +28,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderService implements OrderServiceInterface {
@@ -111,7 +113,7 @@ public class OrderService implements OrderServiceInterface {
     /**
      * Cancel an order.
      *
-     * @param orderId the ID of the order to be cancelled - must not be null
+     * @param orderId the ID of the order to be canceled - must not be null
      * @throws NotFoundException     if the order with the specified ID is not found
      * @throws AccessDeniedException if the current user is not authorized to cancel the order
      */
@@ -132,16 +134,15 @@ public class OrderService implements OrderServiceInterface {
     }
 
     /**
-     * Confirms the payment for a given order if valid and updates the order status to PAID.
-     * Also, triggers the sending of a confirmation email with the order details.
+     * Confirms the payment for a given order, updates the order status, and processes the payment.
+     * The method ensures the user has access to the specified order and validates the payment method.
      *
-     * @param orderId       the unique identifier of the order to confirm payment for
-     * @param paymentMethod the payment method used to confirm the payment. Must not be null or blank
-     * @return an OrderResponseDto containing the details of the updated order
+     * @param orderId       the ID of the order to confirm payment for
+     * @param paymentMethod the method of payment used (e.g., credit card, PayPal)
+     * @return an OrderResponseDto object containing the details of the updated order
      * @throws NotFoundException     if the order with the specified ID is not found
      * @throws AccessDeniedException if the current user does not have access to the specified order
-     * @throws BadRequestException   if the payment method is invalid or the order status is not PENDING_PAYMENT
-     * @throws MailSendingException  if an error occurs while trying to send the order confirmation email
+     * @throws BadRequestException   if the payment method is null, blank, or if the order is not in a pending payment status
      */
     @Override
     @Transactional
@@ -159,12 +160,118 @@ public class OrderService implements OrderServiceInterface {
         if (!order.getStatus().equals(Order.Status.PENDING_PAYMENT)) {
             throw new BadRequestException("You can't confirm payment for an order that is not in PENDING_PAYMENT status");
         }
-        order.setStatus(Order.Status.PAID);
+        order.setStatus(Order.Status.PROCESSING);
         orderRepository.save(order);
         cartService.clearCart();
+        log.info("Order {} in payment confirmation process. Cart cleared.", orderId);
+
+        processOrderPayment(orderId);
 
         return orderConverter.toDto(order);
     }
+
+    /**
+     * Processes the payment for the specified order by attempting to send a confirmation email.
+     * If the email is successfully sent, the order status is updated to PAID.
+     * Otherwise, the order status is reverted to PENDING_PAYMENT.
+     * Handles exceptions such as order not found and unexpected errors.
+     *
+     * @param orderId the unique identifier of the order to be processed
+     */
+    @Async
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void processOrderPayment(Integer orderId) {
+        try {
+            boolean emailSent = sendEmailWithRetry(orderId);
+
+            if (emailSent) {
+                updateOrderStatus(orderId, Order.Status.PAID);
+                log.info("Order {} processed successfully - status updated to PAID", orderId);
+            } else {
+                updateOrderStatus(orderId, Order.Status.PENDING_PAYMENT);
+                log.error("Order {} email sending failed - status reverted to PENDING_PAYMENT", orderId);
+            }
+
+        } catch (NotFoundException e) {
+            log.error("Order {} not found during processing: {}", orderId, e.getMessage());
+            updateOrderStatus(orderId, Order.Status.PENDING_PAYMENT);
+        } catch (Exception e) {
+            log.error("Unexpected error processing order {}: {}", orderId, e.getMessage());
+            updateOrderStatus(orderId, Order.Status.PENDING_PAYMENT);
+        }
+    }
+
+    /**
+     * Attempts to send an email with a generated PDF attachment regarding the specified order.
+     * The method retries a predefined number of times in case of failure, implementing exponential backoff.
+     *
+     * @param orderId the unique identifier of the order for which the email will be sent
+     * @return true if the email is successfully sent within the retry limit, otherwise false
+     */
+    @Transactional
+    protected boolean sendEmailWithRetry(Integer orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new NotFoundException("Order not found: " + orderId));
+
+        int maxAttempts = 3;
+
+        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+                byte[] pdfBytes = PdfOrderGenerator.generatePdfOrder(order);
+                mailUtil.sendOrderPaidEmail(order.getUser(), order, pdfBytes);
+                log.info("Email sent successfully for order {} (attempt {})", orderId, attempt);
+                return true;
+
+            } catch (Exception e) {
+                log.warn("Email attempt {}/{} failed for order {}: {}",
+                        attempt, maxAttempts, orderId, e.getMessage());
+
+                if (attempt < maxAttempts) {
+                    try {
+                        Thread.sleep(5000L * attempt);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Updates the status of an order identified by its ID.
+     *
+     * @param orderId the unique identifier of the order to be updated
+     * @param status  the new status to set for the order
+     */
+    @Transactional
+    public void updateOrderStatus(Integer orderId, Order.Status status) {
+        try {
+            Order order = orderRepository.findById(orderId)
+                    .orElseThrow(() -> new NotFoundException("Order not found: " + orderId));
+            order.setStatus(status);
+            orderRepository.save(order);
+        } catch (Exception e) {
+            log.error("Failed to update status for order {}: {}", orderId, e.getMessage());
+        }
+    }
+
+    /**
+     * Sends an order confirmation email for the specified order ID. This method processes
+     * the payment for the order and triggers the email sending operation in an asynchronous
+     * transaction with a new propagation context.
+     *
+     * @param orderId the unique identifier of the order for which the confirmation email will be sent
+     */
+    @Generated
+    @Async
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void sendOrderConfirmationEmail(Integer orderId) {
+        processOrderPayment(orderId);
+    }
+
 
     /**
      * Updates the delivery details of an existing order.
@@ -288,32 +395,5 @@ public class OrderService implements OrderServiceInterface {
             oi.setPriceAtPurchase(priceAtPurchase);
         }
         orderRepository.save(order);
-    }
-
-    /**
-     * Sends an order confirmation email to the user associated with the specified order.
-     * The email includes the order details and a PDF attachment of the order summary.
-     * This method is executed asynchronously in a new transactional context.
-     *
-     * @param orderId the unique identifier of the order for which the confirmation email should be sent.
-     *                The method retrieves the order details based on this ID.
-     * @throws BadRequestException  if the specified order is not found in the database.
-     * @throws MailSendingException if an error occurs while generating or sending the email.
-     */
-    @Async
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void sendOrderConfirmationEmail(Integer orderId) {
-        try {
-            Order order = orderRepository.findById(orderId)
-                    .orElseThrow(() -> new NotFoundException("Order not found for email sending: " + orderId));
-
-            byte[] pdfBytes = PdfOrderGenerator.generatePdfOrder(order);
-            mailUtil.sendOrderPaidEmail(order.getUser(), order, pdfBytes);
-
-        } catch (NotFoundException e) {
-            throw new BadRequestException("Order not found for email sending: " + orderId);
-        } catch (Exception e) {
-            throw new MailSendingException("Error sending order confirmation email: " + e.getMessage()); // TODO Resend Email
-        }
     }
 }

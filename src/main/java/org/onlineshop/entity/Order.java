@@ -62,6 +62,7 @@ public class Order {
 
     public enum Status {
         PENDING_PAYMENT,
+        PROCESSING,
         PAID,
         IN_TRANSIT,
         DELIVERED,
