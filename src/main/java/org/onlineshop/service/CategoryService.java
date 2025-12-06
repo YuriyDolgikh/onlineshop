@@ -6,6 +6,7 @@ import org.onlineshop.dto.category.CategoryResponseDto;
 import org.onlineshop.dto.category.CategoryUpdateDto;
 import org.onlineshop.entity.Category;
 import org.onlineshop.exception.BadRequestException;
+import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.repository.CategoryRepository;
 import org.onlineshop.service.converter.CategoryConverter;
 import org.onlineshop.service.interfaces.CategoryServiceInterface;
@@ -64,15 +65,19 @@ public class CategoryService implements CategoryServiceInterface {
      * @param categoryId        the ID of the category to be updated
      * @param categoryUpdateDto the data transfer object containing the updated details of the category
      * @return a CategoryResponseDto containing the details of the updated category
-     * @throws IllegalArgumentException if the provided category ID is not found in the database,
-     *                                  or if the updated category name is invalid
-     * @throws BadRequestException      if a category with the updated name already exists with a different ID
+     * @throws IllegalArgumentException if the updated category name is invalid
+     * @throws NotFoundException        if the provided category ID is not found in the database
+     * @throws BadRequestException      if a category with the updated name already exists with a different ID and category name 'Other'
      */
     @Transactional
     @Override
     public CategoryResponseDto updateCategory(Integer categoryId, CategoryUpdateDto categoryUpdateDto) {
         Category categoryForUpdate = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new IllegalArgumentException("Category with id = " + categoryId + " not found"));
+                .orElseThrow(() -> new NotFoundException("Category with id = " + categoryId + " not found"));
+
+        if (categoryForUpdate.getCategoryName().equals("Other")) {
+            throw new BadRequestException("Category with name 'Other' cannot be updated");
+        }
 
         if (categoryUpdateDto.getCategoryName() != null && !categoryUpdateDto.getCategoryName().isBlank()) {
             if (categoryUpdateDto.getCategoryName().length() < 3 || categoryUpdateDto.getCategoryName().length() > 20) {
@@ -95,7 +100,8 @@ public class CategoryService implements CategoryServiceInterface {
      * @param categoryId the ID of the category to be deleted from the database
      * @return a CategoryResponseDto containing the details of the deleted category
      * @throws IllegalArgumentException if the provided category ID is null
-     * @throws BadRequestException      if the category cannot be deleted because it is associated with one or more products
+     * @throws NotFoundException        if the provided category ID is not found in the database
+     * @throws BadRequestException      if the category cannot be deleted because it is associated with one or more products and category 'Other'
      */
     @Transactional
     @Override
@@ -103,11 +109,16 @@ public class CategoryService implements CategoryServiceInterface {
         if (categoryId == null) {
             throw new IllegalArgumentException("Category id must be provided");
         }
+
         Category categoryToDelete = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new BadRequestException("Category with id: " + categoryId + " not found"));
+                .orElseThrow(() -> new NotFoundException("Category with id: " + categoryId + " not found"));
+
+        if (categoryToDelete.getCategoryName().equals("Other")) {
+            throw new BadRequestException("Category with name 'Other' cannot be deleted");
+        }
         categoryToDelete.getProducts()
                 .forEach(product -> product.setCategory(categoryRepository.findByCategoryName("Other")
-                        .orElseThrow(() -> new BadRequestException("Other category not found"))));
+                        .orElseThrow(() -> new NotFoundException("Other category not found"))));
         categoryRepository.delete(categoryToDelete);
         return categoryConverter.toDto(categoryToDelete);
     }
@@ -130,13 +141,13 @@ public class CategoryService implements CategoryServiceInterface {
      *
      * @param categoryId the ID of the category to be retrieved
      * @return the Category object corresponding to the specified ID
-     * @throws BadRequestException if a category with the specified ID is not found in the database
+     * @throws NotFoundException if a category with the specified ID is not found in the database
      */
     @Override
     @Transactional(readOnly = true)
     public Category getCategoryById(Integer categoryId) {
         return categoryRepository.findByCategoryId(categoryId)
-                .orElseThrow(() -> new BadRequestException("Category with id: " + categoryId + " not found"));
+                .orElseThrow(() -> new NotFoundException("Category with id: " + categoryId + " not found"));
     }
 
     /**
@@ -144,11 +155,11 @@ public class CategoryService implements CategoryServiceInterface {
      *
      * @param categoryName the name of the category to be retrieved from the database
      * @return the Category object corresponding to the specified name
-     * @throws BadRequestException if a category with the specified name is not found in the database
+     * @throws NotFoundException if a category with the specified name is not found in the database
      */
     @Transactional(readOnly = true)
     public Category getCategoryByName(String categoryName) {
         return categoryRepository.findByCategoryName(categoryName)
-                .orElseThrow(() -> new BadRequestException("Category with name: " + categoryName + " not found"));
+                .orElseThrow(() -> new NotFoundException("Category with name: " + categoryName + " not found"));
     }
 }

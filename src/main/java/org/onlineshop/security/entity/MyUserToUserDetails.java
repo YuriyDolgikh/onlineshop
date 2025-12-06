@@ -53,4 +53,8 @@ public class MyUserToUserDetails implements UserDetails {
     public boolean isCredentialsNonExpired() {
         return true;
     }
+
+    public User getUser() {
+        return user;
+    }
 }
