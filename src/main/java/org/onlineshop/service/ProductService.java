@@ -1,6 +1,5 @@
 package org.onlineshop.service;
 
-import lombok.Generated;
 import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.product.ProductRequestDto;
 import org.onlineshop.dto.product.ProductResponseDto;
@@ -238,11 +237,13 @@ public class ProductService implements ProductServiceInterface {
 
     /**
      * Retrieves a paginated list of products within the specified price range.
+     * If the minimum price is greater than the maximum price, the values are swapped
+     * to ensure a valid range.
      *
-     * @param minPrice the minimum price of the products to be retrieved; must not be null
-     * @param maxPrice the maximum price of the products to be retrieved; must not be null
-     * @param pageable the pagination and sorting information for retrieving the products
-     * @return a paginated list of products as ProductResponseDto objects within the specified price range
+     * @param minPrice the minimum price used to filter products; must not be null
+     * @param maxPrice the maximum price used to filter products; must not be null
+     * @param pageable the pagination information, including page number, size, and sorting, must not be null
+     * @return a paginated list of ProductResponseDto representing products within the specified price range
      * @throws IllegalArgumentException if either minPrice or maxPrice is null
      */
     @Transactional(readOnly = true)
@@ -251,8 +252,16 @@ public class ProductService implements ProductServiceInterface {
         if (minPrice == null || maxPrice == null) {
             throw new IllegalArgumentException("Min price and max price must be provided");
         }
-        normalizeMinMax(minPrice, maxPrice);
-        return productRepository.findByPriceBetween(minPrice, maxPrice, pageable)
+        final BigDecimal actualMinPrice;
+        final BigDecimal actualMaxPrice;
+        if (minPrice.compareTo(maxPrice) > 0) {
+            actualMinPrice = maxPrice;
+            actualMaxPrice = minPrice;
+        } else {
+            actualMinPrice = minPrice;
+            actualMaxPrice = maxPrice;
+        }
+        return productRepository.findByPriceBetween(actualMinPrice, actualMaxPrice, pageable)
                 .map(productConverter::toDto);
     }
 
@@ -380,23 +389,6 @@ public class ProductService implements ProductServiceInterface {
         }
         if (productDiscountPrice.compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("Product discount price must be greater than 0");
-        }
-    }
-
-    /**
-     * Adjusts the provided minimum and maximum values to ensure that the minimum value
-     * is not greater than the maximum value. If the minimum value is greater than the
-     * maximum value, their values are swapped.
-     *
-     * @param min the minimum value to be normalized
-     * @param max the maximum value to be normalized
-     */
-    @Generated
-    private void normalizeMinMax(BigDecimal min, BigDecimal max) {
-        if (min.compareTo(max) > 0) {
-            BigDecimal temp = min;
-            min = max;
-            max = temp;
         }
     }
 }
