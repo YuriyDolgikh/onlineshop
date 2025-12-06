@@ -1,11 +1,13 @@
 package org.onlineshop.service.interfaces;
 
 import org.onlineshop.dto.favourite.FavouriteResponseDto;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface FavouriteServiceInterface {
     FavouriteResponseDto addFavourite(Integer productId);
+
     FavouriteResponseDto deleteFavourite(Integer productId);
-    List<FavouriteResponseDto> getFavourites();
+
+    Page<FavouriteResponseDto> getFavourites(Pageable pageable);
 }

@@ -16,6 +16,8 @@ import org.onlineshop.service.converter.OrderConverter;
 import org.onlineshop.service.interfaces.OrderServiceInterface;
 import org.onlineshop.service.mail.MailUtil;
 import org.onlineshop.service.util.PdfOrderGenerator;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -117,18 +119,18 @@ public class OrderService implements OrderServiceInterface {
     }
 
     /**
-     * Retrieves all orders for the specified user.
+     * Retrieves a paginated list of orders for a specified user.
      *
-     * @param userId the ID of the user whose orders are to be retrieved - must not be null
-     * @return a list of {@link OrderResponseDto} objects representing the user's orders
-     * @throws NotFoundException        if the user with the specified ID is not found
-     * @throws AccessDeniedException    if the current user is not authorized to view the orders of another user
-     * @throws IllegalArgumentException if the specified user ID is null
+     * @param userId  the ID of the user whose orders are being requested; must not be null
+     * @param pageable  the pagination information
+     * @return a paginated list of orders wrapped in a {@code Page<OrderResponseDto>}
+     * @throws IllegalArgumentException if the {@code userId} is null
+     * @throws NotFoundException if no user is found with the specified {@code userId}
+     * @throws AccessDeniedException if the current user does not have permission to access the requested user's orders
      */
-
     @Override
     @Transactional(readOnly = true)
-    public List<OrderResponseDto> getOrdersByUser(Integer userId) {
+    public Page<OrderResponseDto> getOrdersByUser(Integer userId, Pageable pageable) {
         if (userId == null) {
             throw new IllegalArgumentException("UserId cannot be null");
         }
@@ -139,8 +141,8 @@ public class OrderService implements OrderServiceInterface {
         if (currentUser.getRole() == User.Role.USER && !currentUser.getUserId().equals(userId)) {
             throw new AccessDeniedException("Access denied");
         }
-        List<Order> orders = orderRepository.findByUser(requestedUser);
-        return orderConverter.toDtos(orders);
+        Page<Order> orders = orderRepository.findByUser(requestedUser, pageable);
+        return orders.map(orderConverter::toDto);
     }
 
     /**

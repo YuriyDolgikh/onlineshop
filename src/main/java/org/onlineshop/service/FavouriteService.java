@@ -12,10 +12,10 @@ import org.onlineshop.repository.ProductRepository;
 import org.onlineshop.service.converter.FavouriteConverter;
 import org.onlineshop.service.interfaces.FavouriteServiceInterface;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -92,10 +92,10 @@ public class FavouriteService implements FavouriteServiceInterface {
      */
     @Transactional(readOnly = true)
     @Override
-    public List<FavouriteResponseDto> getFavourites() {
+    public Page<FavouriteResponseDto> getFavourites(Pageable pageable) {
         User user = userService.getCurrentUser();
-        List<Favourite> favourites = favouriteRepository.findByUser(user);
+        Page<Favourite> favourites = favouriteRepository.findByUser(user, pageable);
 
-        return favouriteConverter.toDtos(favourites);
+        return favourites.map(favouriteConverter::toDto);
     }
 }
