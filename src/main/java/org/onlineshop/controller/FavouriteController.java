@@ -11,11 +11,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.favourite.FavouriteResponseDto;
 import org.onlineshop.service.FavouriteService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,27 +26,35 @@ public class FavouriteController {
     private final FavouriteService favouriteService;
 
     /**
-     * Retrieves a list of favorite items for the current user.
+     * Retrieves a paginated list of favorite items for the current user.
      *
-     * @return a ResponseEntity containing a List of FavouriteResponseDto objects,
+     * @param page the page number (0-based)
+     * @param size the page size
+     * @return a ResponseEntity containing a Page of FavouriteResponseDto objects,
      * representing the user's favorite items, with an HTTP status of OK.
      */
     @Operation(
             summary = "Get user favorites",
-            description = "Retrieves a list of all favorite products for the currently authenticated user."
+            description = "Retrieves a paginated list of all favorite products for the currently authenticated user."
     )
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
                     description = "Favorites retrieved successfully",
-                    content = @Content(schema = @Schema(implementation = FavouriteResponseDto.class))
+                    content = @Content(schema = @Schema(implementation = Page.class))
             )
     })
     @GetMapping
-    public ResponseEntity<List<FavouriteResponseDto>> getFavorites() {
+    public ResponseEntity<Page<FavouriteResponseDto>> getFavorites(
+            @Parameter(description = "Page number (0-based)", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size", example = "20")
+            @RequestParam(defaultValue = "20") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(favouriteService.getFavourites());
+                .body(favouriteService.getFavourites(pageable));
     }
 
     /**

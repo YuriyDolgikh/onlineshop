@@ -12,11 +12,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.order.OrderResponseDto;
 import org.onlineshop.service.OrderService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -66,10 +67,12 @@ public class OrderController {
     }
 
     /**
-     * Retrieves a list of orders associated with a specific user ID.
+     * Retrieves a paginated list of orders associated with a specific user ID.
      *
      * @param userId the ID of the user whose order history is to be retrieved must not be null
-     * @return a response entity containing a list of {@link OrderResponseDto} objects representing the user's orders,
+     * @param page   the page number (0-based)
+     * @param size   the page size
+     * @return a response entity containing a page of {@link OrderResponseDto} objects representing the user's orders,
      * with an HTTP status of 200 (OK)
      */
     @Operation(
@@ -80,7 +83,7 @@ public class OrderController {
             @ApiResponse(
                     responseCode = "200",
                     description = "User orders retrieved successfully",
-                    content = @Content(schema = @Schema(implementation = OrderResponseDto.class))
+                    content = @Content(schema = @Schema(implementation = Page.class))
             ),
             @ApiResponse(
                     responseCode = "403",
@@ -92,16 +95,22 @@ public class OrderController {
             )
     })
     @GetMapping("/ordersHistory/{userId}")
-    public ResponseEntity<List<OrderResponseDto>> getOrdersByUser(
+    public ResponseEntity<Page<OrderResponseDto>> getOrdersByUser(
             @Parameter(
                     description = "ID of the user to retrieve orders for",
                     required = true,
                     example = "456"
             )
-            @Valid @PathVariable Integer userId) {
+            @Valid @PathVariable Integer userId,
+            @Parameter(description = "Page number (0-based)", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size", example = "20")
+            @RequestParam(defaultValue = "20") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(orderService.getOrdersByUser(userId));
+                .body(orderService.getOrdersByUser(userId, pageable));
     }
 
     /**
@@ -170,7 +179,7 @@ public class OrderController {
      * Users can only confirm payment for orders they own.
      * Different payment methods can be used, such as Credit Card, PayPal, or Bank Transfer.
      *
-     * @param orderId the unique identifier of the order for which payment is to be confirmed
+     * @param orderId   the unique identifier of the order for which payment is to be confirmed
      * @param payMethod the payment method used for the transaction, e.g., CREDIT_CARD, PAYPAL, or BANK_TRANSFER
      * @return a ResponseEntity containing an OrderResponseDto with order details upon successful confirmation
      */
