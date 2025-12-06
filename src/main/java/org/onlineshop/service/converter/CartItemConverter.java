@@ -41,12 +41,6 @@ public class CartItemConverter {
                 .collect(Collectors.toSet());
     }
 
-    public Set<CartItemResponseDto> toDtos(Set<CartItem> cartItems) {
-        return cartItems.stream()
-                .map(this::toDto)
-                .collect(Collectors.toSet());
-    }
-
     public OrderItem cartItemToOrderItem(CartItem cartItem) {
         Product product = cartItem.getProduct();
 
@@ -69,11 +63,13 @@ public class CartItemConverter {
         return CartItemSimpleResponseDto.builder()
                 .productName(cartItem.getProduct().getName())
                 .quantity(cartItem.getQuantity())
-                .build();    }
+                .build();
+    }
 
     public CartItemSimpleResponseDto toSimpleDtoFromDto(CartItemResponseDto cartItemResponseDto) {
         return CartItemSimpleResponseDto.builder()
                 .productName(cartItemResponseDto.getProduct().getName())
                 .quantity(cartItemResponseDto.getQuantity())
-                .build();    }
+                .build();
+    }
 }

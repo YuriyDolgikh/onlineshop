@@ -146,6 +146,12 @@ public class UserService implements UserServiceInterface {
         if (userToUpdateOptional.isEmpty()) {
             throw new NotFoundException("User with id = " + userId + " not found");
         }
+        if(userToUpdateOptional.get().getStatus().equals(User.Status.NOT_CONFIRMED)) {
+            throw new BadRequestException("User with id = " + userId + " is not confirmed and is not allowed to update");
+        }
+        if (userToUpdateOptional.get().getStatus().equals(User.Status.DELETED)) {
+            throw new BadRequestException("User with id = " + userId + " is deleted and is not allowed to update");
+        }
         User userToUpdate = userToUpdateOptional.get();
         // Check that the user for update is the same as the current user
         User currentUser = getCurrentUser();
@@ -206,18 +212,19 @@ public class UserService implements UserServiceInterface {
      *
      * @param email the email address of the user to be renewed; must not be null or blank
      * @return a {@link UserResponseDto} containing the updated user information
-     * @throws BadRequestException if the email is null, blank, or if the user's status is not DELETED
+     * @throws IllegalArgumentException if the email is null, blank, or if the user's status is not DELETED
      * @throws NotFoundException   if no user with the provided email exists
+     * @throws BadRequestException if user not deleted
      */
     @Override
     @Transactional
     public UserResponseDto renewUser(String email) {
         if (email == null || email.isBlank()) {
-            throw new BadRequestException("Email must be provided to renew user");
+            throw new IllegalArgumentException("Email must be provided to renew user");
         }
         String emailRegex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
         if (!email.matches(emailRegex)) {
-            throw new BadRequestException("Invalid email format");
+            throw new IllegalArgumentException("Invalid email format");
         }
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("User with email: " + email + " not found"));

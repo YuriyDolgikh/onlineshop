@@ -41,8 +41,8 @@ public class CartItemService implements CartItemServiceInterface {
      *
      * @param cartItemRequestDto the DTO containing information about the product to add to the cart, such as product ID and quantity.
      * @return a DTO representing the added or updated cart item, including product details and quantity.
-     * @throws IllegalArgumentException if the product ID or quantity is null.
-     * @throws BadRequestException      if the quantity is less than 1, or if the product cannot be found.
+     * @throws IllegalArgumentException if the product ID or quantity is null or invalid.
+     * @throws NotFoundException if a product with the specified id is not found in the database
      */
     @Transactional
     @Override
@@ -54,10 +54,10 @@ public class CartItemService implements CartItemServiceInterface {
             throw new IllegalArgumentException("Quantity cannot be null");
         }
         if (cartItemRequestDto.getQuantity() < 1) {
-            throw new BadRequestException("Quantity must be at least 1");
+            throw new IllegalArgumentException("Quantity must be at least 1");
         }
         if (productService.getProductById(cartItemRequestDto.getProductId()).isEmpty()) {
-            throw new BadRequestException("Product with ID: " + cartItemRequestDto.getProductId() + " not found");
+            throw new NotFoundException("Product with ID: " + cartItemRequestDto.getProductId() + " not found");
         }
         User user = userService.getCurrentUser();
         Cart cart = user.getCart();
@@ -70,7 +70,7 @@ public class CartItemService implements CartItemServiceInterface {
             savedCartItem = cartItemRepository.save(cartItem);
         } else {
             Product product = productService.getProductById(cartItemRequestDto.getProductId())
-                    .orElseThrow(() -> new BadRequestException("Product not found"));
+                    .orElseThrow(() -> new NotFoundException("Product not found"));
 
             CartItem newCartItem = CartItem.builder()
                     .product(product)
@@ -132,7 +132,7 @@ public class CartItemService implements CartItemServiceInterface {
             throw new IllegalArgumentException("Quantity cannot be null");
         }
         if (cartItemUpdateDto.getQuantity() < 1) {
-            throw new BadRequestException("Quantity must be at least 1");
+            throw new IllegalArgumentException("Quantity must be at least 1");
         }
         if (productService.getProductById(cartItemUpdateDto.getProductId()).isEmpty()) {
             throw new NotFoundException("Product with ID: " + cartItemUpdateDto.getProductId() + " not found");

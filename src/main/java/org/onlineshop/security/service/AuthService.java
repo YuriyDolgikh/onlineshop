@@ -1,12 +1,16 @@
 package org.onlineshop.security.service;
 
 import lombok.RequiredArgsConstructor;
+import org.onlineshop.entity.User;
+import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.security.dto.AuthRequestDto;
+import org.onlineshop.security.entity.MyUserToUserDetails;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -25,11 +29,23 @@ public class AuthService {
      * @return String variable with JWT token
      */
     public String generateJwt(AuthRequestDto request) {
+        UserDetails userDetails;
         try {
-            customUserDetailService.loadUserByUsername(request.getUsername());
+          userDetails = customUserDetailService.loadUserByUsername(request.getUsername());
         } catch (UsernameNotFoundException e) {
             throw new NotFoundException("User with email: " + request.getUsername() + " is not registered");
         }
+
+        User user = ((MyUserToUserDetails)userDetails).getUser();
+        if(user.getStatus().equals("DELETED")){
+            throw new BadRequestException("User with email: " + request.getUsername() + " is deleted");
+        }
+
+        if(user.getStatus().equals("NOT_CONFIRMED")){
+            throw new BadRequestException("User with email: " + request.getUsername() + " is not confirmed");
+        }
+
+
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getUsername(),

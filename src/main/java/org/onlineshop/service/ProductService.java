@@ -72,14 +72,15 @@ public class ProductService implements ProductServiceInterface {
      * @param productId        the ID of the product to be updated
      * @param productUpdateDto the details of the product to be updated
      * @return a ProductResponseDto representing the updated product
-     * @throws IllegalArgumentException if the product ID does not exist, if there is a duplicate product name within the category,
+     * @throws IllegalArgumentException if there is a duplicate product name within the category,
      *                                  or if product price values are not valid.
+     * @throws NotFoundException        if a product with the specified id is not found in the database
      */
     @Transactional
     @Override
     public ProductResponseDto updateProduct(Integer productId, ProductUpdateDto productUpdateDto) {
         Product productToUpdate = productRepository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("Product with id = " + productId + " not found"));
+                .orElseThrow(() -> new NotFoundException("Product with id = " + productId + " not found"));
 
         Category targetCategory = (productUpdateDto.getProductCategory() != null && !productUpdateDto.getProductCategory().isBlank())
                 ? categoryService.getCategoryByName(productUpdateDto.getProductCategory().trim())
@@ -126,7 +127,8 @@ public class ProductService implements ProductServiceInterface {
      * @param productId        the ID of the product to set the discount price for
      * @param newDiscountPrice the new discount price to set
      * @return a {@code ProductResponseDto} containing the updated product details
-     * @throws IllegalArgumentException if the product ID does not exist
+     * @throws IllegalArgumentException if product update arguments are invalid
+     * @throws NotFoundException        if a product with the specified id is not found in the database
      */
     @Transactional
     public ProductResponseDto setDiscountPrice(Integer productId, BigDecimal newDiscountPrice) {
@@ -141,7 +143,7 @@ public class ProductService implements ProductServiceInterface {
         }
 
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("Product with id = " + productId + " not found"));
+                .orElseThrow(() -> new NotFoundException("Product with id = " + productId + " not found"));
 
         product.setDiscountPrice(newDiscountPrice);
         product.setUpdatedAt(LocalDateTime.now());
@@ -155,13 +157,13 @@ public class ProductService implements ProductServiceInterface {
      *
      * @param productId the ID of the product to be deleted
      * @return a {@code ProductResponseDto} containing the deleted product details
-     * @throws IllegalArgumentException if the product ID does not exist
+     * @throws NotFoundException if a product with the specified id is not found in the database
      */
     @Transactional
     @Override
     public ProductResponseDto deleteProduct(Integer productId) {
         Product productToDelete = productRepository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("Product with id = " + productId + " not found"));
+                .orElseThrow(() -> new NotFoundException("Product with id = " + productId + " not found"));
         productRepository.delete(productToDelete);
         return productConverter.toDto(productToDelete);
     }
