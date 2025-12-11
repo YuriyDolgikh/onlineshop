@@ -1,6 +1,7 @@
 package org.onlineshop.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.onlineshop.dto.favourite.FavouriteResponseDto;
 import org.onlineshop.entity.Favourite;
 import org.onlineshop.entity.Product;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FavouriteService implements FavouriteServiceInterface {
@@ -52,6 +54,7 @@ public class FavouriteService implements FavouriteServiceInterface {
 
         try {
             Favourite savedFavourite = favouriteRepository.save(favourite);
+            log.info("Product {} added to favourites for user {}", product.getName(), user.getUsername());
             return favouriteConverter.toDto(savedFavourite);
         } catch (DataIntegrityViolationException exception) {
             throw new BadRequestException("Product is already in favourites");
@@ -82,6 +85,7 @@ public class FavouriteService implements FavouriteServiceInterface {
                 .orElseThrow(() -> new NotFoundException("Product not found in favourites"));
 
         favouriteRepository.delete(favourite);
+        log.info("Product {} removed from favourites for user {}", favourite.getProduct().getName(), user.getUsername());
         return favouriteConverter.toDto(favourite);
     }
 

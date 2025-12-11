@@ -2,6 +2,7 @@ package org.onlineshop.service;
 
 import lombok.Generated;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.onlineshop.dto.user.UserRequestDto;
 import org.onlineshop.dto.user.UserResponseDto;
 import org.onlineshop.dto.user.UserUpdateRequestDto;
@@ -24,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService implements UserServiceInterface {
@@ -67,8 +69,10 @@ public class UserService implements UserServiceInterface {
         newUser.setCart(newCartForUser);
 
         User finalUser = userRepository.save(newUser);
+        log.info("User {} registered successfully", finalUser.getEmail());
 
         confirmationCodeService.confirmationCodeManager(finalUser);
+        log.info("Confirmation code sent to user {}", finalUser.getEmail());
         return userConverter.toDto(finalUser);
     }
 
@@ -118,12 +122,14 @@ public class UserService implements UserServiceInterface {
         if (confirmationCodeService.isConfirmationCodeExpired(code)) {
             confirmationCodeService.deleteConfirmationCodeByUser(user);
             confirmationCodeService.confirmationCodeManager(user);
+            log.info("New confirmation code sent to user {}", user.getEmail());
             return "Confirmation code for email: " + user.getEmail() + " is expired. " +
                     "Please, check your email again for the new one.";
         }
         confirmationCodeService.changeConfirmationStatusByCode(code);
         user.setStatus(User.Status.CONFIRMED);
         userRepository.save(user);
+        log.info("User {} confirmed successfully", user.getEmail());
         return "Email " + user.getEmail() + " is successfully confirmed";
     }
 
@@ -173,6 +179,7 @@ public class UserService implements UserServiceInterface {
         }
         // Save the updated user
         userRepository.save(userToUpdate);
+        log.info("User {} updated successfully", userToUpdate.getUsername());
         return userConverter.toDto(userToUpdate);
     }
 
@@ -202,6 +209,7 @@ public class UserService implements UserServiceInterface {
         confirmationCodeService.deleteConfirmationCodeByUser(userToDelete);
         userToDelete.setStatus(User.Status.DELETED);
         userRepository.save(userToDelete);
+        log.info("User {} deleted successfully", userToDelete.getUsername());
         return userConverter.toDto(userToDelete);
     }
 
@@ -214,7 +222,7 @@ public class UserService implements UserServiceInterface {
      * @return a {@link UserResponseDto} containing the updated user information
      * @throws IllegalArgumentException if the email is null, blank, or if the user's status is not DELETED
      * @throws NotFoundException   if no user with the provided email exists
-     * @throws BadRequestException if user not deleted
+     * @throws BadRequestException if user isn't deleted
      */
     @Override
     @Transactional
@@ -234,6 +242,7 @@ public class UserService implements UserServiceInterface {
         confirmationCodeService.confirmationCodeManager(user);
         user.setStatus(User.Status.NOT_CONFIRMED);
         userRepository.save(user);
+        log.info("User {} renewed successfully", user.getEmail());
         return userConverter.toDto(user);
     }
 
@@ -319,6 +328,7 @@ public class UserService implements UserServiceInterface {
     @Transactional
     public User saveUser(User user) {
         userRepository.save(user);
+        log.info("User {} saved successfully", user.getEmail());
         return user;
     }
 }

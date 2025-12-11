@@ -98,6 +98,7 @@ public class OrderService implements OrderServiceInterface {
         orderRepository.save(savedOrder);
         user.getOrders().add(savedOrder);
         userService.saveUser(user);
+        log.info("Cart transferred to order successfully. Order ID: {}", savedOrder.getOrderId());
     }
 
 
@@ -169,6 +170,7 @@ public class OrderService implements OrderServiceInterface {
         Order.Status updatedStatus = Order.Status.valueOf(newStatus.toUpperCase());
         order.setStatus(updatedStatus);
         orderRepository.save(order);
+        log.info("Order {} status updated to {}", orderId, updatedStatus);
         return orderConverter.toDto(order);
     }
 
@@ -193,6 +195,7 @@ public class OrderService implements OrderServiceInterface {
         }
         order.setStatus(Order.Status.CANCELLED);
         orderRepository.save(order);
+        log.info("Order {} canceled successfully", orderId);
     }
 
     /**
@@ -228,6 +231,7 @@ public class OrderService implements OrderServiceInterface {
         log.info("Order {} in payment confirmation process. Cart cleared.", orderId);
 
         processOrderPayment(orderId);
+        log.info("Order {} payment processed successfully", orderId);
 
         return orderConverter.toDto(order);
     }
@@ -381,6 +385,7 @@ public class OrderService implements OrderServiceInterface {
         order.setDeliveryAddress(orderRequestDto.getDeliveryAddress());
         order.setContactPhone(orderRequestDto.getContactPhone());
         orderRepository.save(order);
+        log.info("Order {} delivery details updated successfully", orderId);
         return orderConverter.toDto(order);
     }
 
@@ -460,6 +465,7 @@ public class OrderService implements OrderServiceInterface {
 
             oi.setPriceAtPurchase(finalPrice);
         }
+        log.info("Order price recalculated successfully");
         orderRepository.save(order);
     }
 }

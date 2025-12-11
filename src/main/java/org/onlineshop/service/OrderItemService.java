@@ -1,6 +1,7 @@
 package org.onlineshop.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.onlineshop.dto.orderItem.OrderItemResponseDto;
 import org.onlineshop.dto.orderItem.OrderItemUpdateDto;
 import org.onlineshop.entity.Order;
@@ -15,6 +16,7 @@ import org.onlineshop.service.interfaces.OrderItemServiceInterface;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderItemService implements OrderItemServiceInterface {
@@ -55,6 +57,7 @@ public class OrderItemService implements OrderItemServiceInterface {
         currentOrder.getOrderItems().remove(orderItem);
         orderItemRepository.delete(orderItem);
         orderRepository.save(currentOrder);
+        log.info("Item {} deleted from order for user {}", orderItemId, userService.getCurrentUser().getUsername());
     }
 
     /**
@@ -93,6 +96,7 @@ public class OrderItemService implements OrderItemServiceInterface {
         }
         orderItem.setQuantity(dto.getQuantity());
         orderItemRepository.save(orderItem);
+        log.info("OrderItem {} quantity updated for user {}", orderItem.getOrderItemId(), currentUser.getUsername());
         return orderItemConverter.toDto(orderItem);
     }
 }

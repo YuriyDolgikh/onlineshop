@@ -3,6 +3,7 @@ package org.onlineshop.service;
 import lombok.Data;
 import lombok.Generated;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.onlineshop.entity.ConfirmationCode;
 import org.onlineshop.entity.User;
 import org.onlineshop.exception.BadRequestException;
@@ -19,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @Data
 @RequiredArgsConstructor
 @Service
@@ -49,8 +51,11 @@ public class ConfirmationCodeService implements ConfirmationCodeServiceInterface
     @Transactional
     public void confirmationCodeManager(User user) {
         String code = generateCode();
+        log.info("Generated confirmation code: {}", code);
         saveConfirmationCode(code, user);
+        log.info("Confirmation code saved for user: {}", user.getUsername());
         sendCodeByEmail(code, user);
+        log.info("Confirmation email sent to user: {}", user.getUsername());
     }
 
     /**
@@ -121,6 +126,7 @@ public class ConfirmationCodeService implements ConfirmationCodeServiceInterface
         User user = confirmationCode.getUser();
         confirmationCode.setConfirmed(true);
         repository.save(confirmationCode);
+        log.info("Confirmation code {} updated for user {}. Set to confirmed.", code, user.getUsername());
         return user;
     }
 
@@ -162,6 +168,7 @@ public class ConfirmationCodeService implements ConfirmationCodeServiceInterface
         ConfirmationCode confirmationCode = repository.findByUser(user)
                 .orElseThrow(() -> new NotFoundException("Confirmation code for user: " + user.getUsername() + " not found"));
         repository.delete(confirmationCode);
+        log.info("Confirmation code for user {} deleted.", user.getUsername());
     }
 
     /**
