@@ -7,6 +7,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.onlineshop.dto.favourite.FavouriteResponseDto;
 import org.onlineshop.service.FavouriteService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -31,42 +35,48 @@ class FavouriteControllerGetFavouriteTest {
                 new FavouriteResponseDto(5, "bbbb"),
                 new FavouriteResponseDto(13, "dddd")
         );
+        Page<FavouriteResponseDto> page = new PageImpl<>(list);
 
-        when(favouriteService.getFavourites()).thenReturn(list);
+        Pageable pageable = PageRequest.of(0, 10);
+        when(favouriteService.getFavourites(pageable)).thenReturn(page);
 
-        ResponseEntity<List<FavouriteResponseDto>> response = favouriteController.getFavorites();
+        ResponseEntity<Page<FavouriteResponseDto>> response = favouriteController.getFavorites(0, 10);
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals(3, response.getBody().size());
-        assertEquals(1, response.getBody().get(0).getFavouriteId());
-        assertEquals("aaaa", response.getBody().get(0).getProductName());
-        assertEquals(5, response.getBody().get(1).getFavouriteId());
-        assertEquals("bbbb", response.getBody().get(1).getProductName());
-        assertEquals(13, response.getBody().get(2).getFavouriteId());
-        assertEquals("dddd", response.getBody().get(2).getProductName());
-        verify(favouriteService, times(1)).getFavourites();
+        assertEquals(3, response.getBody().getTotalElements());
+        assertEquals(1, response.getBody().getContent().get(0).getFavouriteId());
+        assertEquals("aaaa", response.getBody().getContent().get(0).getProductName());
+        assertEquals(5, response.getBody().getContent().get(1).getFavouriteId());
+        assertEquals("bbbb", response.getBody().getContent().get(1).getProductName());
+        assertEquals(13, response.getBody().getContent().get(2).getFavouriteId());
+        assertEquals("dddd", response.getBody().getContent().get(2).getProductName());
+        verify(favouriteService, times(1)).getFavourites(pageable);
     }
 
     @Test
     void getFavouriteIfEmpty() {
-        when(favouriteService.getFavourites()).thenReturn(List.of());
+        Page<FavouriteResponseDto> emptyPage = new PageImpl<>(List.of());
+        Pageable pageable = PageRequest.of(0, 10);
+        when(favouriteService.getFavourites(pageable)).thenReturn(emptyPage);
 
-        ResponseEntity<List<FavouriteResponseDto>> response = favouriteController.getFavorites();
+        ResponseEntity<Page<FavouriteResponseDto>> response = favouriteController.getFavorites(0, 10);
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertTrue(response.getBody().isEmpty());
-        verify(favouriteService, times(1)).getFavourites();
+        assertEquals(0, response.getBody().getTotalElements());
+        verify(favouriteService, times(1)).getFavourites(pageable);
     }
 
     @Test
     void getFavouriteIfErrors() {
-        when(favouriteService.getFavourites())
+        Pageable pageable = PageRequest.of(0, 10);
+        when(favouriteService.getFavourites(pageable))
                 .thenThrow(new RuntimeException("Test service failure"));
 
-        assertThrows(RuntimeException.class, () -> favouriteController.getFavorites());
+        assertThrows(RuntimeException.class, () -> favouriteController.getFavorites(0, 10));
     }
 }

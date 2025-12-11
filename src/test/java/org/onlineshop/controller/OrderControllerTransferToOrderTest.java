@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.onlineshop.entity.User;
 import org.onlineshop.repository.UserRepository;
 import org.onlineshop.service.CartService;
+import org.onlineshop.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -26,12 +27,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @TestPropertySource(locations = "classpath:application-test.yml")
-class CartControllerTransferToOrderTest {
+class OrderControllerTransferToOrderTest {
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
-    private CartService cartService;
+    private OrderService orderService;
 
     @Autowired
     private UserRepository userRepository;
@@ -59,12 +60,12 @@ class CartControllerTransferToOrderTest {
     @WithMockUser(username = "testUser@email.com",
             roles = {"ADMIN", "MANAGER","USER"})
     void testTransferToOrderIfOkAndRoleAdminUserManager() throws Exception {
-        doNothing().when(cartService).transferCartToOrder();
+        doNothing().when(orderService).transferCartToOrder();
 
         mockMvc.perform(get("/v1/carts/toOrder"))
                 .andExpect(status().isOk());
 
-        verify(cartService, times(1)).transferCartToOrder();
+        verify(orderService, times(1)).transferCartToOrder();
     }
 
     @Test

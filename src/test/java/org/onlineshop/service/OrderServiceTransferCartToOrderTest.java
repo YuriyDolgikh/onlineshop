@@ -26,7 +26,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class CartServiceTransferCartToOrderTest {
+class OrderServiceTransferCartToOrderTest {
 
     @Mock
     private CartRepository cartRepository;
@@ -44,7 +44,7 @@ class CartServiceTransferCartToOrderTest {
     private OrderRepository orderRepository;
 
     @InjectMocks
-    private CartService cartService;
+    private OrderService orderService;
 
     private User userTest;
     private Cart cartTest;
@@ -121,7 +121,7 @@ class CartServiceTransferCartToOrderTest {
 
         when(orderRepository.save(any(Order.class))).thenReturn(savedOrder);
 
-        cartService.transferCartToOrder();
+        orderService.transferCartToOrder();
 
         verify(userService, atLeastOnce()).getCurrentUser();
         verify(cartRepository, times(1)).findByUser(userTest);
@@ -173,7 +173,7 @@ class CartServiceTransferCartToOrderTest {
 
         when(orderRepository.save(any(Order.class))).thenReturn(savedOrder);
 
-        cartService.transferCartToOrder();
+        orderService.transferCartToOrder();
 
         verify(cartItemConverter, times(2)).cartItemToOrderItem(any(CartItem.class));
         verify(orderRepository, times(2)).save(any(Order.class));
@@ -187,7 +187,7 @@ class CartServiceTransferCartToOrderTest {
         when(userService.getCurrentUser()).thenReturn(userTest);
         when(cartRepository.findByUser(userTest)).thenReturn(Optional.of(cartTest));
 
-        assertThrows(BadRequestException.class, () -> cartService.transferCartToOrder());
+        assertThrows(BadRequestException.class, () -> orderService.transferCartToOrder());
 
         verify(orderRepository, never()).save(any(Order.class));
         verify(userService, never()).saveUser(any(User.class));
@@ -200,7 +200,7 @@ class CartServiceTransferCartToOrderTest {
         when(userService.getCurrentUser()).thenReturn(userTest);
         when(cartRepository.findByUser(userTest)).thenReturn(Optional.of(cartTest));
 
-        assertThrows(BadRequestException.class, () -> cartService.transferCartToOrder());
+        assertThrows(BadRequestException.class, () -> orderService.transferCartToOrder());
 
         verify(orderRepository, never()).save(any(Order.class));
         verify(userService, never()).saveUser(any(User.class));
@@ -218,7 +218,7 @@ class CartServiceTransferCartToOrderTest {
                 .build();
         when(orderRepository.findByUserAndStatus(userTest, Order.Status.PENDING_PAYMENT)).thenReturn(existingOrder);
 
-        assertThrows(BadRequestException.class, () -> cartService.transferCartToOrder());
+        assertThrows(BadRequestException.class, () -> orderService.transferCartToOrder());
 
         verify(orderRepository, never()).save(any(Order.class));
         verify(userService, never()).saveUser(any(User.class));

@@ -16,6 +16,8 @@ import org.onlineshop.repository.UserRepository;
 import org.onlineshop.service.converter.FavouriteConverter;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
@@ -102,7 +104,7 @@ class FavouriteServiceDeleteFromFavouriteTest {
     @Test
     void deleteFavouriteIfProductNotFound() {
         when(userService.getCurrentUser()).thenReturn(user);
-        when(favouriteRepository.findByUser(user)).thenReturn(List.of());
+        when(favouriteRepository.findByUser(user, Pageable.unpaged())).thenReturn(Page.empty());
 
         assertEquals("Product not found", assertThrows(NotFoundException.class, () -> favouriteService.deleteFavourite(10)).getMessage());
     }
