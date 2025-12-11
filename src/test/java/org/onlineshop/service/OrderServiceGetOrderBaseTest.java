@@ -7,6 +7,9 @@ import org.onlineshop.dto.order.OrderResponseDto;
 import org.onlineshop.entity.Order;
 import org.onlineshop.entity.User;
 import org.onlineshop.exception.NotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 
 import java.util.List;
@@ -61,7 +64,7 @@ class OrderServiceGetOrderBaseTest extends OrderServiceBaseTest {
     void getOrdersByUser_whenUserIdNull_shouldThrowIllegalArgumentException() {
         assertThrows(
                 IllegalArgumentException.class,
-                () -> orderService.getOrdersByUser(null),
+                () -> orderService.getOrdersByUser(null, Pageable.unpaged()),
                 "Expected IllegalArgumentException when userId is null"
         );
     }
@@ -73,7 +76,7 @@ class OrderServiceGetOrderBaseTest extends OrderServiceBaseTest {
 
         assertThrows(
                 NotFoundException.class,
-                () -> orderService.getOrdersByUser(userId),
+                () -> orderService.getOrdersByUser(userId, Pageable.unpaged()),
                 "Expected NotFoundException when user not found"
         );
     }
@@ -89,23 +92,25 @@ class OrderServiceGetOrderBaseTest extends OrderServiceBaseTest {
         Order order1 = Order.builder().orderId(10).user(user).build();
         Order order2 = Order.builder().orderId(11).user(user).build();
         List<Order> orders = List.of(order1, order2);
+        Page<Order> ordersPage = new PageImpl<>(orders);
 
         OrderResponseDto dto1 = new OrderResponseDto();
         OrderResponseDto dto2 = new OrderResponseDto();
         List<OrderResponseDto> dtos = List.of(dto1, dto2);
+        Page<OrderResponseDto> dtosPage = new PageImpl<>(dtos);
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(userService.getCurrentUser()).thenReturn(user);
-        when(orderRepository.findByUser(user)).thenReturn(orders);
+        when(orderRepository.findByUser(user, Pageable.unpaged())).thenReturn(ordersPage);
         when(orderConverter.toDtos(orders)).thenReturn(dtos);
 
-        List<OrderResponseDto> result = orderService.getOrdersByUser(userId);
+        Page<OrderResponseDto> result = orderService.getOrdersByUser(userId, Pageable.unpaged());
 
         assertNotNull(result);
-        assertEquals(2, result.size());
-        assertSame(dtos, result);
+        assertEquals(2, result.getTotalElements());
+        assertEquals(dtosPage.getContent(), result.getContent());
         verify(userService).getCurrentUser();
-        verify(orderRepository).findByUser(user);
+        verify(orderRepository).findByUser(user, Pageable.unpaged());
     }
 
     @Test
@@ -128,12 +133,12 @@ class OrderServiceGetOrderBaseTest extends OrderServiceBaseTest {
 
         assertThrows(
                 AccessDeniedException.class,
-                () -> orderService.getOrdersByUser(requestedUserId),
+                () -> orderService.getOrdersByUser(requestedUserId, Pageable.unpaged()),
                 "Expected AccessDeniedException when USER tries to access foreign user's orders"
         );
 
         verify(userService).getCurrentUser();
-        verify(orderRepository, never()).findByUser(any());
+        verify(orderRepository, never()).findByUser(any(), any());
     }
 
     @Test
@@ -153,20 +158,23 @@ class OrderServiceGetOrderBaseTest extends OrderServiceBaseTest {
 
         Order order1 = Order.builder().orderId(1).user(requestedUser).build();
         List<Order> orders = List.of(order1);
+        Page<Order> ordersPage = new PageImpl<>(orders);
 
         OrderResponseDto dto1 = new OrderResponseDto();
         List<OrderResponseDto> dtos = List.of(dto1);
+        Page<OrderResponseDto> dtosPage = new PageImpl<>(dtos);
 
         when(userRepository.findById(requestedUserId)).thenReturn(Optional.of(requestedUser));
         when(userService.getCurrentUser()).thenReturn(adminUser);
-        when(orderRepository.findByUser(requestedUser)).thenReturn(orders);
+        when(orderRepository.findByUser(requestedUser, Pageable.unpaged())).thenReturn(ordersPage);
         when(orderConverter.toDtos(orders)).thenReturn(dtos);
 
-        List<OrderResponseDto> result = orderService.getOrdersByUser(requestedUserId);
+        Page<OrderResponseDto> result = orderService.getOrdersByUser(requestedUserId, Pageable.unpaged());
 
         assertNotNull(result);
-        assertEquals(1, result.size());
-        verify(orderRepository).findByUser(requestedUser);
+        assertEquals(1, result.getTotalElements());
+        assertEquals(dtosPage.getContent(), result.getContent());
+        verify(orderRepository).findByUser(requestedUser, Pageable.unpaged());
     }
 
     @Test
@@ -186,24 +194,27 @@ class OrderServiceGetOrderBaseTest extends OrderServiceBaseTest {
 
         Order order1 = Order.builder().orderId(20).user(requestedUser).build();
         List<Order> orders = List.of(order1);
+        Page<Order> ordersPage = new PageImpl<>(orders);
 
         OrderResponseDto dto1 = new OrderResponseDto();
         List<OrderResponseDto> dtos = List.of(dto1);
+        Page<OrderResponseDto> dtosPage = new PageImpl<>(dtos);
 
         when(userRepository.findById(requestedUserId)).thenReturn(Optional.of(requestedUser));
         when(userService.getCurrentUser()).thenReturn(managerUser);
-        when(orderRepository.findByUser(requestedUser)).thenReturn(orders);
+        when(orderRepository.findByUser(requestedUser, Pageable.unpaged())).thenReturn(ordersPage);
         when(orderConverter.toDtos(orders)).thenReturn(dtos);
 
-        List<OrderResponseDto> result = orderService.getOrdersByUser(requestedUserId);
+        Page<OrderResponseDto> result = orderService.getOrdersByUser(requestedUserId, Pageable.unpaged());
 
         assertNotNull(result);
-        assertEquals(1, result.size());
-        verify(orderRepository).findByUser(requestedUser);
+        assertEquals(1, result.getTotalElements());
+        assertEquals(dtosPage.getContent(), result.getContent());
+        verify(orderRepository).findByUser(requestedUser, Pageable.unpaged());
     }
 
     @Test
-    void getOrdersByUser_whenUserHasNoOrders_shouldReturnEmptyList() {
+    void getOrdersByUser_whenUserHasNoOrders_shouldReturnEmptyPage() {
         Integer userId = 7;
         User user = User.builder()
                 .userId(userId)
@@ -211,18 +222,19 @@ class OrderServiceGetOrderBaseTest extends OrderServiceBaseTest {
                 .build();
 
         List<Order> emptyOrders = List.of();
+        Page<Order> emptyOrdersPage = new PageImpl<>(emptyOrders);
         List<OrderResponseDto> emptyDtos = List.of();
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(userService.getCurrentUser()).thenReturn(user);
-        when(orderRepository.findByUser(user)).thenReturn(emptyOrders);
+        when(orderRepository.findByUser(user, Pageable.unpaged())).thenReturn(emptyOrdersPage);
         when(orderConverter.toDtos(emptyOrders)).thenReturn(emptyDtos);
 
-        List<OrderResponseDto> result = orderService.getOrdersByUser(userId);
+        Page<OrderResponseDto> result = orderService.getOrdersByUser(userId, Pageable.unpaged());
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
-        verify(orderRepository).findByUser(user);
+        assertEquals(0, result.getTotalElements());
+        verify(orderRepository).findByUser(user, Pageable.unpaged());
     }
-
 }

@@ -11,6 +11,10 @@ import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.exception.MailSendingException;
 import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.service.OrderService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -89,47 +93,52 @@ class OrderControllerTest {
         void getOrdersByUser_whenOk_shouldReturnOrderList() {
             OrderResponseDto dto1 = new OrderResponseDto();
             OrderResponseDto dto2 = new OrderResponseDto();
-            List<OrderResponseDto> serviceResponse = List.of(dto1, dto2);
+            List<OrderResponseDto> content = List.of(dto1, dto2);
+            Page<OrderResponseDto> serviceResponse = new PageImpl<>(content);
 
-            when(orderService.getOrdersByUser(USER_ID)).thenReturn(serviceResponse);
+            Pageable pageable = PageRequest.of(0, 10);
+            when(orderService.getOrdersByUser(USER_ID, pageable)).thenReturn(serviceResponse);
 
-            ResponseEntity<List<OrderResponseDto>> response = orderController.getOrdersByUser(USER_ID);
+            ResponseEntity<Page<OrderResponseDto>> response =
+                    orderController.getOrdersByUser(USER_ID, 0, 10);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
             assertSame(serviceResponse, response.getBody());
             assertNotNull(response.getBody());
-            assertEquals(2, response.getBody().size());
-            verify(orderService).getOrdersByUser(USER_ID);
+            assertEquals(2, response.getBody().getTotalElements());
+            verify(orderService).getOrdersByUser(USER_ID, pageable);
         }
 
         @Test
         @DisplayName("Should propagate NotFoundException when user does not exist")
         void getOrdersByUser_whenUserNotFound_shouldPropagateNotFound() {
-            when(orderService.getOrdersByUser(USER_ID))
+            Pageable pageable = PageRequest.of(0, 10);
+            when(orderService.getOrdersByUser(USER_ID, pageable))
                     .thenThrow(new NotFoundException("User not found"));
 
             NotFoundException ex = assertThrows(
                     NotFoundException.class,
-                    () -> orderController.getOrdersByUser(USER_ID)
+                    () -> orderController.getOrdersByUser(USER_ID, 0, 10)
             );
 
             assertEquals("User not found", ex.getMessage());
-            verify(orderService).getOrdersByUser(USER_ID);
+            verify(orderService).getOrdersByUser(USER_ID, pageable);
         }
 
         @Test
         @DisplayName("Should propagate AccessDeniedException when regular user tries to access foreign orders")
         void getOrdersByUser_whenAccessDenied_shouldPropagateAccessDenied() {
-            when(orderService.getOrdersByUser(USER_ID))
+            Pageable pageable = PageRequest.of(0, 10);
+            when(orderService.getOrdersByUser(USER_ID, pageable))
                     .thenThrow(new AccessDeniedException("Access denied"));
 
             AccessDeniedException ex = assertThrows(
                     AccessDeniedException.class,
-                    () -> orderController.getOrdersByUser(USER_ID)
+                    () -> orderController.getOrdersByUser(USER_ID, 0, 10)
             );
 
             assertEquals("Access denied", ex.getMessage());
-            verify(orderService).getOrdersByUser(USER_ID);
+            verify(orderService).getOrdersByUser(USER_ID, pageable);
         }
     }
 
@@ -259,5 +268,4 @@ class OrderControllerTest {
             verify(orderService).confirmPayment(ORDER_ID, PAY_METHOD);
         }
     }
-
 }

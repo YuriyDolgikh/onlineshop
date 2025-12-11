@@ -17,9 +17,13 @@ import org.onlineshop.repository.UserRepository;
 import org.onlineshop.service.converter.FavouriteConverter;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -86,7 +90,8 @@ class FavouriteServiceAddToFavouriteTest {
     void addFavourite() {
         when(userService.getCurrentUser()).thenReturn(user);
         when(productRepository.findById(10)).thenReturn(Optional.of(product));
-        when(favouriteRepository.findByUser(user)).thenReturn(List.of());
+        Page<Favourite> emptyPage = new PageImpl<>(Collections.emptyList());
+        when(favouriteRepository.findByUser(user, Pageable.unpaged())).thenReturn(emptyPage);
         when(favouriteRepository.save(any(Favourite.class))).thenReturn(favourite);
         when(favouriteConverter.toDto(favourite)).thenReturn(favouriteResponseDto);
 
@@ -96,11 +101,11 @@ class FavouriteServiceAddToFavouriteTest {
 
     @Test
     void addFavouriteWhenProductIsNull() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> favouriteService.addFavourite(null));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> favouriteService.addFavourite(null));
         assertEquals("Product Id cannot be null", exception.getMessage());
         verifyNoInteractions(userService, productRepository, favouriteRepository, favouriteConverter);
     }
-
 
     @Test
     void addFavouriteIfAlreadyInFavourite() {
@@ -108,7 +113,8 @@ class FavouriteServiceAddToFavouriteTest {
         when(productRepository.findById(10)).thenReturn(Optional.of(product));
         when(favouriteRepository.findByUserAndProduct(user, product)).thenReturn(Optional.of(favourite));
 
-        assertEquals("Product is already in favourites", assertThrows(BadRequestException.class, () -> favouriteService.addFavourite(10)).getMessage());
+        assertEquals("Product is already in favourites", assertThrows(BadRequestException.class,
+                () -> favouriteService.addFavourite(10)).getMessage());
     }
 
     @Test
@@ -116,8 +122,7 @@ class FavouriteServiceAddToFavouriteTest {
         when(userService.getCurrentUser()).thenReturn(user);
         when(productRepository.findById(10)).thenReturn(Optional.empty());
 
-        assertEquals("Product not found with ID: 10", assertThrows(NotFoundException.class, () -> favouriteService.addFavourite(10)).getMessage());
-
+        assertEquals("Product not found with ID: 10", assertThrows(NotFoundException.class,
+                () -> favouriteService.addFavourite(10)).getMessage());
     }
-
 }
