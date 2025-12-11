@@ -5,6 +5,7 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.onlineshop.entity.Order;
 import org.onlineshop.entity.User;
 import org.onlineshop.exception.MailSendingException;
@@ -18,6 +19,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MailUtil {
@@ -46,6 +48,7 @@ public class MailUtil {
             throw new MailSendingException(e.getMessage());
         }
         mailSender.send(message);
+        log.info("Confirmation email sent to {}", user.getEmail());
     }
 
     /**
@@ -106,6 +109,7 @@ public class MailUtil {
             helper.addAttachment("order_" + order.getOrderId() + ".pdf",
                     new ByteArrayResource(pdfBytes));
             mailSender.send(message);
+            log.info("Order payment email sent to {}", user.getEmail());
         } catch (Exception e) {
             throw new MailSendingException("Error sending order payment email: " + e.getMessage());
         }

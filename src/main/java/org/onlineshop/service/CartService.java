@@ -1,6 +1,7 @@
 package org.onlineshop.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.onlineshop.dto.cart.CartResponseDto;
 import org.onlineshop.dto.cartItem.CartItemResponseDto;
 import org.onlineshop.dto.cartItem.CartItemSimpleResponseDto;
@@ -18,6 +19,7 @@ import java.math.RoundingMode;
 import java.util.List;
 import java.util.Set;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CartService implements CartServiceInterface {
@@ -39,6 +41,7 @@ public class CartService implements CartServiceInterface {
         User user = userService.getCurrentUser();
         user.getCart().getCartItems().clear();
         userService.saveUser(user);
+        log.info("Cart cleared for user: {}", user.getUsername());
     }
 
     /**
@@ -119,6 +122,8 @@ public class CartService implements CartServiceInterface {
         if (cart.getCartItems() == null) {
             throw new IllegalArgumentException("Cart items can't be null");
         }
-        return cartRepository.save(cart);
+        Cart savedCart = cartRepository.save(cart);
+        log.info("Cart saved for user: {}", savedCart.getUser().getUsername());
+        return savedCart;
     }
 }

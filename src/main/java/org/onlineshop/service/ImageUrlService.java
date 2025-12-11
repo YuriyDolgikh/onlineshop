@@ -26,6 +26,7 @@ public class ImageUrlService implements ImageUrlServiceInterface {
     @Override
     public String validateAndNormalizeUrl(String imageUrl) {
         if (imageUrl == null || imageUrl.isBlank()) {
+            log.warn("Invalid image URL: {}", imageUrl);
             return null;
         }
         validateUrlConstraints(imageUrl);

@@ -1,12 +1,12 @@
 package org.onlineshop.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.onlineshop.dto.cartItem.*;
 import org.onlineshop.entity.Cart;
 import org.onlineshop.entity.CartItem;
 import org.onlineshop.entity.Product;
 import org.onlineshop.entity.User;
-import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.repository.CartItemRepository;
 import org.onlineshop.service.converter.CartItemConverter;
@@ -25,6 +25,7 @@ import java.util.Set;
  * related to cart item persistence and integration with upstream services
  * such as ProductService, UserService, and CartService.
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CartItemService implements CartItemServiceInterface {
@@ -42,7 +43,7 @@ public class CartItemService implements CartItemServiceInterface {
      * @param cartItemRequestDto the DTO containing information about the product to add to the cart, such as product ID and quantity.
      * @return a DTO representing the added or updated cart item, including product details and quantity.
      * @throws IllegalArgumentException if the product ID or quantity is null or invalid.
-     * @throws NotFoundException if a product with the specified id is not found in the database
+     * @throws NotFoundException        if a product with the specified id is not found in the database
      */
     @Transactional
     @Override
@@ -83,6 +84,7 @@ public class CartItemService implements CartItemServiceInterface {
         }
 
         cartService.saveCart(cart);
+        log.info("Cart item added to cart: {}", savedCartItem);
         return cartItemConverter.toSimpleDto(savedCartItem);
     }
 
@@ -109,6 +111,7 @@ public class CartItemService implements CartItemServiceInterface {
         cart.getCartItems().remove(cartItemToRemove);
         cartItemRepository.delete(cartItemToRemove);
         cartService.saveCart(cart);
+        log.info("Cart item removed from cart: {}", cartItemToRemove);
         return cartItemConverter.toDto(cartItemToRemove);
     }
 
@@ -141,6 +144,7 @@ public class CartItemService implements CartItemServiceInterface {
                 new NotFoundException("Product with ID: " + cartItemUpdateDto.getProductId() + " not found in users cart"));
         cartItemToUpdate.setQuantity(cartItemUpdateDto.getQuantity());
         CartItem savedCartItem = cartItemRepository.save(cartItemToUpdate);
+        log.info("Cart item updated: {}", savedCartItem);
         return cartItemConverter.toDto(savedCartItem);
     }
 
@@ -166,7 +170,7 @@ public class CartItemService implements CartItemServiceInterface {
      * @return an Optional containing the CartItem if found; otherwise, an empty Optional
      */
     @Transactional(readOnly = true)
-     public Optional<CartItem> getCartItemFromCart(Integer productId) {
+    public Optional<CartItem> getCartItemFromCart(Integer productId) {
         User user = userService.getCurrentUser();
         Cart userCart = user.getCart();
         Set<CartItem> cartItems = userCart.getCartItems();

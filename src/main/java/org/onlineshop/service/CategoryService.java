@@ -1,6 +1,7 @@
 package org.onlineshop.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.onlineshop.dto.category.CategoryRequestDto;
 import org.onlineshop.dto.category.CategoryResponseDto;
 import org.onlineshop.dto.category.CategoryUpdateDto;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CategoryService implements CategoryServiceInterface {
@@ -55,6 +57,7 @@ public class CategoryService implements CategoryServiceInterface {
                 .build();
 
         Category savedCategory = categoryRepository.save(category);
+        log.info("Category {} saved successfully", savedCategory.getCategoryName());
         return categoryConverter.toDto(savedCategory);
     }
 
@@ -91,6 +94,7 @@ public class CategoryService implements CategoryServiceInterface {
             categoryForUpdate.setImage(newImage);
         }
         Category savedCategory = categoryRepository.save(categoryForUpdate);
+        log.info("Category {} updated successfully", savedCategory.getCategoryName());
         return categoryConverter.toDto(savedCategory);
     }
 
@@ -120,6 +124,7 @@ public class CategoryService implements CategoryServiceInterface {
                 .forEach(product -> product.setCategory(categoryRepository.findByCategoryName("Other")
                         .orElseThrow(() -> new NotFoundException("Other category not found"))));
         categoryRepository.delete(categoryToDelete);
+        log.info("Category {} deleted successfully", categoryToDelete.getCategoryName());
         return categoryConverter.toDto(categoryToDelete);
     }
 

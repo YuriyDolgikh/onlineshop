@@ -1,6 +1,7 @@
 package org.onlineshop.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.onlineshop.dto.product.ProductRequestDto;
 import org.onlineshop.dto.product.ProductResponseDto;
 import org.onlineshop.dto.product.ProductResponseForUserDto;
@@ -24,6 +25,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class ProductService implements ProductServiceInterface {
@@ -61,6 +63,7 @@ public class ProductService implements ProductServiceInterface {
                 .build();
 
         Product savedProduct = productRepository.save(productToSave);
+        log.info("Product {} successfully added", savedProduct.getName());
         return productConverter.toDto(savedProduct);
     }
 
@@ -117,6 +120,7 @@ public class ProductService implements ProductServiceInterface {
         productToUpdate.setUpdatedAt(LocalDateTime.now());
 
         Product updatedProduct = productRepository.save(productToUpdate);
+        log.info("Product {} successfully updated", updatedProduct.getName());
         return productConverter.toDto(updatedProduct);
     }
 
@@ -148,6 +152,7 @@ public class ProductService implements ProductServiceInterface {
         product.setUpdatedAt(LocalDateTime.now());
 
         Product updatedProduct = productRepository.save(product);
+        log.info("Discount price for product {} successfully updated", updatedProduct.getName());
         return productConverter.toDto(updatedProduct);
     }
 
@@ -164,6 +169,7 @@ public class ProductService implements ProductServiceInterface {
         Product productToDelete = productRepository.findById(productId)
                 .orElseThrow(() -> new NotFoundException("Product with id = " + productId + " not found"));
         productRepository.delete(productToDelete);
+        log.info("Product {} successfully deleted", productToDelete.getName());
         return productConverter.toDto(productToDelete);
     }
 
