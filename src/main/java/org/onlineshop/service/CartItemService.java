@@ -7,6 +7,7 @@ import org.onlineshop.entity.Cart;
 import org.onlineshop.entity.CartItem;
 import org.onlineshop.entity.Product;
 import org.onlineshop.entity.User;
+import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.repository.CartItemRepository;
 import org.onlineshop.service.converter.CartItemConverter;
@@ -55,10 +56,10 @@ public class CartItemService implements CartItemServiceInterface {
             throw new IllegalArgumentException("Quantity cannot be null");
         }
         if (cartItemRequestDto.getQuantity() < 1) {
-            throw new IllegalArgumentException("Quantity must be at least 1");
+            throw new BadRequestException("Quantity must be at least 1");
         }
         if (productService.getProductById(cartItemRequestDto.getProductId()).isEmpty()) {
-            throw new NotFoundException("Product with ID: " + cartItemRequestDto.getProductId() + " not found");
+            throw new BadRequestException("Product with ID: " + cartItemRequestDto.getProductId() + " not found");
         }
         User user = userService.getCurrentUser();
         Cart cart = user.getCart();

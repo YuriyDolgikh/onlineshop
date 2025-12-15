@@ -102,13 +102,14 @@ class OrderServiceGetOrderBaseTest extends OrderServiceBaseTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(userService.getCurrentUser()).thenReturn(user);
         when(orderRepository.findByUser(user, Pageable.unpaged())).thenReturn(ordersPage);
-        when(orderConverter.toDtos(orders)).thenReturn(dtos);
+        when(orderConverter.toDto(order1)).thenReturn(dto1);
+        when(orderConverter.toDto(order2)).thenReturn(dto2);
 
         Page<OrderResponseDto> result = orderService.getOrdersByUser(userId, Pageable.unpaged());
 
         assertNotNull(result);
         assertEquals(2, result.getTotalElements());
-        assertEquals(dtosPage.getContent(), result.getContent());
+        assertEquals(List.of(dto1, dto2), result.getContent());
         verify(userService).getCurrentUser();
         verify(orderRepository).findByUser(user, Pageable.unpaged());
     }
