@@ -13,7 +13,6 @@ import org.onlineshop.repository.CartRepository;
 import org.onlineshop.repository.OrderRepository;
 import org.onlineshop.repository.UserRepository;
 import org.onlineshop.service.converter.CartItemConverter;
-import org.onlineshop.service.interfaces.UserServiceInterface;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -33,12 +32,13 @@ class OrderServiceTransferCartToOrderTest {
 
     @Mock
     private UserRepository userRepository;
-
     @Mock
-    private UserServiceInterface userService;
-
+    private CartService cartService;
     @Mock
     private CartItemConverter cartItemConverter;
+
+    @Mock
+    private UserService userService;
 
     @Mock
     private OrderRepository orderRepository;
@@ -104,10 +104,11 @@ class OrderServiceTransferCartToOrderTest {
 
     @Test
     void testTransferCartToOrderAllIsOk() {
+        when(cartService.getCurrentCart()).thenReturn(cartTest);
         when(userService.getCurrentUser()).thenReturn(userTest);
-        when(cartRepository.findByUser(userTest)).thenReturn(Optional.of(cartTest));
         when(cartItemConverter.cartItemToOrderItem(cartItemTest)).thenReturn(orderItemTest);
         when(orderRepository.findByUserAndStatus(userTest, Order.Status.PENDING_PAYMENT)).thenReturn(null);
+
 
         Order savedOrder = Order.builder()
                 .orderId(200)
@@ -124,7 +125,7 @@ class OrderServiceTransferCartToOrderTest {
         orderService.transferCartToOrder();
 
         verify(userService, atLeastOnce()).getCurrentUser();
-        verify(cartRepository, times(1)).findByUser(userTest);
+        verify(cartService, times(1)).getCurrentCart();
         verify(cartItemConverter, times(1)).cartItemToOrderItem(cartItemTest);
         verify(orderRepository, times(2)).save(any(Order.class));
         verify(userService, times(1)).saveUser(userTest);
@@ -156,10 +157,10 @@ class OrderServiceTransferCartToOrderTest {
                 .build();
 
         when(userService.getCurrentUser()).thenReturn(userTest);
-        when(cartRepository.findByUser(userTest)).thenReturn(Optional.of(cartTest));
+        when(cartService.getCurrentCart()).thenReturn(cartTest);
         when(cartItemConverter.cartItemToOrderItem(cartItemTest)).thenReturn(orderItemTest);
         when(cartItemConverter.cartItemToOrderItem(cartItemTest2)).thenReturn(orderItemTest2);
-        when(orderRepository.findByUserAndStatus(userTest, Order.Status.PENDING_PAYMENT)).thenReturn(null);
+        lenient().when(orderRepository.findByUserAndStatus(userTest, Order.Status.PENDING_PAYMENT)).thenReturn(null);
 
         Order savedOrder = Order.builder()
                 .orderId(200)
@@ -184,8 +185,8 @@ class OrderServiceTransferCartToOrderTest {
     void testTransferCartToOrderWithEmptyCart() {
         cartTest.getCartItems().clear();
 
-        when(userService.getCurrentUser()).thenReturn(userTest);
-        when(cartRepository.findByUser(userTest)).thenReturn(Optional.of(cartTest));
+        when(cartService.getCurrentCart()).thenReturn(cartTest);
+        lenient().when(userService.getCurrentUser()).thenReturn(userTest);
 
         assertThrows(BadRequestException.class, () -> orderService.transferCartToOrder());
 
@@ -198,7 +199,8 @@ class OrderServiceTransferCartToOrderTest {
         cartItemTest.getProduct().setDiscountPrice(null);
 
         when(userService.getCurrentUser()).thenReturn(userTest);
-        when(cartRepository.findByUser(userTest)).thenReturn(Optional.of(cartTest));
+        when(cartService.getCurrentCart()).thenReturn(cartTest);
+        lenient().when(cartRepository.findByUser(userTest)).thenReturn(Optional.of(cartTest));
 
         assertThrows(BadRequestException.class, () -> orderService.transferCartToOrder());
 
@@ -209,7 +211,8 @@ class OrderServiceTransferCartToOrderTest {
     @Test
     void testTransferCartToOrderWhenPendingOrderExists() {
         when(userService.getCurrentUser()).thenReturn(userTest);
-        when(cartRepository.findByUser(userTest)).thenReturn(Optional.of(cartTest));
+        when(cartService.getCurrentCart()).thenReturn(cartTest);
+        lenient().when(cartRepository.findByUser(userTest)).thenReturn(Optional.of(cartTest));
 
         Order existingOrder = Order.builder()
                 .orderId(300)
