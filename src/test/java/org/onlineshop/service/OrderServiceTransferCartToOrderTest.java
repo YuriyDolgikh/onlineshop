@@ -221,7 +221,7 @@ class OrderServiceTransferCartToOrderTest {
                 .build();
         when(orderRepository.findByUserAndStatus(userTest, Order.Status.PENDING_PAYMENT)).thenReturn(existingOrder);
 
-        assertThrows(NullPointerException.class, () -> orderService.transferCartToOrder());
+        assertThrows(BadRequestException.class, () -> orderService.transferCartToOrder());
 
         verify(orderRepository, never()).save(any(Order.class));
         verify(userService, never()).saveUser(any(User.class));

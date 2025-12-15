@@ -1,11 +1,13 @@
 package org.onlineshop.controller;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.onlineshop.dto.order.OrderResponseDto;
 import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.exception.MailSendingException;
@@ -18,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.List;
 
@@ -35,6 +38,13 @@ class OrderControllerTest {
     private OrderService orderService;
     @InjectMocks
     private OrderController orderController;
+
+    @AfterEach
+    void tearDown() {
+        Mockito.reset(orderService);
+
+        SecurityContextHolder.clearContext();
+    }
 
     @Nested
     @DisplayName("getOrderById() endpoint tests")

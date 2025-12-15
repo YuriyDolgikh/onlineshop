@@ -3,7 +3,9 @@ package org.onlineshop.controller;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.onlineshop.entity.User;
+import org.onlineshop.repository.OrderRepository;
 import org.onlineshop.repository.UserRepository;
 import org.onlineshop.service.CartService;
 import org.onlineshop.service.OrderService;
@@ -12,6 +14,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
@@ -37,9 +40,15 @@ class OrderControllerTransferToOrderTest {
     @Autowired
     private UserRepository userRepository;
 
+
+
     @AfterEach
     void tearDown() {
         userRepository.deleteAll();
+
+        Mockito.reset(orderService);
+
+        SecurityContextHolder.clearContext();
     }
 
     @BeforeEach

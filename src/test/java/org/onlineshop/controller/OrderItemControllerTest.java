@@ -1,11 +1,13 @@
 package org.onlineshop.controller;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.onlineshop.dto.orderItem.OrderItemResponseDto;
 import org.onlineshop.dto.orderItem.OrderItemUpdateDto;
 import org.onlineshop.exception.BadRequestException;
@@ -14,6 +16,7 @@ import org.onlineshop.service.OrderItemService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -29,6 +32,13 @@ class OrderItemControllerTest {
     private OrderItemController orderItemController;
 
     private static final Integer ORDER_ITEM_ID = 789;
+
+    @AfterEach
+    void tearDown() {
+        Mockito.reset(orderItemService);
+
+        SecurityContextHolder.clearContext();
+    }
 
     @Nested
     @DisplayName("deleteItemFromOrder() endpoint tests")
