@@ -7,6 +7,7 @@ import org.onlineshop.dto.product.ProductResponseDto;
 import org.onlineshop.dto.product.ProductUpdateDto;
 import org.onlineshop.entity.Category;
 import org.onlineshop.entity.Product;
+import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.repository.CategoryRepository;
 import org.onlineshop.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -284,7 +285,7 @@ class ProductServiceUpdateProductTest {
                 .productName("Product")
                 .build();
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(10000, productSecond));
+        Exception exception = assertThrows(NotFoundException.class, () -> productService.updateProduct(10000, productSecond));
         String messageException = "Product with id = 10000 not found";
         assertEquals(messageException, exception.getMessage());
     }

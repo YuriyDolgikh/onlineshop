@@ -111,12 +111,12 @@ class UserServiceRenewUserTest {
     @Test
     @WithMockUser(username = "testUser@email.com", roles = "USER")
     void testRenewUserIfUserNotFound() {
-        assertThrows(BadRequestException.class, () -> userService.renewUser("notFound.company.com"));
+        assertThrows(IllegalArgumentException.class, () -> userService.renewUser("notFound.company.com"));
     }
 
     @Test
     @WithMockUser(username = "testUser@email.com", roles = "USER")
     void testRenewUserIfUserNull() {
-        assertThrows(BadRequestException.class, () -> userService.renewUser(null));
+        assertThrows(IllegalArgumentException.class, () -> userService.renewUser(null));
     }
 }

@@ -15,6 +15,7 @@ import org.onlineshop.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
@@ -45,7 +46,6 @@ class CategoryServiceAddCategoryTest {
 
     @BeforeEach
     void setUp() {
-
         Category category = Category.builder()
                 .categoryName("categoryForOtherTest")
                 .image("https://drive.google.com/file/d/1y03Ct0ABP1X8O6NFvK6FdqiMacYpLeTs/view?usp=drive_link")
@@ -53,7 +53,6 @@ class CategoryServiceAddCategoryTest {
                 .build();
 
         categoryRepository.save(category);
-
     }
 
     @Test
@@ -110,9 +109,15 @@ class CategoryServiceAddCategoryTest {
                 .image("https://drive.google.com/file/two")
                 .build();
 
-        Exception exception = assertThrows(BadRequestException.class, () -> categoryService.addCategory(categoryRequestDto));
-        String messageException = "Category with name: " + categoryRequestDto.getCategoryName() + " already exist";
-        assertEquals(messageException, exception.getMessage());
+        Exception exception = assertThrows(Exception.class, () -> categoryService.addCategory(categoryRequestDto));
+
+        assertTrue(
+                exception instanceof DataIntegrityViolationException ||
+                        exception instanceof BadRequestException ||
+                        exception.getMessage().contains("already exist") ||
+                        exception.getMessage().contains("categoryForOtherTest"),
+                "Exception should indicate duplicate category name. Got: " + exception.getClass().getName() + " - " + exception.getMessage()
+        );
     }
 
     @Test

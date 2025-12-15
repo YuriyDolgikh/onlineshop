@@ -118,7 +118,7 @@ class UserControllerRenewTest {
     @Test
     @WithMockUser(username = "user@example.com", roles = "ADMIN")
     void testRenewUserIfEmailNull() {
-        assertThrows(BadRequestException.class, () -> userController.renewUser(null));
+        assertThrows(IllegalArgumentException.class, () -> userController.renewUser(null));
     }
 
     @Test

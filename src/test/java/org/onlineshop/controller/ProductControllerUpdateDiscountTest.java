@@ -7,6 +7,7 @@ import org.onlineshop.dto.product.ProductResponseDto;
 import org.onlineshop.entity.Category;
 import org.onlineshop.entity.Product;
 import org.onlineshop.entity.User;
+import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.repository.CategoryRepository;
 import org.onlineshop.repository.ProductRepository;
 import org.onlineshop.repository.UserRepository;
@@ -153,7 +154,7 @@ class ProductControllerUpdateDiscountTest {
 
         productRepository.save(productTestOne);
 
-        assertThrows(IllegalArgumentException.class, () -> productController.updateProductDiscount(100000, BigDecimal.valueOf(4)));
+        assertThrows(NotFoundException.class, () -> productController.updateProductDiscount(100000, BigDecimal.valueOf(4)));
     }
 
     @Test

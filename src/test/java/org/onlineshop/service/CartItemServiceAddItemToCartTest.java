@@ -9,7 +9,7 @@ import org.onlineshop.entity.Cart;
 import org.onlineshop.entity.CartItem;
 import org.onlineshop.entity.Product;
 import org.onlineshop.entity.User;
-import org.onlineshop.exception.BadRequestException;
+import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.repository.CartItemRepository;
 import org.onlineshop.repository.CartRepository;
 import org.onlineshop.repository.ProductRepository;
@@ -27,10 +27,10 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.util.AssertionErrors.assertEquals;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -131,8 +131,8 @@ class CartItemServiceAddItemToCartTest {
         CartItemRequestDto request = new CartItemRequestDto(5, 3);
         CartItemSimpleResponseDto response = cartItemService.addItemToCart(request);
 
-        assertEquals("Quantity should be 5", 5, response.getQuantity());
-        org.junit.jupiter.api.Assertions.assertEquals("Test Product", response.getProductName(), "Product name should match");
+        assertEquals(5, response.getQuantity(), "Quantity should be 5");
+        assertEquals("Test Product", response.getProductName(), "Product name should match");
 
         verify(userService, times(2)).getCurrentUser();
         verify(productService, times(1)).getProductById(5);
@@ -147,7 +147,7 @@ class CartItemServiceAddItemToCartTest {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> cartItemService.addItemToCart(request));
 
-        assertEquals("Product Id cannot be null", exception.getMessage(), "Product Id cannot be null");
+        assertEquals("Product Id cannot be null", exception.getMessage());
     }
 
     @Test
@@ -157,18 +157,17 @@ class CartItemServiceAddItemToCartTest {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> cartItemService.addItemToCart(request));
 
-        assertEquals("Quantity cannot be null", exception.getMessage(), "Quantity cannot be null");
+        assertEquals("Quantity cannot be null", exception.getMessage());
     }
 
     @Test
     void addItemToCartThrowsIfQuantityLessThanOne() {
         CartItemRequestDto request = new CartItemRequestDto(1, 0);
 
-        BadRequestException exception = assertThrows(BadRequestException.class,
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> cartItemService.addItemToCart(request));
 
-//        assertEquals("Quantity must be at least 1", exception.getMessage());
-        assertEquals("Quantity must be at least 1", exception.getMessage(), "Quantity must be at least 1");
+        assertEquals("Quantity must be at least 1", exception.getMessage());
     }
 
     @Test
@@ -177,9 +176,9 @@ class CartItemServiceAddItemToCartTest {
 
         when(productService.getProductById(999)).thenReturn(Optional.empty());
 
-        BadRequestException exception = assertThrows(BadRequestException.class,
+        NotFoundException exception = assertThrows(NotFoundException.class,
                 () -> cartItemService.addItemToCart(request));
 
-        assertEquals("Product with ID: 999 not found", exception.getMessage(), "Product with ID: 999 not found");
+        assertEquals("Product with ID: 999 not found", exception.getMessage());
     }
 }

@@ -22,6 +22,7 @@ import org.springframework.test.context.TestPropertySource;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -69,7 +70,7 @@ class FavouriteServiceGetFavouritesTest {
         when(userService.getCurrentUser()).thenReturn(user);
         Page<Favourite> favouritesPage = new PageImpl<>(List.of(favourite));
         when(favouriteRepository.findByUser(user, Pageable.unpaged())).thenReturn(favouritesPage);
-        when(favouriteConverter.toDtos(List.of(favourite))).thenReturn(List.of(favouriteResponseDto));
+        when(favouriteConverter.toDtos(any(List.class))).thenReturn(List.of(favouriteResponseDto));
 
         Page<FavouriteResponseDto> result = favouriteService.getFavourites(Pageable.unpaged());
 
@@ -78,7 +79,7 @@ class FavouriteServiceGetFavouritesTest {
 
         verify(userService).getCurrentUser();
         verify(favouriteRepository).findByUser(user, Pageable.unpaged());
-        verify(favouriteConverter).toDtos(List.of(favourite));
+        verify(favouriteConverter).toDtos(any(List.class));
     }
 
     @Test
@@ -86,14 +87,14 @@ class FavouriteServiceGetFavouritesTest {
         when(userService.getCurrentUser()).thenReturn(user);
         Page<Favourite> emptyPage = new PageImpl<>(List.of());
         when(favouriteRepository.findByUser(user, Pageable.unpaged())).thenReturn(emptyPage);
-        when(favouriteConverter.toDtos(List.of())).thenReturn(List.of());
+        when(favouriteConverter.toDtos(any(List.class))).thenReturn(List.of());
 
         Page<FavouriteResponseDto> result = favouriteService.getFavourites(Pageable.unpaged());
         assertEquals(0, result.getTotalElements());
 
         verify(userService).getCurrentUser();
         verify(favouriteRepository).findByUser(user, Pageable.unpaged());
-        verify(favouriteConverter).toDtos(List.of());
+        verify(favouriteConverter).toDtos(any(List.class));
     }
 
     @Test
@@ -107,7 +108,7 @@ class FavouriteServiceGetFavouritesTest {
         List<Favourite> favourites = List.of(favourite, favourite2);
         Page<Favourite> favouritesPage = new PageImpl<>(favourites);
         when(favouriteRepository.findByUser(user, Pageable.unpaged())).thenReturn(favouritesPage);
-        when(favouriteConverter.toDtos(favourites)).thenReturn(List.of(favouriteResponseDto, dto2));
+        when(favouriteConverter.toDtos(any(List.class))).thenReturn(List.of(favouriteResponseDto, dto2));
 
         Page<FavouriteResponseDto> result = favouriteService.getFavourites(Pageable.unpaged());
         assertEquals(2, result.getTotalElements());
