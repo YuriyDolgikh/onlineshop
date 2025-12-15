@@ -47,6 +47,9 @@ public class FavouriteService implements FavouriteServiceInterface {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new NotFoundException("Product not found with ID: " + productId));
 
+        if (favouriteRepository.findByUserAndProduct(user, product).isPresent()) {
+            throw new BadRequestException("Product is already in favourites");
+        }
         Favourite favourite = Favourite.builder()
                 .user(user)
                 .product(product)
