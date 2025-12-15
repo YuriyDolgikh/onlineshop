@@ -1,12 +1,18 @@
 package org.onlineshop.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.onlineshop.dto.cartItem.CartItemResponseDto;
 import org.onlineshop.dto.cartItem.CartItemUpdateDto;
 import org.onlineshop.entity.Product;
 import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.exception.NotFoundException;
+import org.onlineshop.repository.CartItemRepository;
+import org.onlineshop.repository.CartRepository;
+import org.onlineshop.repository.ProductRepository;
+import org.onlineshop.repository.UserRepository;
 import org.onlineshop.service.CartItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -14,6 +20,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
@@ -43,6 +50,31 @@ class CartItemControllerUpdateCartItemTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private CartItemRepository cartItemRepository;
+
+    @Autowired
+    private CartRepository cartRepository;
+
+    @Autowired
+    private ProductRepository  productRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+
+    @AfterEach
+    void tearDown() {
+        cartItemRepository.deleteAll();
+        cartRepository.deleteAll();
+        productRepository.deleteAll();
+        userRepository.deleteAll();
+
+        Mockito.reset(cartItemService);
+
+        SecurityContextHolder.clearContext();
+    }
 
     @Test
     @WithMockUser(username = "testUser@email.com",

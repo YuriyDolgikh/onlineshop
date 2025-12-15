@@ -1,16 +1,24 @@
 package org.onlineshop.controller;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.onlineshop.dto.cartItem.CartItemResponseDto;
 import org.onlineshop.entity.Product;
 import org.onlineshop.exception.NotFoundException;
+import org.onlineshop.repository.CartItemRepository;
+import org.onlineshop.repository.CartRepository;
+import org.onlineshop.repository.ProductRepository;
+import org.onlineshop.repository.UserRepository;
 import org.onlineshop.service.CartItemService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.math.BigDecimal;
 
@@ -25,6 +33,16 @@ class CartItemControllerDeleteCartItemTest {
 
     @InjectMocks
     private CartItemController cartItemController;
+
+
+
+
+    @AfterEach
+    void tearDown() {
+        Mockito.reset(cartItemService);
+
+        SecurityContextHolder.clearContext();
+    }
 
     @Test
     void deleteCartItemIfExists() {
