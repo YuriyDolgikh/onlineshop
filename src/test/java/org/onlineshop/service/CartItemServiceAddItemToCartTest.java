@@ -165,7 +165,7 @@ class CartItemServiceAddItemToCartTest {
     void addItemToCartThrowsIfQuantityLessThanOne() {
         CartItemRequestDto request = new CartItemRequestDto(1, 0);
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> cartItemService.addItemToCart(request));
 
 //        assertEquals("Quantity must be at least 1", exception.getMessage());
@@ -174,13 +174,13 @@ class CartItemServiceAddItemToCartTest {
 
     @Test
     void addItemToCartThrowsIfProductNotFound() {
-        CartItemRequestDto request = new CartItemRequestDto(999, 2);
+        CartItemRequestDto request = new CartItemRequestDto(9999, 2);
 
-        when(productService.getProductById(999)).thenReturn(Optional.empty());
+        when(productService.getProductById(9999)).thenReturn(Optional.empty());
 
-        NotFoundException exception = assertThrows(NotFoundException.class,
+        BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> cartItemService.addItemToCart(request));
 
-        assertEquals("Product with ID: 999 not found", exception.getMessage(), "Product with ID: 999 not found");
+        assertEquals("Product with ID: 9999 not found", exception.getMessage(), "Product with ID: 9999 not found");
     }
 }
