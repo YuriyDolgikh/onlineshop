@@ -196,7 +196,7 @@ class OrderServiceAccessAndPaymentBaseTest extends OrderServiceBaseTest {
             assertSame(dto, result);
             assertEquals(Order.Status.PAID, order.getStatus());
 
-            verify(orderRepository, times(1)).save(order);
+            verify(orderRepository, times(2)).save(order);
             verify(cartService).clearCart();
         }
     }

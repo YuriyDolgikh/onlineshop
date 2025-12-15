@@ -10,6 +10,7 @@ import org.onlineshop.entity.CartItem;
 import org.onlineshop.entity.Product;
 import org.onlineshop.entity.User;
 import org.onlineshop.exception.BadRequestException;
+import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.repository.CartItemRepository;
 import org.onlineshop.repository.CartRepository;
 import org.onlineshop.repository.ProductRepository;
@@ -164,7 +165,7 @@ class CartItemServiceAddItemToCartTest {
     void addItemToCartThrowsIfQuantityLessThanOne() {
         CartItemRequestDto request = new CartItemRequestDto(1, 0);
 
-        BadRequestException exception = assertThrows(BadRequestException.class,
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> cartItemService.addItemToCart(request));
 
 //        assertEquals("Quantity must be at least 1", exception.getMessage());
@@ -177,7 +178,7 @@ class CartItemServiceAddItemToCartTest {
 
         when(productService.getProductById(999)).thenReturn(Optional.empty());
 
-        BadRequestException exception = assertThrows(BadRequestException.class,
+        NotFoundException exception = assertThrows(NotFoundException.class,
                 () -> cartItemService.addItemToCart(request));
 
         assertEquals("Product with ID: 999 not found", exception.getMessage(), "Product with ID: 999 not found");

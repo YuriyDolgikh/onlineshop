@@ -62,7 +62,7 @@ class OrderControllerTransferToOrderTest {
     void testTransferToOrderIfOkAndRoleAdminUserManager() throws Exception {
         doNothing().when(orderService).transferCartToOrder();
 
-        mockMvc.perform(get("/v1/carts/toOrder"))
+        mockMvc.perform(get("/v1/orders/toOrder"))
                 .andExpect(status().isOk());
 
         verify(orderService, times(1)).transferCartToOrder();

@@ -10,6 +10,7 @@ import org.onlineshop.dto.product.ProductResponseDto;
 import org.onlineshop.entity.Category;
 import org.onlineshop.entity.Product;
 import org.onlineshop.exception.BadRequestException;
+import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.exception.UrlValidationError;
 import org.onlineshop.exception.UrlValidationException;
 import org.onlineshop.repository.CategoryRepository;
@@ -108,7 +109,7 @@ class ProductServiceAddProductTest {
                 .productDiscountPrice(BigDecimal.valueOf(5))
                 .build();
 
-        Exception exception = assertThrows(BadRequestException.class, () -> productService.addProduct(requestDto));
+        Exception exception = assertThrows(NotFoundException.class, () -> productService.addProduct(requestDto));
         assertEquals("Category with name: " + requestDto.getProductCategory() + " not found", exception.getMessage());
 
     }

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.onlineshop.entity.Category;
 import org.onlineshop.exception.BadRequestException;
+import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -57,7 +58,7 @@ class CategoryServiceGetCategoryByIdTest {
 
     @Test
     void testGetCategoryByIdIfIdNotFound() {
-        Exception exception = assertThrows(BadRequestException.class, () -> categoryService.getCategoryById(100000));
+        Exception exception = assertThrows(NotFoundException.class, () -> categoryService.getCategoryById(100000));
         String messageException = "Category with id: " + 100000 + " not found";
         assertEquals(messageException, exception.getMessage());
     }

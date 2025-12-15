@@ -70,7 +70,6 @@ class ConfirmationCodeServiceFindCodesByUserTest {
     @Test
     void testFindCodesByUserWhenNoCodesFound() {
         User user = User.builder()
-                .userId(10)
                 .email("test@example.com")
                 .username("testUser")
                 .hashPassword("password")

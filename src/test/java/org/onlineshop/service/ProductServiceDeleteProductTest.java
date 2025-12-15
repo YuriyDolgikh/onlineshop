@@ -8,6 +8,7 @@ import org.onlineshop.dto.product.ProductRequestDto;
 import org.onlineshop.dto.product.ProductResponseDto;
 import org.onlineshop.entity.Category;
 import org.onlineshop.entity.Product;
+import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.repository.CategoryRepository;
 import org.onlineshop.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,7 +78,7 @@ class ProductServiceDeleteProductTest {
 
     @Test
     void testDeleteProductIfProductNotFound() {
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> productService.deleteProduct(100000));
+        Exception exception = assertThrows(NotFoundException.class, () -> productService.deleteProduct(100000));
         String messageException = "Product with id = 100000 not found";
         assertEquals(messageException, exception.getMessage());
 

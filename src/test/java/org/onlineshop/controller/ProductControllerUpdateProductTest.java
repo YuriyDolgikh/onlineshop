@@ -8,6 +8,7 @@ import org.onlineshop.dto.product.ProductUpdateDto;
 import org.onlineshop.entity.Category;
 import org.onlineshop.entity.Product;
 import org.onlineshop.entity.User;
+import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.exception.UrlValidationException;
 import org.onlineshop.repository.CategoryRepository;
 import org.onlineshop.repository.ProductRepository;
@@ -594,7 +595,7 @@ class ProductControllerUpdateProductTest {
                 .image("https://drive.google.com/file/first")
                 .build();
 
-        assertThrows(IllegalArgumentException.class, () -> productController.updateProduct(10000, requestDto));
+        assertThrows(NotFoundException.class, () -> productController.updateProduct(10000, requestDto));
         assertEquals(1, productRepository.findAll().size());
     }
 

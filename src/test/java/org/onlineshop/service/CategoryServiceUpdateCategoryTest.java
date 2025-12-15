@@ -7,10 +7,12 @@ import org.onlineshop.dto.category.CategoryResponseDto;
 import org.onlineshop.dto.category.CategoryUpdateDto;
 import org.onlineshop.entity.Category;
 import org.onlineshop.exception.BadRequestException;
+import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
@@ -103,9 +105,7 @@ class CategoryServiceUpdateCategoryTest {
                 .categoryName("testCategorySecond")
                 .build();
 
-        Exception exception = assertThrows(BadRequestException.class, () -> categoryService.updateCategory(categoryOne.getCategoryId(), categoryUpdateDto));
-        String messageException = "Category with name: " + categoryUpdateDto.getCategoryName() + " already exist";
-        assertEquals(messageException, exception.getMessage());
+        assertThrows(DataIntegrityViolationException.class, () -> categoryService.updateCategory(categoryOne.getCategoryId(), categoryUpdateDto));
     }
 
     @Test
@@ -114,7 +114,7 @@ class CategoryServiceUpdateCategoryTest {
                 .categoryName("testCategorySecond")
                 .build();
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> categoryService.updateCategory(100000, categoryUpdateDto));
+        Exception exception = assertThrows(NotFoundException.class, () -> categoryService.updateCategory(100000, categoryUpdateDto));
         String messageException = "Category with id = " + 100000 + " not found";
         assertEquals(messageException, exception.getMessage());
     }

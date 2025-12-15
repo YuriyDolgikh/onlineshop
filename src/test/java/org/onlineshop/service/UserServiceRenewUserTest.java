@@ -7,6 +7,7 @@ import org.onlineshop.dto.user.UserResponseDto;
 import org.onlineshop.entity.ConfirmationCode;
 import org.onlineshop.entity.User;
 import org.onlineshop.exception.BadRequestException;
+import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.repository.ConfirmationCodeRepository;
 import org.onlineshop.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,12 +112,12 @@ class UserServiceRenewUserTest {
     @Test
     @WithMockUser(username = "testUser@email.com", roles = "USER")
     void testRenewUserIfUserNotFound() {
-        assertThrows(BadRequestException.class, () -> userService.renewUser("notFound.company.com"));
+        assertThrows(NotFoundException.class, () -> userService.renewUser("notFound@company.com"));
     }
 
     @Test
     @WithMockUser(username = "testUser@email.com", roles = "USER")
     void testRenewUserIfUserNull() {
-        assertThrows(BadRequestException.class, () -> userService.renewUser(null));
+        assertThrows(IllegalArgumentException.class, () -> userService.renewUser(null));
     }
 }

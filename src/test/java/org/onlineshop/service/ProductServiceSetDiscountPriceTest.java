@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.onlineshop.dto.product.ProductResponseDto;
 import org.onlineshop.entity.Category;
 import org.onlineshop.entity.Product;
+import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.repository.CategoryRepository;
 import org.onlineshop.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,7 +73,7 @@ class ProductServiceSetDiscountPriceTest {
 
     @Test
     void testSetDiscountPriceIfProductNotFound() {
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> productService.setDiscountPrice(100000, BigDecimal.valueOf(100)));
+        Exception exception = assertThrows(NotFoundException.class, () -> productService.setDiscountPrice(100000, BigDecimal.valueOf(100)));
         String messageException = "Product with id = 100000 not found";
         assertEquals(messageException, exception.getMessage());
     }

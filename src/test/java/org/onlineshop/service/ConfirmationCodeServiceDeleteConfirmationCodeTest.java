@@ -72,7 +72,6 @@ class ConfirmationCodeServiceDeleteConfirmationCodeTest {
     @Test
     void testDeleteCodesByUserWhenNoCodesFound() {
         User user = User.builder()
-                .userId(10)
                 .email("test@example.com")
                 .username("testUser")
                 .hashPassword("password")

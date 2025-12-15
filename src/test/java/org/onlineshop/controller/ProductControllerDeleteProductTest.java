@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.onlineshop.entity.Category;
 import org.onlineshop.entity.Product;
 import org.onlineshop.entity.User;
+import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.repository.CategoryRepository;
 import org.onlineshop.repository.ProductRepository;
 import org.onlineshop.repository.UserRepository;
@@ -100,7 +101,7 @@ class ProductControllerDeleteProductTest {
     @WithMockUser(username = "testUser@email.com",
             roles = {"ADMIN", "MANAGER"})
     void deleteProductIfRoleAdminAndManagerAndIfIdNotFound() {
-        assertThrows(IllegalArgumentException.class, () -> productController.deleteProduct(100000));
+        assertThrows(NotFoundException.class, () -> productController.deleteProduct(100000));
     }
 
     @Test

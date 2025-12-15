@@ -156,8 +156,8 @@ class CartItemServiceUpdateItemInCartTest {
     void updateItemInCartThrowsIfQuantityLessThanOne() {
         CartItemUpdateDto updateDto = new CartItemUpdateDto(1, 0);
 
-        BadRequestException exception = assertThrows(
-                BadRequestException.class,
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
                 () -> cartItemService.updateItemInCart(updateDto)
         );
 

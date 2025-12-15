@@ -98,7 +98,14 @@ public class ProductService implements ProductServiceInterface {
                 throw new IllegalArgumentException("Product title must be between 3 and 20 characters");
             }
             productToUpdate.setName(targetName);
-            productToUpdate.setCategory(targetCategory);
+        }
+
+        if (productUpdateDto.getProductCategory() != null && !productUpdateDto.getProductCategory().isBlank()) {
+            Category categoryForUpdate = categoryService.getCategoryByName(productUpdateDto.getProductCategory().trim());
+            if (categoryForUpdate == null) {
+                throw new NotFoundException("Category with name " + productUpdateDto.getProductCategory() + " not found");
+            }
+            productToUpdate.setCategory(categoryForUpdate);
         }
 
         if (productUpdateDto.getProductDescription() != null && !productUpdateDto.getProductDescription().isBlank()) {
