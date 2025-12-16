@@ -21,10 +21,6 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class OrderServiceGetOrderBaseTest extends OrderServiceBaseTest {
 
-    // =========================
-    // getOrderById
-    // =========================
-
     @Test
     void getOrderById_whenAccessDenied_shouldThrowAccessDeniedException() {
         Integer orderId = 10;
@@ -68,10 +64,6 @@ class OrderServiceGetOrderBaseTest extends OrderServiceBaseTest {
 
         assertSame(dto, result);
     }
-
-    // =========================
-    // getOrdersByUser
-    // =========================
 
     @Test
     void getOrdersByUser_whenUserIdNull_shouldThrowIllegalArgumentException() {
