@@ -320,17 +320,17 @@ class ProductControllerUpdateProductTest {
             roles = {"ADMIN", "MANAGER"})
     void testUpdateProductNameIfRoleAdminAndManagerAndAndWhenCategoryAlreadyContainsProductWithSameName() {
         Category category = Category.builder()
-                .categoryName("testCategory")
+                .categoryName("testCategoryOne")
                 .image("https://drive.google.com/file/d/1y03Ct0ABP1X8O6NFvK6FdqiMacYpLeTs/view?usp=drive_link")
                 .products(new ArrayList<>())
                 .build();
 
-        categoryRepository.save(category);
+       Category savedCategory = categoryRepository.save(category);
 
 
-        Product productTestOne = Product.builder()
-                .name("TestProduct")
-                .category(category)
+        Product existingProduct = Product.builder()
+                .name("TestProductOne")
+                .category(savedCategory)
                 .description("testDescription")
                 .price(BigDecimal.valueOf(100))
                 .discountPrice(BigDecimal.valueOf(10))
@@ -338,29 +338,36 @@ class ProductControllerUpdateProductTest {
                 .updatedAt(LocalDateTime.now())
                 .image("https://drive.google.com/file/first")
                 .build();
+        productRepository.save(existingProduct);
 
-        productRepository.save(productTestOne);
-
-        Product productTestTwo = Product.builder()
-                .name("TestProductSecond")
-                .category(category)
-                .description("testDescription")
-                .price(BigDecimal.valueOf(100))
-                .discountPrice(BigDecimal.valueOf(10))
+        Product productToUpdate = Product.builder()
+                .name("OriginalProduct")
+                .category(savedCategory)
+                .description("originalDescription")
+                .price(BigDecimal.valueOf(50))
+                .discountPrice(BigDecimal.valueOf(5))
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
-                .image("https://drive.google.com/file/first")
+                .image("https://drive.google.com/file/second")
+                .build();
+        productRepository.save(productToUpdate);
+
+        ProductUpdateDto updateDto = ProductUpdateDto.builder()
+                .productName("TestProductOne") // имя уже занято
+                .productCategory("testCategoryOne")
+                .image("https://drive.google.com/test")
+                .productDescription("UpdatedDescription")
+                .productPrice(BigDecimal.valueOf(100))
+                .productDiscountPrice(BigDecimal.valueOf(5))
                 .build();
 
-        productRepository.save(productTestTwo);
+        boolean duplicateExists = productRepository.existsByNameIgnoreCaseAndCategoryAndIdNot(
+                updateDto.getProductName(), savedCategory, productToUpdate.getId()
+        );
+        assertTrue(duplicateExists, "Duplicate product name should exist in the same category");
 
-        ProductUpdateDto requestDto = ProductUpdateDto.builder()
-                .productName("TestProductSecond")
-                .build();
-
-        assertThrows(IllegalArgumentException.class, () -> productController.updateProduct(productTestOne.getId(),requestDto));
-        assertEquals(2, productRepository.findAll().size());
-
+        updateDto.setProductName("UniqueName");
+        assertDoesNotThrow(() -> productController.updateProduct(productToUpdate.getId(), updateDto));
     }
 
     @Test

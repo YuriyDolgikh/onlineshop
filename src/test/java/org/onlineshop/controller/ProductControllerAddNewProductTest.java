@@ -8,6 +8,7 @@ import org.onlineshop.dto.product.ProductResponseDto;
 import org.onlineshop.entity.Category;
 import org.onlineshop.entity.Product;
 import org.onlineshop.entity.User;
+import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.exception.UrlValidationException;
 import org.onlineshop.repository.CategoryRepository;
 import org.onlineshop.repository.ProductRepository;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
@@ -26,6 +28,7 @@ import org.springframework.test.context.TestPropertySource;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -270,8 +273,12 @@ class ProductControllerAddNewProductTest {
                 .productPrice(BigDecimal.valueOf(100))
                 .productDiscountPrice(BigDecimal.valueOf(5))
                 .build();
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> productController.addNewProduct(requestDto));
 
-        assertThrows(IllegalArgumentException.class, () -> productController.addNewProduct(requestDto));
+        String message = exception.getMessage();
+        assertTrue(message.contains("TestProductSecond"));
+        assertTrue(message.contains("testCategorySecond"));
         assertEquals(1, productRepository.findAll().size());
     }
 

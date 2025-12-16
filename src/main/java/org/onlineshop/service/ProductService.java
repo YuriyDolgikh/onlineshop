@@ -46,13 +46,21 @@ public class ProductService implements ProductServiceInterface {
     @Transactional
     @Override
     public ProductResponseDto addProduct(ProductRequestDto productRequestDto) {
+        if (productRequestDto == null) {
+            throw new IllegalArgumentException("ProductRequestDto cannot be null");
+        }
         validateProductRequestDto(productRequestDto);
         Category category = categoryService.getCategoryByName(productRequestDto.getProductCategory());
+        String normalizedName = productRequestDto.getProductName().trim();
+
+        if (productRepository.existsByNameIgnoreCaseAndCategory(normalizedName, category)) {
+            throw new IllegalArgumentException("Product name '" + normalizedName + "' already exists in category '" + category + "'");
+        }
         LocalDateTime now = LocalDateTime.now();
         final String finalImage = helper.resolveImageUrl(productRequestDto.getImage());
 
         Product productToSave = Product.builder()
-                .name(productRequestDto.getProductName().trim())
+                .name(normalizedName)
                 .description(productRequestDto.getProductDescription())
                 .price(productRequestDto.getProductPrice())
                 .discountPrice(productRequestDto.getProductDiscountPrice())
@@ -84,14 +92,13 @@ public class ProductService implements ProductServiceInterface {
         Product productToUpdate = productRepository.findById(productId)
                 .orElseThrow(() -> new NotFoundException("Product with id = " + productId + " not found"));
 
-        Category targetCategory = (productUpdateDto.getProductCategory() != null && !productUpdateDto.getProductCategory().isBlank())
-                ? categoryService.getCategoryByName(productUpdateDto.getProductCategory().trim())
-                : productToUpdate.getCategory();
-
         String targetName = (productUpdateDto.getProductName() != null && !productUpdateDto.getProductName().isBlank())
                 ? productUpdateDto.getProductName().trim()
                 : productToUpdate.getName();
 
+        Category targetCategory = (productUpdateDto.getProductCategory() != null && !productUpdateDto.getProductCategory().isBlank())
+                ? categoryService.getCategoryByName(productUpdateDto.getProductCategory().trim())
+                : productToUpdate.getCategory();
 
         if (productUpdateDto.getProductName() != null && !productUpdateDto.getProductName().isBlank()) {
             if (targetName.length() < 3 || targetName.length() > 20) {
@@ -100,26 +107,42 @@ public class ProductService implements ProductServiceInterface {
             productToUpdate.setName(targetName);
         }
 
-        if (productUpdateDto.getProductCategory() != null && !productUpdateDto.getProductCategory().isBlank()) {
-            Category categoryForUpdate = categoryService.getCategoryByName(productUpdateDto.getProductCategory().trim());
-            if (categoryForUpdate == null) {
-                throw new NotFoundException("Category with name " + productUpdateDto.getProductCategory() + " not found");
+        boolean nameChanged = !targetName.equals(productToUpdate.getName());
+        boolean categoryChanged = !targetCategory.equals(productToUpdate.getCategory());
+
+        if (nameChanged || categoryChanged) {
+            if (productRepository.existsByNameIgnoreCaseAndCategoryAndIdNot(targetName, targetCategory, productToUpdate.getId())) {
+                throw new IllegalArgumentException(
+                        "Product with name '" + targetName +
+                                "' already exists in category '" +
+                                targetCategory.getCategoryName() + "'"
+                );
             }
-            productToUpdate.setCategory(categoryForUpdate);
+        }
+
+        if (nameChanged) {
+            productToUpdate.setName(targetName);
+        }
+
+        if (categoryChanged) {
+            productToUpdate.setCategory(targetCategory);
         }
 
         if (productUpdateDto.getProductDescription() != null && !productUpdateDto.getProductDescription().isBlank()) {
             productToUpdate.setDescription(productUpdateDto.getProductDescription());
         }
+
         if (productUpdateDto.getProductPrice() != null) {
             if (productUpdateDto.getProductPrice().compareTo(BigDecimal.ZERO) <= 0) {
                 throw new IllegalArgumentException("Product price must be greater than 0");
             }
             productToUpdate.setPrice(productUpdateDto.getProductPrice());
         }
+
         if (productUpdateDto.getProductDiscountPrice() != null) {
             productToUpdate.setDiscountPrice(productUpdateDto.getProductDiscountPrice());
         }
+
         if (productUpdateDto.getImage() != null && !productUpdateDto.getImage().isBlank()) {
             String newImage = helper.resolveImageUrl(productUpdateDto.getImage());
             productToUpdate.setImage(newImage);
