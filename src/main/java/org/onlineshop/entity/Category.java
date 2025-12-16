@@ -2,10 +2,7 @@ package org.onlineshop.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.validator.constraints.URL;
 
 import java.util.ArrayList;
@@ -17,6 +14,7 @@ import java.util.List;
 @Builder
 @Table
 @Entity
+@ToString(exclude = "products")
 public class Category {
 
     @Id

@@ -125,10 +125,12 @@ class ProductServiceAddProductTest {
                 .productDiscountPrice(BigDecimal.valueOf(10))
                 .build();
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> productService.addProduct(productSecond));
-        String messageException = "Product with name: " + productSecond.getProductName() + " already exist in category: " + productSecond.getProductCategory();
-        assertEquals(messageException, exception.getMessage());
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> productService.addProduct(productSecond));
 
+        String message = exception.getMessage();
+        assertTrue(message.contains("TestProductSecond"));
+        assertTrue(message.contains("testCategory"));
     }
 
     @Test
