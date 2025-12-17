@@ -3,7 +3,6 @@ package org.onlineshop.service;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.onlineshop.dto.user.UserResponseDto;
 import org.onlineshop.entity.ConfirmationCode;
 import org.onlineshop.entity.User;
 import org.onlineshop.exception.NotFoundException;
@@ -33,14 +32,13 @@ class UserServiceGetUserByEmailOrThrowTest {
 
     @Autowired
     private UserService userService;
+    private String userEmail;
 
     @AfterEach
     void dropDatabase() {
         confirmationCodeRepository.deleteAll();
         userRepository.deleteAll();
     }
-
-    private String userEmail;
 
     @BeforeEach
     void setUp() {
@@ -87,17 +85,17 @@ class UserServiceGetUserByEmailOrThrowTest {
 
     @Test
     @WithMockUser(username = "admin@email.com", roles = "ADMIN")
-    void testGetUserByIdForAdmin() {
+    void testGetUserByEmailOrThrowOK() {
         User user = userService.getUserByEmailOrThrow(userEmail);
 
-        assertEquals(user.getStatus(), User.Status.CONFIRMED);
-        assertEquals(user.getUsername(), "newTestUser");
+        assertEquals(User.Status.CONFIRMED, user.getStatus());
+        assertEquals("newTestUser", user.getUsername());
         assertNotNull(user);
     }
 
     @Test
     @WithMockUser(username = "admin@email.com", roles = "ADMIN")
-    void testGetUserByIdForAdminIfUserNotFound() {
+    void testGetUserByEmailOrThrowIfUserNotFound() {
         assertThrows(NotFoundException.class, () -> userService.getUserByEmail("EmailNotFound"));
     }
 }
