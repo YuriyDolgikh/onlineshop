@@ -89,6 +89,15 @@ public class ProductService implements ProductServiceInterface {
     @Transactional
     @Override
     public ProductResponseDto updateProduct(Integer productId, ProductUpdateDto productUpdateDto) {
+        if (productId == null) {
+            throw new IllegalArgumentException("Product id cannot be null");
+        }
+        if (productUpdateDto == null) {
+            throw new IllegalArgumentException("ProductUpdateDto cannot be null");
+        }
+        if (productUpdateDto.getProductPrice() != null && productUpdateDto.getProductPrice().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Product price must be greater than 0");
+        }
         Product productToUpdate = productRepository.findById(productId)
                 .orElseThrow(() -> new NotFoundException("Product with id = " + productId + " not found"));
 
@@ -196,6 +205,9 @@ public class ProductService implements ProductServiceInterface {
     @Transactional
     @Override
     public ProductResponseDto deleteProduct(Integer productId) {
+        if (productId == null) {
+            throw new IllegalArgumentException("Product id cannot be null");
+        }
         Product productToDelete = productRepository.findById(productId)
                 .orElseThrow(() -> new NotFoundException("Product with id = " + productId + " not found"));
         productRepository.delete(productToDelete);

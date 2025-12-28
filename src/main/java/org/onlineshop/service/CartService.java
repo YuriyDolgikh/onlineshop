@@ -5,17 +5,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.onlineshop.dto.cart.CartResponseDto;
 import org.onlineshop.dto.cartItem.CartItemResponseDto;
 import org.onlineshop.dto.cartItem.CartItemSimpleResponseDto;
-import org.onlineshop.entity.*;
+import org.onlineshop.entity.Cart;
+import org.onlineshop.entity.CartItem;
+import org.onlineshop.entity.Product;
+import org.onlineshop.entity.User;
 import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.repository.CartRepository;
 import org.onlineshop.service.converter.CartItemConverter;
 import org.onlineshop.service.interfaces.CartServiceInterface;
 import org.onlineshop.service.interfaces.UserServiceInterface;
+import org.onlineshop.service.util.PriceCalculator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.List;
 import java.util.Set;
 
@@ -26,6 +29,7 @@ public class CartService implements CartServiceInterface {
     private final UserServiceInterface userService;
     private final CartItemConverter cartItemConverter;
     private final CartRepository cartRepository;
+    private final PriceCalculator priceCalculator;
 
     /**
      * Clears the current user's shopping cart by removing all cart items.
@@ -68,11 +72,11 @@ public class CartService implements CartServiceInterface {
 
             BigDecimal price = product.getPrice();
 
-            BigDecimal discount = product.getDiscountPrice();
+            BigDecimal discount = product.getDiscountPrice() != null
+                    ? product.getDiscountPrice()
+                    : BigDecimal.ZERO;
 
-            BigDecimal discountedPrice = price.subtract(discount).setScale(2, RoundingMode.HALF_UP);
-
-            BigDecimal itemTotal = discountedPrice.multiply(quantity).setScale(2, RoundingMode.HALF_UP);
+            BigDecimal itemTotal = priceCalculator.calculateDiscountedPrice(price, discount);
 
             totalPrice = totalPrice.add(itemTotal);
         }

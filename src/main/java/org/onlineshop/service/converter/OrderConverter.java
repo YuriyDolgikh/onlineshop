@@ -36,8 +36,8 @@ public class OrderConverter {
                                 .build())
                         .toList())
                 .totalPrice(order.getOrderItems().stream()
-                        .map(i -> i.getQuantity() * i.getPriceAtPurchase().doubleValue())
-                        .reduce(0.0, Double::sum))
+                        .map(i -> i.getPriceAtPurchase().multiply(BigDecimal.valueOf(i.getQuantity())))
+                        .reduce(BigDecimal.ZERO, BigDecimal::add))
                 .build();
     }
 

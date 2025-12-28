@@ -16,6 +16,7 @@ import org.onlineshop.service.converter.OrderConverter;
 import org.onlineshop.service.interfaces.OrderServiceInterface;
 import org.onlineshop.service.mail.MailUtil;
 import org.onlineshop.service.util.PdfOrderGenerator;
+import org.onlineshop.service.util.PriceCalculator;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
@@ -25,7 +26,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +42,7 @@ public class OrderService implements OrderServiceInterface {
     private final MailUtil mailUtil;
     private final CartService cartService;
     private final CartItemConverter cartItemConverter;
+    private final PriceCalculator priceCalculator;
 
     /**
      * Transfers the contents of the current user's shopping cart to a new order
@@ -111,6 +112,9 @@ public class OrderService implements OrderServiceInterface {
     @Override
     @Transactional(readOnly = true)
     public OrderResponseDto getOrderById(Integer orderId) {
+        if (orderId == null) {
+            throw new IllegalArgumentException("OrderId cannot be null");
+        }
         if (!isAccessToOrderAllowed(orderId)) {
             throw new AccessDeniedException("Access denied");
         }
@@ -122,12 +126,12 @@ public class OrderService implements OrderServiceInterface {
     /**
      * Retrieves a paginated list of orders for a specified user.
      *
-     * @param userId  the ID of the user whose orders are being requested; must not be null
-     * @param pageable  the pagination information
+     * @param userId   the ID of the user whose orders are being requested; must not be null
+     * @param pageable the pagination information
      * @return a paginated list of orders wrapped in a {@code Page<OrderResponseDto>}
      * @throws IllegalArgumentException if the {@code userId} is null
-     * @throws NotFoundException if no user is found with the specified {@code userId}
-     * @throws AccessDeniedException if the current user does not have permission to access the requested user's orders
+     * @throws NotFoundException        if no user is found with the specified {@code userId}
+     * @throws AccessDeniedException    if the current user does not have permission to access the requested user's orders
      */
     @Override
     @Transactional(readOnly = true)
@@ -184,6 +188,9 @@ public class OrderService implements OrderServiceInterface {
     @Override
     @Transactional
     public void cancelOrder(Integer orderId) {
+        if (orderId == null) {
+            throw new IllegalArgumentException("OrderId cannot be null");
+        }
         if (!isAccessToOrderAllowed(orderId)) {
             throw new AccessDeniedException("Access denied");
         }
@@ -212,6 +219,12 @@ public class OrderService implements OrderServiceInterface {
     @Override
     @Transactional
     public OrderResponseDto confirmPayment(Integer orderId, String paymentMethod) {
+        if (orderId == null) {
+            throw new IllegalArgumentException("OrderId cannot be null");
+        }
+        if (paymentMethod == null || paymentMethod.isBlank()) {
+            throw new BadRequestException("PaymentMethod cannot be null or blank");
+        }
         User currentUser = userService.getCurrentUser();
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Order not found with ID: " + orderId));
@@ -219,9 +232,6 @@ public class OrderService implements OrderServiceInterface {
             throw new AccessDeniedException("Access denied");
         }
         recalculateOrderPrice(order);
-        if (paymentMethod == null || paymentMethod.isBlank()) {
-            throw new BadRequestException("PaymentMethod cannot be null or blank");
-        }
         if (!order.getStatus().equals(Order.Status.PENDING_PAYMENT)) {
             throw new BadRequestException("You can't confirm payment for an order that is not in PENDING_PAYMENT status");
         }
@@ -434,13 +444,14 @@ public class OrderService implements OrderServiceInterface {
     }
 
     /**
-     * Recalculates the total price for an order based on the current product prices and discounts.
-     * Updates each order item's price at the time of purchase.
+     * Recalculates the price of an order based on the prices and discounts of its associated items.
+     * The method updates the prices of all items in the order and persists the updated order in the repository.
+     * This operation can only be performed on orders with a status of PENDING_PAYMENT.
      *
-     * @param order the order for which the price needs to be recalculated.
-     *              Must not be null, must have a status of PENDING_PAYMENT, and must include at least one order item.
-     * @throws BadRequestException if the provided order is null, or if the order status is not PENDING_PAYMENT.
-     * @throws NotFoundException   if the order does not contain any order items.
+     * @param order the order whose prices need to be recalculated. The order must not be null, and it must be in PENDING_PAYMENT status.
+     *              Additionally, the order must contain at least one item, and each item must have a product with a valid price and discount.
+     * @throws BadRequestException if the order is null or if the order's status is not PENDING_PAYMENT.
+     * @throws NotFoundException   if the order does not contain any items.
      */
     @Transactional
     public void recalculateOrderPrice(Order order) {
@@ -457,11 +468,11 @@ public class OrderService implements OrderServiceInterface {
         for (OrderItem oi : orderItemList) {
             Product product = oi.getProduct();
             BigDecimal price = product.getPrice();
-            BigDecimal discountPercent = product.getDiscountPrice();
+            BigDecimal discountPercent = product.getDiscountPrice() != null
+                    ? product.getDiscountPrice()
+                    : BigDecimal.ZERO;
 
-            BigDecimal discountValue = price.multiply(discountPercent).divide(new BigDecimal(100),4, RoundingMode.HALF_UP);
-
-            BigDecimal finalPrice = price.subtract(discountValue).setScale(2, RoundingMode.HALF_UP);
+            BigDecimal finalPrice = priceCalculator.calculateDiscountedPrice(price, discountPercent);
 
             oi.setPriceAtPurchase(finalPrice);
         }

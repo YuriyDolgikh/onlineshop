@@ -27,7 +27,7 @@ public class Product {
     private Integer id;
 
     @Column(nullable = false, length = 50)
-    @NotBlank(message = "product title is required and must be not blank)")
+    @NotBlank(message = "product title is required and must be not blank")
     @Size(min = 3, max = 20)
     private String name;
 

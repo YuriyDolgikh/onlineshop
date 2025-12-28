@@ -7,6 +7,7 @@ import org.onlineshop.dto.cartItem.CartItemSimpleResponseDto;
 import org.onlineshop.entity.CartItem;
 import org.onlineshop.entity.OrderItem;
 import org.onlineshop.entity.Product;
+import org.onlineshop.service.util.PriceCalculator;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -17,6 +18,12 @@ import java.util.stream.Collectors;
 @Generated
 @Service
 public class CartItemConverter {
+    private final PriceCalculator priceCalculator;
+
+    public CartItemConverter(PriceCalculator priceCalculator) {
+        this.priceCalculator = priceCalculator;
+    }
+
     public CartItemResponseDto toDto(CartItem cartItem) {
         return CartItemResponseDto.builder()
                 .product(cartItem.getProduct())
@@ -29,8 +36,8 @@ public class CartItemConverter {
                 .cartItemId(cartItem.getCartItemId())
                 .productName(cartItem.getProduct().getName())
                 .categoryName(cartItem.getProduct().getCategory().getCategoryName())
-                .productPrice(cartItem.getProduct().getPrice().doubleValue())
-                .productDiscountPrice(cartItem.getProduct().getDiscountPrice().doubleValue())
+                .productPrice(cartItem.getProduct().getPrice().setScale(2, RoundingMode.HALF_UP))
+                .productDiscountPrice(cartItem.getProduct().getDiscountPrice().setScale(2, RoundingMode.HALF_UP))
                 .quantity(cartItem.getQuantity())
                 .build();
     }
@@ -46,11 +53,11 @@ public class CartItemConverter {
 
         BigDecimal quantity = BigDecimal.valueOf(cartItem.getQuantity());
         BigDecimal price = product.getPrice();
-        BigDecimal discount = product.getDiscountPrice();
+        BigDecimal discount = product.getDiscountPrice() != null
+                ? product.getDiscountPrice()
+                : BigDecimal.ZERO;
 
-        BigDecimal priceWithDiscount = price.subtract(discount).setScale(2, RoundingMode.HALF_UP);
-
-        BigDecimal totalPrice = priceWithDiscount.multiply(quantity).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal totalPrice = priceCalculator.calculateDiscountedPrice(price, discount);
 
         return OrderItem.builder()
                 .product(product)

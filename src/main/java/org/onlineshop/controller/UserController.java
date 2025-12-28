@@ -145,7 +145,8 @@ public class UserController {
     })
     @PutMapping("/{userId}")
     @PreAuthorize("hasAnyRole('USER', 'MANAGER', 'ADMIN')")
-    public ResponseEntity<UserResponseDto> updateUser(@Valid @PathVariable Integer userId, @Valid @RequestBody UserUpdateRequestDto requestDto) {
+    public ResponseEntity<UserResponseDto> updateUser(@PathVariable Integer userId,
+                                                      @Valid @RequestBody UserUpdateRequestDto requestDto) {
         return ResponseEntity.ok(userService.updateUser(userId, requestDto));
     }
 
@@ -179,7 +180,7 @@ public class UserController {
     })
     @PreAuthorize("hasAnyRole('USER', 'MANAGER', 'ADMIN')")
     @DeleteMapping("/{userId}")
-    public ResponseEntity<UserResponseDto> deleteUser(@Valid @PathVariable Integer userId) {
+    public ResponseEntity<UserResponseDto> deleteUser(@PathVariable Integer userId) {
         return ResponseEntity.ok(userService.deleteUser(userId));
     }
 
@@ -210,7 +211,7 @@ public class UserController {
     })
     @PreAuthorize("hasAnyRole('USER', 'MANAGER', 'ADMIN')")
     @GetMapping("/renew/{email}")
-    public ResponseEntity<UserResponseDto> renewUser(@Valid @PathVariable String email) {
+    public ResponseEntity<UserResponseDto> renewUser(@PathVariable String email) {
         return ResponseEntity.ok(userService.renewUser(email));
     }
 

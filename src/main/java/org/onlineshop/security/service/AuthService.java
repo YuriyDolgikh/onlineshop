@@ -37,11 +37,11 @@ public class AuthService {
         }
 
         User user = ((MyUserToUserDetails)userDetails).getUser();
-        if(user.getStatus().equals("DELETED")){
+        if(user.getStatus() == User.Status.DELETED){
             throw new BadRequestException("User with email: " + request.getUsername() + " is deleted");
         }
 
-        if(user.getStatus().equals("NOT_CONFIRMED")){
+        if(user.getStatus() == User.Status.NOT_CONFIRMED){
             throw new BadRequestException("User with email: " + request.getUsername() + " is not confirmed");
         }
 

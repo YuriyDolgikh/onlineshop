@@ -87,7 +87,7 @@ public class CategoryController {
     @PutMapping("/{categoryId}")
     public ResponseEntity<CategoryResponseDto> updateCategory(
             @Parameter(description = "ID of the category to update", required = true)
-            @Valid @PathVariable Integer categoryId,
+            @PathVariable Integer categoryId,
             @Parameter(description = "Updated category data", required = true)
             @Valid @RequestBody CategoryUpdateDto categoryUpdateDto) {
         return ResponseEntity.ok(categoryService.updateCategory(categoryId, categoryUpdateDto));
@@ -121,7 +121,7 @@ public class CategoryController {
     @DeleteMapping("/{categoryId}")
     public ResponseEntity<CategoryResponseDto> deleteCategory(
             @Parameter(description = "ID of the category to delete", required = true)
-            @Valid @PathVariable Integer categoryId) {
+            @PathVariable Integer categoryId) {
         return ResponseEntity.ok(categoryService.deleteCategory(categoryId));
     }
 

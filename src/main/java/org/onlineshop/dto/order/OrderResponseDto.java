@@ -4,9 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.onlineshop.dto.orderItem.OrderItemRequestDto;
 import org.onlineshop.dto.orderItem.OrderItemResponseDto;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -34,6 +34,6 @@ public class OrderResponseDto {
 
     private List<OrderItemResponseDto> items;
 
-    private Double totalPrice;
+    private BigDecimal totalPrice;
 
 }

@@ -75,6 +75,12 @@ public class CategoryService implements CategoryServiceInterface {
     @Transactional
     @Override
     public CategoryResponseDto updateCategory(Integer categoryId, CategoryUpdateDto categoryUpdateDto) {
+        if (categoryId == null) {
+            throw new IllegalArgumentException("Category id must be provided");
+        }
+        if (categoryUpdateDto == null) {
+            throw new IllegalArgumentException("Category update data must be provided");
+        }
         Category categoryForUpdate = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new NotFoundException("Category with id = " + categoryId + " not found"));
 

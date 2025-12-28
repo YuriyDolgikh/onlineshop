@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.order.OrderResponseDto;
 import org.onlineshop.service.OrderService;
@@ -60,7 +59,7 @@ public class OrderController {
                     required = true,
                     example = "123"
             )
-            @Valid @PathVariable Integer orderId) {
+            @PathVariable Integer orderId) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(orderService.getOrderById(orderId));
@@ -101,7 +100,7 @@ public class OrderController {
                     required = true,
                     example = "456"
             )
-            @Valid @PathVariable Integer userId,
+            @PathVariable Integer userId,
             @Parameter(description = "Page number (0-based)", example = "0")
             @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Page size", example = "20")
@@ -144,7 +143,7 @@ public class OrderController {
                     required = true,
                     example = "123"
             )
-            @Valid @PathVariable Integer orderId) {
+            @PathVariable Integer orderId) {
         orderService.cancelOrder(orderId);
         return ResponseEntity.ok().build();
     }
@@ -217,7 +216,7 @@ public class OrderController {
                     required = true,
                     example = "123"
             )
-            @Valid @PathVariable Integer orderId,
+            @PathVariable Integer orderId,
             @Parameter(
                     description = "Payment method to use",
                     required = true,
@@ -236,7 +235,7 @@ public class OrderController {
                             )
                     }
             )
-            @Valid @PathVariable String payMethod) {
+            @PathVariable String payMethod) {
 
         OrderResponseDto orderResponse = orderService.confirmPayment(orderId, payMethod);
 
