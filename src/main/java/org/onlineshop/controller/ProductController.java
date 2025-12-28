@@ -108,7 +108,7 @@ public class ProductController {
     @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     public ResponseEntity<ProductResponseDto> updateProduct(
             @Parameter(description = "ID of the product to update", required = true)
-            @Valid @PathVariable Integer productId,
+            @PathVariable Integer productId,
             @Parameter(description = "Updated product data", required = true)
             @Valid @RequestBody ProductUpdateDto updateDto) {
         return ResponseEntity
@@ -141,7 +141,7 @@ public class ProductController {
     @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     public ResponseEntity<ProductResponseDto> deleteProduct(
             @Parameter(description = "ID of the product to delete", required = true)
-            @Valid @PathVariable Integer productId) {
+            @PathVariable Integer productId) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(productService.deleteProduct(productId));
@@ -179,9 +179,9 @@ public class ProductController {
     @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     public ResponseEntity<ProductResponseDto> updateProductDiscount(
             @Parameter(description = "ID of the product to update discount", required = true)
-            @Valid @PathVariable Integer productId,
+            @PathVariable Integer productId,
             @Parameter(description = "New discount price value", required = true, example = "15.99")
-            @Valid @PathVariable BigDecimal newDiscount) {
+            @PathVariable BigDecimal newDiscount) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(productService.setDiscountPrice(productId, newDiscount));
@@ -317,13 +317,13 @@ public class ProductController {
      * @return the corresponding sort property as a string; defaults to "id" if no match is found
      */
     private String getSortProperty(String paramName) {
-        switch (paramName) {
-            case "price": return "price";
-            case "discount": return "discountPrice";
-            case "category": return "category.categoryName";
-            case "name": return "name";
-            case "createDate": return "createdAt";
-            default: return "id";
-        }
+        return switch (paramName) {
+            case "price" -> "price";
+            case "discount" -> "discountPrice";
+            case "category" -> "category.categoryName";
+            case "name" -> "name";
+            case "createDate" -> "createdAt";
+            default -> "id";
+        };
     }
 }

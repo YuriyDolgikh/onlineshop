@@ -11,6 +11,7 @@ import org.onlineshop.entity.Product;
 import org.onlineshop.service.CategoryService;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +42,9 @@ public class ProductConverter {
                 .productDescription(product.getDescription())
                 .productCategory(product.getCategory().getCategoryName())
                 .productPrice(product.getPrice())
-                .productDiscountPrice(product.getDiscountPrice())
+                .productDiscountPrice(product.getDiscountPrice() != null
+                        ? product.getDiscountPrice()
+                        : BigDecimal.ZERO)
                 .image(product.getImage())
                 .createdAt(product.getCreatedAt())
                 .updatedAt(product.getUpdatedAt())

@@ -147,6 +147,12 @@ public class UserService implements UserServiceInterface {
     @Override
     @Transactional
     public UserResponseDto updateUser(Integer userId, UserUpdateRequestDto updateRequest) {
+        if (userId == null) {
+            throw new IllegalArgumentException("User id cannot be null");
+        }
+        if (updateRequest == null) {
+            throw new IllegalArgumentException("UserUpdateRequestDto cannot be null");
+        }
 
         Optional<User> userToUpdateOptional = userRepository.findById(userId);
         if (userToUpdateOptional.isEmpty()) {
@@ -197,6 +203,9 @@ public class UserService implements UserServiceInterface {
     @Transactional
     @Override
     public UserResponseDto deleteUser(Integer userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("User id cannot be null");
+        }
         User userToDelete = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User with id = " + userId + " not found"));
         User currentUser = getCurrentUser();

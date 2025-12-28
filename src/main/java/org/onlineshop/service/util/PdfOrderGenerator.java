@@ -18,6 +18,8 @@ import java.time.format.DateTimeFormatter;
 
 @Service
 public class PdfOrderGenerator {
+    private static final PriceCalculator priceCalculator = new PriceCalculator();
+
     public static byte[] generatePdfOrder(Order order) {
         try {
             Document document = new Document();
@@ -63,17 +65,10 @@ public class PdfOrderGenerator {
                 BigDecimal price = item.getProduct().getPrice();
                 BigDecimal discount = item.getProduct().getDiscountPrice();
 
-                BigDecimal finalPrice;
-                if (discount != null && discount.compareTo(BigDecimal.ZERO) > 0) {
-                    BigDecimal discountValue = price.multiply(discount).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+                BigDecimal finalPrice = priceCalculator.calculateDiscountedPrice(price, discount);
 
-                    finalPrice = price.subtract(discountValue).setScale(2, RoundingMode.HALF_UP);
-                } else {
-                    finalPrice = price.setScale(2, RoundingMode.HALF_UP);
-                }
-
-                BigDecimal total = finalPrice.multiply(BigDecimal.valueOf(quantity)).setScale(2, RoundingMode.HALF_UP);
-                totalSum = totalSum.add(total).setScale(2, RoundingMode.HALF_UP);
+                BigDecimal totalItems = finalPrice.multiply(BigDecimal.valueOf(quantity)).setScale(2, RoundingMode.HALF_UP);
+                totalSum = totalSum.add(totalItems).setScale(2, RoundingMode.HALF_UP);
 
                 addTableRow(table,
                         product,
@@ -81,7 +76,7 @@ public class PdfOrderGenerator {
                         df.format(price),
                         (discount != null ? df.format(discount) : "0.00") + "%",
                         df.format(finalPrice),
-                        df.format(total)
+                        df.format(totalItems)
                 );
             }
             document.add(table);

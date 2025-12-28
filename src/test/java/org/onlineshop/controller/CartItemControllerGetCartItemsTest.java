@@ -9,6 +9,7 @@ import org.onlineshop.dto.cartItem.CartItemFullResponseDto;
 import org.onlineshop.service.CartItemService;
 import org.springframework.http.ResponseEntity;
 
+import java.math.BigDecimal;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -32,8 +33,8 @@ class CartItemControllerGetCartItemsTest {
                     .cartItemId(1 + i)
                     .productName("Product " + i)
                     .categoryName("Category")
-                    .productPrice(100.0 + (i + 20))
-                    .productDiscountPrice(15.0 - i)
+                    .productPrice(new BigDecimal("100.00").add(new BigDecimal(i + 20)))
+                    .productDiscountPrice(new BigDecimal("15.00").subtract(new BigDecimal(i)))
                     .quantity(2 + i)
                     .build());
         }

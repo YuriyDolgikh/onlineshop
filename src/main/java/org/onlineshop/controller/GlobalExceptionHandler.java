@@ -210,14 +210,14 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(Map.of("message:", userMessage));
+                .body(Map.of("message", userMessage));
     }
 
     @ExceptionHandler(OptimisticLockException.class)
     public ResponseEntity<Map<String, String>> handleOptimisticLockException(OptimisticLockException ex) {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
-                .body(Map.of("message:", "Another user has updated this record since you last retrieved it. " +
+                .body(Map.of("message", "Another user has updated this record since you last retrieved it. " +
                         "Please refresh your page and try again."));
     }
 

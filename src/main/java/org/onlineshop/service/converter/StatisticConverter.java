@@ -6,7 +6,7 @@ import org.onlineshop.dto.statistic.ProductStatisticResponseDto;
 import org.onlineshop.entity.Product;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.math.BigDecimal;
 
 @Generated
 @Service
@@ -17,14 +17,16 @@ public class StatisticConverter {
             throw new IllegalArgumentException("Product must not be null");
         }
         if (quantity == null || quantity < 0) {
-            quantity = 0; // можно установить 0 по умолчанию
+            quantity = 0;
         }
 
         return ProductStatisticResponseDto.builder()
                 .productName(product.getName())
                 .productCategory(product.getCategory().categoryName)
                 .productPrice(product.getPrice())
-                .productDiscountPrice(product.getDiscountPrice())
+                .productDiscountPrice(product.getDiscountPrice() != null
+                        ? product.getDiscountPrice()
+                        : BigDecimal.ZERO)
                 .productQuantity(quantity)
                 .build();
     }
