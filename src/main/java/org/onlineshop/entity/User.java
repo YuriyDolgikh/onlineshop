@@ -31,7 +31,9 @@ public class User {
     @Column(name = "username")
     private String username;
 
-    @Email(regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", message = "Invalid email")
+    @Email(message = "Please provide a valid email address")
+    @NotBlank
+    @Size(max = 100, message = "Email must not exceed 100 characters")
     @Column(unique = true, nullable = false,name = "email")
     private String email;
 

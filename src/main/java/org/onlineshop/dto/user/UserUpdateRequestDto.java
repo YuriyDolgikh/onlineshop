@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class UserUpdateRequestDto {
 
-    @Pattern(regexp = "^$|^.{3,20}$", message = "Username must be empty or between 3 and 20 characters")
+    @Size(min = 3, max = 20, message = "Username must be empty or between 3 and 20 characters")
     private String username;
 
     @Pattern(
@@ -22,7 +22,7 @@ public class UserUpdateRequestDto {
     )
     private String phoneNumber;
 
-    @Pattern(regexp = "^$|^.{6,20}$", message = "Password must be empty or between 6 and 20 characters")
+    @Size(min = 8, max = 20, message = "Password must be empty or between 6 and 20 characters")
     private String hashPassword;
 
 }

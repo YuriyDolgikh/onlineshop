@@ -16,10 +16,8 @@ public class ProfitStatisticRequestDto {
     private Integer periodCount;
 
     @NotBlank
-    @NotNull
     private String periodUnit;
 
     @NotBlank
-    @NotNull
     private String  groupBy;
 }

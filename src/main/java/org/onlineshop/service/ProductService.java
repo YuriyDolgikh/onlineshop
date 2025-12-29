@@ -149,6 +149,10 @@ public class ProductService implements ProductServiceInterface {
         }
 
         if (productUpdateDto.getProductDiscountPrice() != null) {
+            if (productUpdateDto.getProductDiscountPrice().compareTo(BigDecimal.ZERO) < 0 ||
+                productUpdateDto.getProductDiscountPrice().compareTo(BigDecimal.valueOf(100)) > 0) {
+                throw new IllegalArgumentException("Discount price must be between 0 and 100 percents");
+            }
             productToUpdate.setDiscountPrice(productUpdateDto.getProductDiscountPrice());
         }
 
