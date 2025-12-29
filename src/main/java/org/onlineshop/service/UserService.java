@@ -1,5 +1,7 @@
 package org.onlineshop.service;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Generated;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -250,13 +252,9 @@ public class UserService implements UserServiceInterface {
      */
     @Override
     @Transactional
-    public UserResponseDto renewUser(String email) {
+    public UserResponseDto renewUser(@Email @NotBlank String email) {
         if (email == null || email.isBlank()) {
             throw new IllegalArgumentException("Email must be provided to renew user");
-        }
-        String emailRegex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
-        if (!email.matches(emailRegex)) {
-            throw new IllegalArgumentException("Invalid email format");
         }
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("User with email: " + email + " not found"));
