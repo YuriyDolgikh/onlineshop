@@ -1,5 +1,7 @@
 package org.onlineshop.service;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Generated;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -158,31 +160,46 @@ public class UserService implements UserServiceInterface {
         if (userToUpdateOptional.isEmpty()) {
             throw new NotFoundException("User with id = " + userId + " not found");
         }
-        if(userToUpdateOptional.get().getStatus().equals(User.Status.NOT_CONFIRMED)) {
+
+        User userToUpdate = userToUpdateOptional.get();
+
+        // Check user status before allowing update
+        if (userToUpdate.getStatus().equals(User.Status.NOT_CONFIRMED)) {
             throw new BadRequestException("User with id = " + userId + " is not confirmed and is not allowed to update");
         }
-        if (userToUpdateOptional.get().getStatus().equals(User.Status.DELETED)) {
+        if (userToUpdate.getStatus().equals(User.Status.DELETED)) {
             throw new BadRequestException("User with id = " + userId + " is deleted and is not allowed to update");
         }
-        User userToUpdate = userToUpdateOptional.get();
+
         // Check that the user for update is the same as the current user
         User currentUser = getCurrentUser();
         if (!currentUser.getUserId().equals(userId)) {
             throw new BadRequestException("You can't update another user");
         }
+
         // Update all presented fields.
         // Is not known in advance which fields the user wants to change,
         // so in the JSON (in the request body) there will be only those fields (that are not empty),
         // which the user wants to change (not obligatory all)
         if (updateRequest.getUsername() != null && !updateRequest.getUsername().isBlank()) {
-            userToUpdate.setUsername(updateRequest.getUsername());
+            userToUpdate.setUsername(updateRequest.getUsername().trim());
         }
         if (updateRequest.getPhoneNumber() != null && !updateRequest.getPhoneNumber().isBlank()) {
-            userToUpdate.setPhoneNumber(updateRequest.getPhoneNumber());
+            userToUpdate.setPhoneNumber(updateRequest.getPhoneNumber().trim());
         }
         if (updateRequest.getHashPassword() != null && !updateRequest.getHashPassword().isBlank()) {
             userToUpdate.setHashPassword(passwordEncoder.encode(updateRequest.getHashPassword()));
         }
+
+        // Check that at least one field was actually updated
+        boolean anyFieldUpdated = (updateRequest.getUsername() != null && !updateRequest.getUsername().isBlank()) ||
+                (updateRequest.getPhoneNumber() != null && !updateRequest.getPhoneNumber().isBlank()) ||
+                (updateRequest.getHashPassword() != null && !updateRequest.getHashPassword().isBlank());
+
+        if (!anyFieldUpdated) {
+            throw new BadRequestException("At least one field (username, phoneNumber, or hashPassword) must be provided for update");
+        }
+
         // Save the updated user
         userRepository.save(userToUpdate);
         log.info("User {} updated successfully", userToUpdate.getUsername());
@@ -235,13 +252,9 @@ public class UserService implements UserServiceInterface {
      */
     @Override
     @Transactional
-    public UserResponseDto renewUser(String email) {
+    public UserResponseDto renewUser(@Email @NotBlank String email) {
         if (email == null || email.isBlank()) {
             throw new IllegalArgumentException("Email must be provided to renew user");
-        }
-        String emailRegex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
-        if (!email.matches(emailRegex)) {
-            throw new IllegalArgumentException("Invalid email format");
         }
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("User with email: " + email + " not found"));

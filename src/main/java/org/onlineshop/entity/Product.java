@@ -47,7 +47,7 @@ public class Product {
     @Column(length = 256)
     private String image;
 
-    @Column(precision = 10, scale = 2, nullable = false)
+    @Column(precision = 10, scale = 2)
     private BigDecimal discountPrice;
 
     @CreationTimestamp

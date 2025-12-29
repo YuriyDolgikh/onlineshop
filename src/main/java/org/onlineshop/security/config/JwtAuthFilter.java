@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.Generated;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.onlineshop.security.exception.InvalidJwtException;
 import org.onlineshop.security.service.CustomUserDetailService;
 import org.onlineshop.security.service.JwtTokenProvider;
@@ -19,6 +20,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+@Slf4j
 @Generated
 @Component
 @RequiredArgsConstructor
@@ -52,7 +54,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         } catch (InvalidJwtException e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
-            response.getWriter().write("error: " + e.getMessage());
+            log.error("Invalid JWT token: {}", e.getMessage());
+            try {
+                response.getWriter().write("error: " + e.getMessage());
+            } catch (IOException ioException) {
+                log.error("Failed to write error response", ioException);
+            }
             return;
         }
         // definitely we need to apply changes to the object with the list of filters

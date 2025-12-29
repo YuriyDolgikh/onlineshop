@@ -26,7 +26,7 @@ public class ProductUpdateDto {
     private BigDecimal productPrice;
 
     @DecimalMin(value = "0", message = "Discount price cannot be negative")
-    @DecimalMax(value = "99",message = "The maximum allowable discount cannot exceed 99")
+    @DecimalMax(value = "100", message = "Discount price cannot be greater than 100")
     private BigDecimal productDiscountPrice;
 
     @Size(max = 256, message = "Image URL must be less than 256 characters")
