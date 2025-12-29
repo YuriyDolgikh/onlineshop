@@ -237,8 +237,23 @@ public class ProductService implements ProductServiceInterface {
         switch (paramName) {
             case "price":
                 String[] priceRange = paramValue.split("-");
-                BigDecimal minPrice = new BigDecimal(priceRange[0]);
-                BigDecimal maxPrice = new BigDecimal(priceRange[1]);
+                if (priceRange.length != 2) {
+                    throw new IllegalArgumentException("Price range must be specified as a minimum and maximum price separated by a dash");
+                }
+                if (priceRange[0].isBlank() || priceRange[1].isBlank()) {
+                    throw new IllegalArgumentException("Price range must contain both minimum and maximum prices");
+                }
+                BigDecimal minPrice;
+                BigDecimal maxPrice;
+                try {
+                    minPrice = new BigDecimal(priceRange[0].trim());
+                    maxPrice = new BigDecimal(priceRange[1].trim());
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("Both prices must be valid numbers. Error: " + e.getMessage());
+                }
+                if (minPrice.compareTo(BigDecimal.ZERO) < 0 || maxPrice.compareTo(BigDecimal.ZERO) < 0) {
+                    throw new IllegalArgumentException("Prices cannot be negative");
+                }
                 return getProductsByPriceRange(minPrice, maxPrice, pageable);
             case "discount":
                 return getProductsByDiscount(pageable);
@@ -255,7 +270,7 @@ public class ProductService implements ProductServiceInterface {
 
     /**
      * Retrieves a pageable list of products whose names contain the specified part
-     * of a name, ignoring case.
+     * of a name, ignoring a case.
      *
      * @param partOfName the partial name used to search products
      * @param pageable   the pagination information including page size and page number

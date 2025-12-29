@@ -27,7 +27,7 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
 
-    @Value("${cors.allowed.origins:*}")
+    @Value("${cors.allowed.origins:https://api.onlineshop.name/,http://localhost:8080}'.split(',')}")
     private List<String> allowedOrigins;
 
     @Value("${cors.allowed.methods:GET,POST,PUT,DELETE}")

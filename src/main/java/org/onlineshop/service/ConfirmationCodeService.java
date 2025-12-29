@@ -109,21 +109,27 @@ public class ConfirmationCodeService implements ConfirmationCodeServiceInterface
     }
 
     /**
-     * Updates the confirmation status of a code and retrieves the associated user.
-     * <p>
-     * This method finds a confirmation code in the repository using the provided code, marks it as confirmed,
-     * saves the updated confirmation code, and then returns the user associated with the confirmation code.
+     * Changes the confirmation status of a user based on the provided confirmation code.
+     * This method validates the confirmation code, checking its existence, expiration, and related user's status.
+     * It marks the confirmation code as confirmed and persists the changes.
      *
-     * @param code the confirmation code that needs to have its status updated
-     * @return the user associated with the provided confirmation code
-     * @throws NotFoundException if the confirmation code does not exist
+     * @param code the confirmation code provided for updating the user's confirmation status
+     * @return the user associated with the given confirmation code, whose confirmation status was updated
+     * @throws NotFoundException if the given confirmation code does not exist
+     * @throws BadRequestException if the confirmation code has expired or the related user has been deleted
      */
     @Transactional
     @Override
     public User changeConfirmationStatusByCode(String code) {
         ConfirmationCode confirmationCode = repository.findByCode(code)
                 .orElseThrow(() -> new NotFoundException("Confirmation code: " + code + " not found"));
+        if (confirmationCode.getExpireDataTime().isBefore(LocalDateTime.now())) {
+            throw new BadRequestException("Confirmation code expired");
+        }
         User user = confirmationCode.getUser();
+        if (user.getStatus().equals(User.Status.DELETED)){
+            throw new BadRequestException("User has been deleted");
+        }
         confirmationCode.setConfirmed(true);
         repository.save(confirmationCode);
         log.info("Confirmation code {} updated for user {}. Set to confirmed.", code, user.getUsername());

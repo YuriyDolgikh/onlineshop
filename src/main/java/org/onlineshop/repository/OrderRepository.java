@@ -25,4 +25,8 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
                                               @Param("createdAt") LocalDateTime createdAt);
 
     Order findByUserAndStatus(User user, Order.Status status);
+
+    @Query("SELECT o FROM Order o WHERE o.status IN :statuses")
+    @EntityGraph(attributePaths = {"orderItems", "orderItems.product"})
+    Page<Order> findOrdersForStatusUpdate(@Param("statuses") List<Order.Status> statuses, Pageable pageable);
 }
