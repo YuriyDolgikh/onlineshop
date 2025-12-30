@@ -99,7 +99,7 @@ public class StatisticController {
                     required = true,
                     example = "7"
             )
-            @Valid @PathVariable Integer days) {
+            @PathVariable Integer days) {
         List<ProductStatisticResponseDto> response = statisticService.getProductsInPendingPaymentStatus(days);
         return ResponseEntity.ok(response);
     }

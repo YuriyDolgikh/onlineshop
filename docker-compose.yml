@@ -6,8 +6,8 @@ services:
     restart: always
     environment:
       POSTGRES_DB: onlineshop
-      POSTGRES_USER: your_pg_user
-      POSTGRES_PASSWORD: your_pg_password
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
     healthcheck:
@@ -26,9 +26,9 @@ services:
       db:
         condition: service_healthy
     environment:
-      # Все переменные берутся из .env через IDEA
+      # all variables from application.properties
       SPRING_PROFILES_ACTIVE: docker
-      # URL БД для Docker сети
+      # URL DB for the Docker network
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/onlineshop
     ports:
       - "8080:8080"

@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.category.CategoryRequestDto;
 import org.onlineshop.dto.category.CategoryResponseDto;
@@ -147,9 +149,9 @@ public class CategoryController {
     @GetMapping
     public ResponseEntity<Page<CategoryResponseDto>> getAllCategories(
             @Parameter(description = "Page number (0-based)", example = "0")
-            @RequestParam(defaultValue = "0") int page,
+            @Min(0) @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Page size", example = "20")
-            @RequestParam(defaultValue = "20") int size) {
+            @Min(1) @Max(100) @RequestParam(defaultValue = "20") int size) {
 
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.ok(categoryService.getAllCategories(pageable));

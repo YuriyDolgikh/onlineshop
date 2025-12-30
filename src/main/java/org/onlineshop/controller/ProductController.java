@@ -9,6 +9,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.onlineshop.dto.product.ProductRequestDto;
 import org.onlineshop.dto.product.ProductResponseDto;
@@ -22,6 +25,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -32,6 +36,7 @@ import java.util.List;
 @RequestMapping("/v1/products")
 @Tag(name = "Product Management",
         description = "APIs for product management operations including CRUD, discounts, and product filtering with pagination")
+@Validated
 public class ProductController {
 
     private final ProductService productService;
@@ -206,10 +211,17 @@ public class ProductController {
     @GetMapping
     @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     public ResponseEntity<Page<ProductResponseDto>> getAllProductsForAdmin(
-            @Parameter(description = "Page number (0-based)", example = "0") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Page size", example = "20") @RequestParam(defaultValue = "20") int size,
-            @Parameter(description = "Sort field") @RequestParam(defaultValue = "name") String sort,
-            @Parameter(description = "Sort direction") @RequestParam(defaultValue = "asc") String direction) {
+            @Parameter(description = "Page number (0-based)", example = "0")
+            @Min(0) @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size", example = "20")
+            @Min(1) @Max(100) @RequestParam(defaultValue = "20") int size,
+            @Parameter(description = "Sort field")
+            @Pattern(regexp = "^(name|price|discountPrice|createdAt|id)$",
+                    message = "Sort field must be one of: name, price, discountPrice, createdAt, id")
+            @RequestParam(defaultValue = "name") String sort,
+            @Parameter(description = "Sort direction")
+            @Pattern(regexp = "^(asc|desc)$", message = "Sort direction must be 'asc' or 'desc'")
+            @RequestParam(defaultValue = "asc") String direction) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), sort));
         return ResponseEntity.ok(productService.getAllProducts(pageable));
@@ -242,18 +254,18 @@ public class ProductController {
                     @ExampleObject(name = "Discount", value = "discount"),
                     @ExampleObject(name = "Category", value = "category")
             })
-            @Valid @RequestParam String paramName,
+            @RequestParam String paramName,
             @Parameter(description = "Criteria value (for price use format: minPrice-maxPrice, e.g., 100-300)", required = true, examples = {
                     @ExampleObject(name = "Price range", value = "100-300"),
                     @ExampleObject(name = "Category name", value = "electronics"),
                     @ExampleObject(name = "Product name part", value = "phone")
             })
-            @Valid @RequestParam String paramValue,
+            @RequestParam String paramValue,
             @Parameter(description = "Sort direction: asc (ascending) or desc (descending)", required = true, examples = {
                     @ExampleObject(name = "Ascending", value = "asc"),
                     @ExampleObject(name = "Descending", value = "desc")
             })
-            @Valid @RequestParam String sortDirection,
+            @RequestParam String sortDirection,
             @Parameter(description = "Page number (0-based)", example = "0") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Page size", example = "20") @RequestParam(defaultValue = "20") int size) {
 

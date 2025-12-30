@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.onlineshop.entity.Product;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -14,6 +13,7 @@ import org.onlineshop.entity.Product;
 @Builder
 public class CartItemUpdateDto {
     @NotNull(message = "Product ID cannot be null")
+    @Min(value = 1, message = "Product ID must be at least 1")
     private Integer productId;
 
     @NotNull(message = "Quantity cannot be null")
