@@ -22,7 +22,7 @@ public class StatisticConverter {
 
         return ProductStatisticResponseDto.builder()
                 .productName(product.getName())
-                .productCategory(product.getCategory().categoryName)
+                .productCategory(product.getCategory().getCategoryName())
                 .productPrice(product.getPrice())
                 .productDiscountPrice(product.getDiscountPrice() != null
                         ? product.getDiscountPrice()

@@ -23,7 +23,7 @@ public class Category {
 
     @Size(min = 3, max = 20, message = "Category name must be between 3 and 20 characters")
     @Column(nullable = false, unique = true)
-    public String categoryName;
+    private String categoryName;
 
     @URL
     @Column(length = 256)

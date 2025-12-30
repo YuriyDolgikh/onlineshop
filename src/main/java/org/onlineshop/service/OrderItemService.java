@@ -26,17 +26,16 @@ public class OrderItemService implements OrderItemServiceInterface {
     private final OrderRepository orderRepository;
 
     /**
-     * Deletes an item from the specified order. The order item is identified
-     * by its unique ID. This method ensures that the order is in a modifiable
-     * state (e.g., `PENDING_PAYMENT`) and that the current user is authorized
-     * to delete the item. If these conditions are not met, an exception is thrown.
+     * Deletes an order item from a specific order by its ID. Ensures that the user
+     * is authorized to delete the item and that the order is in a valid state
+     * for deletion. If the item is the last one in the order, the order's status
+     * is updated to CANCELLED.
      *
-     * @param orderItemId the unique identifier of the order item to be deleted;
-     *                    must not be null
-     * @throws BadRequestException if the orderItemId is null, if the order
-     *                             is not in `PENDING_PAYMENT` status, or if
-     *                             the current user is not authorized to modify the order
-     * @throws NotFoundException   if the order item with the specified ID is not found
+     * @param orderItemId the ID of the order item to be deleted; must not be null
+     * @throws BadRequestException if the order item ID is null, the order is not
+     *                             in a PENDING_PAYMENT status, or the user is not
+     *                             authorized to delete the item
+     * @throws NotFoundException   if no order item is found with the specified ID
      */
     @Transactional
     @Override
@@ -56,6 +55,10 @@ public class OrderItemService implements OrderItemServiceInterface {
         }
         currentOrder.getOrderItems().remove(orderItem);
         orderItemRepository.delete(orderItem);
+        if (currentOrder.getOrderItems().isEmpty()) {
+            currentOrder.setStatus(Order.Status.CANCELLED);
+            log.info("Order {} cancelled because all items were deleted", currentOrder.getOrderId());
+        }
         orderRepository.save(currentOrder);
         log.info("Item {} deleted from order for user {}", orderItemId, userService.getCurrentUser().getUsername());
     }
