@@ -189,7 +189,7 @@
                 <version>3.2.5</version>
                 <configuration>
                     <systemPropertyVariables>
-                        <spring.datasource.url>jdbc:postgresql://localhost:5433/test</spring.datasource.url>
+                        <spring.datasource.url>jdbc:postgresql://localhost:5432/test</spring.datasource.url>
                         <spring.profiles.active>test</spring.profiles.active>
                     </systemPropertyVariables>
                 </configuration>
