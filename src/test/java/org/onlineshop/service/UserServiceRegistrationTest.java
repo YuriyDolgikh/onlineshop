@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
@@ -141,7 +140,7 @@ class UserServiceRegistrationTest {
                 .phoneNumber("+491213144578")
                 .build();
 
-        assertThrows(DataIntegrityViolationException.class, () -> userService.registration(request));
+        assertThrows(ConstraintViolationException.class, () -> userService.registration(request));
     }
 
     @Test

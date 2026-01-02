@@ -6,14 +6,12 @@ import org.junit.jupiter.api.Test;
 import org.onlineshop.dto.category.CategoryResponseDto;
 import org.onlineshop.dto.category.CategoryUpdateDto;
 import org.onlineshop.entity.Category;
-import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
@@ -125,8 +123,8 @@ class CategoryServiceUpdateCategoryTest {
                 .categoryName("testCategorySecond")
                 .build();
 
-        Exception exception = assertThrows(InvalidDataAccessApiUsageException.class, () -> categoryService.updateCategory(null, categoryUpdateDto));
-        String messageException = "The given id must not be null";
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> categoryService.updateCategory(null, categoryUpdateDto));
+        String messageException = "Category id must be provided";
         assertEquals(messageException, exception.getMessage());
     }
 

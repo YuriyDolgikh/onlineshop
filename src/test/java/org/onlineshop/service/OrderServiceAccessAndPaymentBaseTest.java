@@ -16,6 +16,7 @@ import org.springframework.security.access.AccessDeniedException;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -47,7 +48,7 @@ class OrderServiceAccessAndPaymentBaseTest extends OrderServiceBaseTest {
         OrderItem orderItem = createMockOrderItem();
         lenient().when(orderItem.getOrder()).thenReturn(order);
 
-        order.setOrderItems(Arrays.asList(orderItem));
+        order.setOrderItems(List.of(orderItem));
         return order;
     }
 
@@ -149,8 +150,8 @@ class OrderServiceAccessAndPaymentBaseTest extends OrderServiceBaseTest {
         Integer orderId = 10;
         Order order = createOrderWithItems(userRegular, Order.Status.PENDING_PAYMENT);
 
-        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
-        when(userService.getCurrentUser()).thenReturn(userRegular);
+        lenient().when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        lenient().when(userService.getCurrentUser()).thenReturn(userRegular);
 
         assertThrows(
                 BadRequestException.class,

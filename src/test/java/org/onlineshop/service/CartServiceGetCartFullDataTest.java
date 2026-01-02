@@ -16,6 +16,7 @@ import org.onlineshop.entity.Product;
 import org.onlineshop.entity.User;
 import org.onlineshop.repository.CartRepository;
 import org.onlineshop.service.converter.CartItemConverter;
+import org.onlineshop.service.util.PriceCalculator;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
@@ -35,6 +36,9 @@ class CartServiceGetCartFullDataTest {
 
     @Mock
     private CartItemConverter cartItemConverter;
+
+    @Mock
+    private PriceCalculator priceCalculator;
 
     @InjectMocks
     private CartService cartService;
@@ -97,6 +101,11 @@ class CartServiceGetCartFullDataTest {
         when(cartItemConverter.toDto(cartItemTest)).thenReturn(cartItemDto);
         when(cartItemConverter.toSimpleDtoFromDto(cartItemDto)).thenReturn(simpleDto);
 
+        when(priceCalculator.calculateDiscountedPrice(
+                BigDecimal.valueOf(100),
+                BigDecimal.valueOf(10)))
+                .thenReturn(BigDecimal.valueOf(180));
+
         CartResponseDto result = cartService.getCartFullData();
 
         assertEquals(180.00, result.getTotalPrice().doubleValue());
@@ -110,5 +119,6 @@ class CartServiceGetCartFullDataTest {
         verify(cartRepository).findByUser(userTest);
         verify(cartItemConverter).toDto(cartItemTest);
         verify(cartItemConverter).toSimpleDtoFromDto(cartItemDto);
+        verify(priceCalculator).calculateDiscountedPrice(BigDecimal.valueOf(100), BigDecimal.valueOf(10));
     }
 }

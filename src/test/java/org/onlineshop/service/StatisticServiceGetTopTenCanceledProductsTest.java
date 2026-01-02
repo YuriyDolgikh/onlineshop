@@ -13,10 +13,6 @@ import org.onlineshop.entity.OrderItem;
 import org.onlineshop.entity.Product;
 import org.onlineshop.repository.OrderRepository;
 import org.onlineshop.service.converter.ProductConverter;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -107,7 +103,7 @@ class StatisticServiceGetTopTenCanceledProductsTest {
                 .limit(10)
                 .map(entry -> ProductStatisticResponseDto.builder()
                         .productName(entry.getKey().getName())
-                        .productCategory(entry.getKey().getCategory().categoryName)
+                        .productCategory(entry.getKey().getCategory().getCategoryName())
                         .productPrice(entry.getKey().getPrice())
                         .productDiscountPrice(entry.getKey().getDiscountPrice())
                         .productQuantity(entry.getValue())
