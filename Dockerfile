@@ -6,10 +6,9 @@ RUN mvn dependency:go-offline
 
 COPY src ./src
 
-# Используем 172.17.0.1 (Docker host) вместо localhost
 RUN mvn test \
     -Dspring.profiles.active=test \
-    -Dspring.datasource.url=jdbc:postgresql://172.17.0.1:5433/test
+    -Dspring.datasource.url=jdbc:postgresql://localhost:5433/test
 
 RUN mvn clean package -DskipTests
 
