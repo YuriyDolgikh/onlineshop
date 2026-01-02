@@ -1,5 +1,6 @@
 package org.onlineshop.controller;
 
+import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,7 +17,6 @@ import org.onlineshop.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
@@ -98,7 +98,7 @@ class ProductControllerUpdateProductTest {
                 .productName("TestProductSecond")
                 .build();
 
-        ResponseEntity<ProductResponseDto> response = productController.updateProduct(productTestOne.getId(),requestDto);
+        ResponseEntity<ProductResponseDto> response = productController.updateProduct(productTestOne.getId(), requestDto);
 
         assertNotNull(response);
         assertEquals(200, response.getStatusCode().value());
@@ -146,7 +146,7 @@ class ProductControllerUpdateProductTest {
                 .productCategory("testCategorySecond")
                 .build();
 
-        ResponseEntity<ProductResponseDto> response = productController.updateProduct(productTestOne.getId(),requestDto);
+        ResponseEntity<ProductResponseDto> response = productController.updateProduct(productTestOne.getId(), requestDto);
 
         assertNotNull(response);
         assertEquals(200, response.getStatusCode().value());
@@ -185,7 +185,7 @@ class ProductControllerUpdateProductTest {
                 .productPrice(BigDecimal.valueOf(80))
                 .build();
 
-        ResponseEntity<ProductResponseDto> response = productController.updateProduct(productTestOne.getId(),requestDto);
+        ResponseEntity<ProductResponseDto> response = productController.updateProduct(productTestOne.getId(), requestDto);
 
         assertNotNull(response);
         assertEquals(200, response.getStatusCode().value());
@@ -225,7 +225,7 @@ class ProductControllerUpdateProductTest {
                 .productDiscountPrice(BigDecimal.valueOf(80))
                 .build();
 
-        ResponseEntity<ProductResponseDto> response = productController.updateProduct(productTestOne.getId(),requestDto);
+        ResponseEntity<ProductResponseDto> response = productController.updateProduct(productTestOne.getId(), requestDto);
 
         assertNotNull(response);
         assertEquals(200, response.getStatusCode().value());
@@ -265,7 +265,7 @@ class ProductControllerUpdateProductTest {
                 .productDescription("New Description")
                 .build();
 
-        ResponseEntity<ProductResponseDto> response = productController.updateProduct(productTestOne.getId(),requestDto);
+        ResponseEntity<ProductResponseDto> response = productController.updateProduct(productTestOne.getId(), requestDto);
 
         assertNotNull(response);
         assertEquals(200, response.getStatusCode().value());
@@ -305,7 +305,7 @@ class ProductControllerUpdateProductTest {
                 .image("https://drive.google.com/file/new")
                 .build();
 
-        ResponseEntity<ProductResponseDto> response = productController.updateProduct(productTestOne.getId(),requestDto);
+        ResponseEntity<ProductResponseDto> response = productController.updateProduct(productTestOne.getId(), requestDto);
 
         assertNotNull(response);
         assertEquals(200, response.getStatusCode().value());
@@ -325,7 +325,7 @@ class ProductControllerUpdateProductTest {
                 .products(new ArrayList<>())
                 .build();
 
-       Category savedCategory = categoryRepository.save(category);
+        Category savedCategory = categoryRepository.save(category);
 
 
         Product existingProduct = Product.builder()
@@ -399,7 +399,7 @@ class ProductControllerUpdateProductTest {
                 .productName("te")
                 .build();
 
-        assertThrows(IllegalArgumentException.class, () -> productController.updateProduct(productTestOne.getId(),requestDto));
+        assertThrows(ConstraintViolationException.class, () -> productController.updateProduct(productTestOne.getId(), requestDto));
         assertEquals(1, productRepository.findAll().size());
 
     }
@@ -433,7 +433,7 @@ class ProductControllerUpdateProductTest {
                 .productName("TestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProductTestProduct")
                 .build();
 
-        assertThrows(IllegalArgumentException.class, () -> productController.updateProduct(productTestOne.getId(),requestDto));
+        assertThrows(ConstraintViolationException.class, () -> productController.updateProduct(productTestOne.getId(), requestDto));
         assertEquals(1, productRepository.findAll().size());
 
     }
@@ -467,7 +467,7 @@ class ProductControllerUpdateProductTest {
                 .productPrice(BigDecimal.ZERO)
                 .build();
 
-        assertThrows(IllegalArgumentException.class, () -> productController.updateProduct(productTestOne.getId(),requestDto));
+        assertThrows(ConstraintViolationException.class, () -> productController.updateProduct(productTestOne.getId(), requestDto));
         assertEquals(1, productRepository.findAll().size());
 
     }
@@ -501,7 +501,7 @@ class ProductControllerUpdateProductTest {
                 .image("NOT VALID IMAGE")
                 .build();
 
-        assertThrows(UrlValidationException.class, () -> productController.updateProduct(productTestOne.getId(),requestDto));
+        assertThrows(UrlValidationException.class, () -> productController.updateProduct(productTestOne.getId(), requestDto));
         assertEquals(1, productRepository.findAll().size());
 
     }
@@ -635,7 +635,7 @@ class ProductControllerUpdateProductTest {
                 .image("https://drive.google.com/file/first")
                 .build();
 
-        assertThrows(InvalidDataAccessApiUsageException.class, () -> productController.updateProduct(null, requestDto));
+        assertThrows(IllegalArgumentException.class, () -> productController.updateProduct(null, requestDto));
         assertEquals(1, productRepository.findAll().size());
     }
 }

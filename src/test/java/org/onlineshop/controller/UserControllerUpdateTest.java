@@ -81,8 +81,9 @@ class UserControllerUpdateTest {
 
         ResponseEntity<UserResponseDto> response = userController.updateUser(adminId, userUpdateRequestDto);
 
-        assertEquals(response.getBody().getUsername(), "Alex");
-        assertEquals(userRepository.findAll().size(), 2);
+        assertNotNull(response.getBody());
+        assertEquals("Alex", response.getBody().getUsername());
+        assertEquals(2, userRepository.findAll().size());
     }
 
     @Test
@@ -95,8 +96,9 @@ class UserControllerUpdateTest {
 
         ResponseEntity<UserResponseDto> response = userController.updateUser(adminId, userUpdateRequestDto);
 
-        assertEquals(response.getBody().getPhoneNumber(), "+49321456773");
-        assertEquals(userRepository.findAll().size(), 2);
+        assertNotNull(response.getBody());
+        assertEquals("+49321456773", response.getBody().getPhoneNumber());
+        assertEquals(2, userRepository.findAll().size());
     }
 
     @Test
@@ -104,14 +106,14 @@ class UserControllerUpdateTest {
             roles = {"ADMIN", "MANAGER", "USER"})
     void testUpdateUserPasswordIfOkAndRoleIsAdminManagerUser() {
         UserUpdateRequestDto userUpdateRequestDto = UserUpdateRequestDto.builder()
-                .hashPassword("alex123")
+                .hashPassword("alex12345")
                 .build();
 
         ResponseEntity<UserResponseDto> response = userController.updateUser(adminId, userUpdateRequestDto);
 
-        assertEquals(response.getBody().getUsername(), "admin");
-        assertEquals(userRepository.findAll().size(), 2);
-        assertNotNull(response.getBody().hashCode());
+        assertNotNull(response.getBody());
+        assertEquals("admin", response.getBody().getUsername());
+        assertEquals(2, userRepository.findAll().size());
     }
 
     @Test

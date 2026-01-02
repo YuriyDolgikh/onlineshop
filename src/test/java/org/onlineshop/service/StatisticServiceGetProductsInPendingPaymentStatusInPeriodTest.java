@@ -13,10 +13,6 @@ import org.onlineshop.entity.OrderItem;
 import org.onlineshop.entity.Product;
 import org.onlineshop.repository.OrderRepository;
 import org.onlineshop.service.converter.ProductConverter;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -43,7 +39,7 @@ class StatisticServiceGetProductsInPendingPaymentStatusInPeriodTest {
 
     @Test
     void getProductsInPendingPaymentStatus() {
-        int days = 5; // проверяем за последние 5 дней
+        int days = 5;
         LocalDateTime since = LocalDateTime.now().minusDays(days);
 
         Category category = Category.builder()
@@ -102,7 +98,6 @@ class StatisticServiceGetProductsInPendingPaymentStatusInPeriodTest {
             return list;
         });
 
-        //вычисляю expectedList
         Map<Product, Integer> productQuantityMap = new LinkedHashMap<>();
         for (Order o : orders) {
             for (OrderItem oi : o.getOrderItems()) {
@@ -113,24 +108,21 @@ class StatisticServiceGetProductsInPendingPaymentStatusInPeriodTest {
                 .sorted(Map.Entry.<Product, Integer>comparingByValue().reversed())
                 .map(e -> ProductStatisticResponseDto.builder()
                         .productName(e.getKey().getName())
-                        .productCategory(e.getKey().getCategory().categoryName)
+                        .productCategory(e.getKey().getCategory().getCategoryName())
                         .productPrice(e.getKey().getPrice())
                         .productDiscountPrice(e.getKey().getDiscountPrice())
                         .productQuantity(e.getValue())
                         .build())
                 .toList();
 
-        //вызов сервиса
         List<ProductStatisticResponseDto> actualList = statisticService.getProductsInPendingPaymentStatus(days);
 
-        //сравниваю
         assertEquals(expectedList.size(), actualList.size());
         for (int i = 0; i < expectedList.size(); i++) {
             assertEquals(expectedList.get(i).getProductName(), actualList.get(i).getProductName());
             assertEquals(expectedList.get(i).getProductQuantity(), actualList.get(i).getProductQuantity());
         }
 
-        //// проверка сорт по убыванию кол-ва
         for (int i = 0; i < actualList.size() - 1; i++) {
             assertTrue(actualList.get(i).getProductQuantity() >= actualList.get(i + 1).getProductQuantity());
         }

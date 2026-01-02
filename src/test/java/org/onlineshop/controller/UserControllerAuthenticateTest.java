@@ -1,10 +1,11 @@
 package org.onlineshop.controller;
 
+import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.onlineshop.entity.User;
-import org.onlineshop.exception.NotFoundException;
+import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.repository.ConfirmationCodeRepository;
 import org.onlineshop.repository.UserRepository;
 import org.onlineshop.security.dto.AuthRequestDto;
@@ -13,11 +14,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.DisabledException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -82,7 +83,7 @@ class UserControllerAuthenticateTest {
                 .password("manager123")
                 .build();
 
-        assertThrows(DisabledException.class, () -> userController.authenticate(requestDto));
+        assertThrows(BadRequestException.class, () -> userController.authenticate(requestDto));
     }
 
     @Test
@@ -92,7 +93,7 @@ class UserControllerAuthenticateTest {
                 .password("admin123")
                 .build();
 
-        assertThrows(NotFoundException.class, () -> userController.authenticate(requestDto));
+        assertThrows(ConstraintViolationException.class, () -> userController.authenticate(requestDto));
     }
 
     @Test
@@ -102,7 +103,7 @@ class UserControllerAuthenticateTest {
                 .password(" ")
                 .build();
 
-        assertThrows(NotFoundException.class, () -> userController.authenticate(requestDto));
+        assertThrows(ConstraintViolationException.class, () -> userController.authenticate(requestDto));
     }
 
     @Test
@@ -112,7 +113,7 @@ class UserControllerAuthenticateTest {
                 .password("admin123")
                 .build();
 
-        assertThrows(NotFoundException.class, () -> userController.authenticate(requestDto));
+        assertThrows(ConstraintViolationException.class, () -> userController.authenticate(requestDto));
     }
 
     @Test
@@ -122,6 +123,6 @@ class UserControllerAuthenticateTest {
                 .password(null)
                 .build();
 
-        assertThrows(NotFoundException.class, () -> userController.authenticate(requestDto));
+        assertThrows(ConstraintViolationException.class, () -> userController.authenticate(requestDto));
     }
 }

@@ -6,6 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.onlineshop.entity.ConfirmationCode;
 import org.onlineshop.entity.User;
+import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.repository.ConfirmationCodeRepository;
 import org.onlineshop.repository.UserRepository;
@@ -59,6 +60,7 @@ class ConfirmationCodeServiceChangeConfirmationStatusByCodeTest {
                 .hashPassword("$2a$10$WiAt7dmC1vLIxjY9/9n7P.I5RQU1MKKSOI1Dy1pNLPPIts7K5RJR2")
                 .phoneNumber("+494949494949")
                 .role(User.Role.USER)
+                .status(User.Status.NOT_CONFIRMED)
                 .cart(null)
                 .orders(new ArrayList<>())
                 .favourites(new HashSet<>())
@@ -99,6 +101,7 @@ class ConfirmationCodeServiceChangeConfirmationStatusByCodeTest {
                 .hashPassword("$2a$10$WiAt7dmC1vLIxjY9/9n7P.I5RQU1MKKSOI1Dy1pNLPPIts7K5RJR2")
                 .phoneNumber("+494949494949")
                 .role(User.Role.USER)
+                .status(User.Status.NOT_CONFIRMED)
                 .build();
 
         ConfirmationCode confirmationCode = ConfirmationCode.builder()
@@ -114,5 +117,35 @@ class ConfirmationCodeServiceChangeConfirmationStatusByCodeTest {
         assertEquals(newTestUser, result);
         assertEquals(newTestUser.getUserId(), result.getUserId());
         assertEquals(newTestUser.getEmail(), result.getEmail());
+    }
+
+    @Test
+    void testChangeConfirmationStatusByCodeWhenUserDeleted() {
+        String code = "deleted-user-code";
+
+        User deletedUser = User.builder()
+                .userId(99)
+                .username("deletedUser")
+                .email("deleted@email.com")
+                .hashPassword("hash")
+                .phoneNumber("+499999999999")
+                .role(User.Role.USER)
+                .status(User.Status.DELETED)
+                .build();
+
+        ConfirmationCode confirmationCode = ConfirmationCode.builder()
+                .code(code)
+                .user(deletedUser)
+                .expireDataTime(LocalDateTime.now().plusDays(1))
+                .build();
+
+        when(confirmationCodeRepository.findByCode(code)).thenReturn(Optional.of(confirmationCode));
+
+        BadRequestException exception = assertThrows(
+                BadRequestException.class,
+                () -> confirmationCodeService.changeConfirmationStatusByCode(code)
+        );
+
+        assertTrue(exception.getMessage().contains("User has been deleted"));
     }
 }

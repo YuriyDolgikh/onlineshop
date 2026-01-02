@@ -14,13 +14,12 @@ import org.onlineshop.entity.OrderItem;
 import org.onlineshop.entity.Product;
 import org.onlineshop.repository.OrderRepository;
 import org.onlineshop.service.converter.ProductConverter;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -48,7 +47,6 @@ class StatisticServiceGetTopTenProductsByStatusTest {
                 .categoryName("Category1")
                 .build();
 
-        //созд продукты
         List<Product> products = new ArrayList<>();
         for (int i = 0; i <= 15; i++) {
             products.add(Product.builder()
@@ -60,7 +58,6 @@ class StatisticServiceGetTopTenProductsByStatusTest {
                     .build());
         }
 
-        //созд заказы
         List<Order> orders = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
             Order order = new Order();
@@ -81,37 +78,32 @@ class StatisticServiceGetTopTenProductsByStatusTest {
 
         when(orderRepository.findByStatus(status)).thenReturn(orders);
 
-        //созд List<ProductStatisticResponseDto> из переданной карты:
-        //для каждого продукта создаётся DTO с нужными полями;
-        // quantity берётся из значения мапы.
-        //И этот список возвращается, имитируя поведение настоящего конвертера.
         when(productConverter.fromMapToList(Mockito.anyMap())).thenAnswer(invocation -> {
             Map<Product, Integer> map = invocation.getArgument(0);
             List<ProductStatisticResponseDto> list = new ArrayList<>();
             map.forEach((product, quantity) -> {
                 list.add(ProductStatisticResponseDto.builder()
                         .productName(product.getName())
-                        .productCategory(product.getCategory().categoryName)
+                        .productCategory(product.getCategory().getCategoryName())
                         .productPrice(product.getPrice())
                         .productDiscountPrice(product.getDiscountPrice())
-                                .productQuantity(quantity)
+                        .productQuantity(quantity)
                         .build());
             });
             return list;
         });
 
-        // Формируем expectedList
         List<ProductStatisticResponseDto> expectedList = orders.stream()
                 .flatMap(o -> o.getOrderItems().stream())
-                .collect(HashMap<Product,Integer>::new,
-                        (map,item) -> map.merge(item.getProduct(), item.getQuantity(), Integer::sum),
+                .collect(HashMap<Product, Integer>::new,
+                        (map, item) -> map.merge(item.getProduct(), item.getQuantity(), Integer::sum),
                         Map::putAll)
                 .entrySet().stream()
-                .sorted(Map.Entry.<Product,Integer>comparingByValue().reversed())
+                .sorted(Map.Entry.<Product, Integer>comparingByValue().reversed())
                 .limit(10)
                 .map(e -> ProductStatisticResponseDto.builder()
                         .productName(e.getKey().getName())
-                        .productCategory(e.getKey().getCategory().categoryName)
+                        .productCategory(e.getKey().getCategory().getCategoryName())
                         .productPrice(e.getKey().getPrice())
                         .productDiscountPrice(e.getKey().getDiscountPrice())
                         .productQuantity(e.getValue())
@@ -129,15 +121,8 @@ class StatisticServiceGetTopTenProductsByStatusTest {
             assertEquals(expectedList.get(i).getProductQuantity(), actualList.get(i).getProductQuantity());
         }
 
-        //проверяем отсортировано ли по убыванию количество продуктов в заказе
-        for (int i = 0; i < actualList.size()-1; i++) {
-            assertTrue(actualList.get(i).getProductQuantity() >= actualList.get(i+1).getProductQuantity());
+        for (int i = 0; i < actualList.size() - 1; i++) {
+            assertTrue(actualList.get(i).getProductQuantity() >= actualList.get(i + 1).getProductQuantity());
         }
-
-
-
-
     }
-
-
 }

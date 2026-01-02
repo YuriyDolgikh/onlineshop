@@ -1,11 +1,7 @@
 package org.onlineshop.service;
 
-import org.hibernate.validator.internal.constraintvalidators.bv.AssertFalseValidator;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.onlineshop.dto.product.ProductRequestDto;
-import org.onlineshop.dto.product.ProductResponseDto;
 import org.onlineshop.entity.Category;
 import org.onlineshop.entity.Product;
 import org.onlineshop.exception.NotFoundException;
@@ -14,7 +10,6 @@ import org.onlineshop.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
@@ -86,8 +81,8 @@ class ProductServiceDeleteProductTest {
 
     @Test
     void testDeleteProductIfProductIdNull() {
-        Exception exception = assertThrows(InvalidDataAccessApiUsageException.class, () -> productService.deleteProduct(null));
-        String messageException = "The given id must not be null";
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> productService.deleteProduct(null));
+        String messageException = "Product id cannot be null";
         assertEquals(messageException, exception.getMessage());
 
     }
