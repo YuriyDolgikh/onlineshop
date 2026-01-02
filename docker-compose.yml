@@ -18,6 +18,23 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+  # ДОБАВЬ ТЕСТОВУЮ БАЗУ
+  test-db:
+    image: postgres:17
+    container_name: onlineshop_test_db
+    restart: "no"  # Только для тестов
+    environment:
+      POSTGRES_DB: test
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1111
+    ports:
+      - "5433:5432"  # Другой порт
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   app:
     build: .
     container_name: onlineshop_app
@@ -26,9 +43,7 @@ services:
       db:
         condition: service_healthy
     environment:
-      # all variables from application.properties
       SPRING_PROFILES_ACTIVE: docker
-      # URL DB for the Docker network
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/onlineshop
     ports:
       - "8080:8080"

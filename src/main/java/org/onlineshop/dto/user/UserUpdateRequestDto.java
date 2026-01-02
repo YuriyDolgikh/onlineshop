@@ -22,7 +22,7 @@ public class UserUpdateRequestDto {
     )
     private String phoneNumber;
 
-    @Size(min = 8, max = 20, message = "Password must be empty or between 6 and 20 characters")
+    @Size(min = 8, max = 20, message = "Password must be empty or between 8 and 20 characters")
     private String hashPassword;
 
 }

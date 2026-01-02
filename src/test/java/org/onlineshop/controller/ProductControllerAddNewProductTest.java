@@ -1,5 +1,6 @@
 package org.onlineshop.controller;
 
+import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -8,7 +9,6 @@ import org.onlineshop.dto.product.ProductResponseDto;
 import org.onlineshop.entity.Category;
 import org.onlineshop.entity.Product;
 import org.onlineshop.entity.User;
-import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.exception.UrlValidationException;
 import org.onlineshop.repository.CategoryRepository;
 import org.onlineshop.repository.ProductRepository;
@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
@@ -28,7 +27,6 @@ import org.springframework.test.context.TestPropertySource;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -151,7 +149,7 @@ class ProductControllerAddNewProductTest {
                 .productDiscountPrice(BigDecimal.valueOf(5))
                 .build();
 
-        assertThrows(IllegalArgumentException.class, () -> productController.addNewProduct(requestDto));
+        assertThrows(ConstraintViolationException.class, () -> productController.addNewProduct(requestDto));
         assertEquals(0, productRepository.findAll().size());
     }
 
@@ -168,7 +166,7 @@ class ProductControllerAddNewProductTest {
                 .productDiscountPrice(BigDecimal.valueOf(5))
                 .build();
 
-        assertThrows(IllegalArgumentException.class, () -> productController.addNewProduct(requestDto));
+        assertThrows(ConstraintViolationException.class, () -> productController.addNewProduct(requestDto));
         assertEquals(0, productRepository.findAll().size());
     }
 
@@ -185,7 +183,7 @@ class ProductControllerAddNewProductTest {
                 .productDiscountPrice(BigDecimal.valueOf(5))
                 .build();
 
-        assertThrows(IllegalArgumentException.class, () -> productController.addNewProduct(requestDto));
+        assertThrows(ConstraintViolationException.class, () -> productController.addNewProduct(requestDto));
         assertEquals(0, productRepository.findAll().size());
     }
 
@@ -202,7 +200,7 @@ class ProductControllerAddNewProductTest {
                 .productDiscountPrice(BigDecimal.valueOf(5))
                 .build();
 
-        assertThrows(IllegalArgumentException.class, () -> productController.addNewProduct(requestDto));
+        assertThrows(ConstraintViolationException.class, () -> productController.addNewProduct(requestDto));
         assertEquals(0, productRepository.findAll().size());
     }
 
@@ -219,7 +217,7 @@ class ProductControllerAddNewProductTest {
                 .productDiscountPrice(BigDecimal.valueOf(5))
                 .build();
 
-        assertThrows(IllegalArgumentException.class, () -> productController.addNewProduct(requestDto));
+        assertThrows(ConstraintViolationException.class, () -> productController.addNewProduct(requestDto));
         assertEquals(0, productRepository.findAll().size());
     }
 
@@ -236,7 +234,7 @@ class ProductControllerAddNewProductTest {
                 .productDiscountPrice(BigDecimal.valueOf(5))
                 .build();
 
-        assertThrows(IllegalArgumentException.class, () -> productController.addNewProduct(requestDto));
+        assertThrows(ConstraintViolationException.class, () -> productController.addNewProduct(requestDto));
         assertEquals(0, productRepository.findAll().size());
     }
 
@@ -312,7 +310,7 @@ class ProductControllerAddNewProductTest {
                 .productDiscountPrice(BigDecimal.valueOf(5))
                 .build();
 
-        assertThrows(IllegalArgumentException.class, () -> productController.addNewProduct(requestDto));
+        assertThrows(ConstraintViolationException.class, () -> productController.addNewProduct(requestDto));
         assertEquals(0, productRepository.findAll().size());
 
     }
@@ -330,7 +328,7 @@ class ProductControllerAddNewProductTest {
                 .productDiscountPrice(BigDecimal.valueOf(5))
                 .build();
 
-        assertThrows(IllegalArgumentException.class, () -> productController.addNewProduct(requestDto));
+        assertThrows(ConstraintViolationException.class, () -> productController.addNewProduct(requestDto));
         assertEquals(0, productRepository.findAll().size());
 
     }

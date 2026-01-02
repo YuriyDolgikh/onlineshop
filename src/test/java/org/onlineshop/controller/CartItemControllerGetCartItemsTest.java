@@ -52,8 +52,8 @@ class CartItemControllerGetCartItemsTest {
         assertEquals("Product 0", firstItem.getProductName());
         assertEquals(1, firstItem.getCartItemId());
         assertEquals("Category", firstItem.getCategoryName());
-        assertEquals(120.0, firstItem.getProductPrice());
-        assertEquals(15.0, firstItem.getProductDiscountPrice());
+        assertEquals(new BigDecimal("120.00"), firstItem.getProductPrice());
+        assertEquals(new BigDecimal("15.00"), firstItem.getProductDiscountPrice());
         assertEquals(2, firstItem.getQuantity());
     }
 
