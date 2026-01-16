@@ -2,6 +2,7 @@ package org.onlineshop.entity;
 
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -48,6 +49,8 @@ public class Product {
     private String image;
 
     @Column(precision = 10, scale = 2)
+    @DecimalMin(value = "0.00", message = "Discount price must be at least 0%")
+    @DecimalMax(value = "100.00", message = "Discount price cannot be greater than 100%")
     private BigDecimal discountPrice;
 
     @CreationTimestamp

@@ -12,7 +12,6 @@ import org.onlineshop.repository.ConfirmationCodeRepository;
 import org.onlineshop.service.interfaces.ConfirmationCodeServiceInterface;
 import org.onlineshop.service.mail.MailUtil;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -109,14 +108,17 @@ public class ConfirmationCodeService implements ConfirmationCodeServiceInterface
     }
 
     /**
-     * Changes the confirmation status of a user based on the provided confirmation code.
-     * This method validates the confirmation code, checking its existence, expiration, and related user's status.
-     * It marks the confirmation code as confirmed and persists the changes.
+     * Changes the confirmation status of a user by validating a provided confirmation code.
+     * <p>
+     * The method retrieves the confirmation code from the repository and checks if it exists,
+     * has not expired, and has not already been confirmed. If the confirmation code is valid,
+     * it updates its status to confirmed and logs the action. The associated user is returned.
      *
-     * @param code the confirmation code provided for updating the user's confirmation status
-     * @return the user associated with the given confirmation code, whose confirmation status was updated
-     * @throws NotFoundException if the given confirmation code does not exist
-     * @throws BadRequestException if the confirmation code has expired or the related user has been deleted
+     * @param code the confirmation code used to verify and update the user's status
+     * @return the user associated with the provided confirmation code, with the updated status
+     * @throws NotFoundException   if the confirmation code cannot be found
+     * @throws BadRequestException if the confirmation code is expired, already confirmed,
+     *                             or the user associated with it has been deleted
      */
     @Transactional
     @Override
@@ -126,8 +128,11 @@ public class ConfirmationCodeService implements ConfirmationCodeServiceInterface
         if (confirmationCode.getExpireDataTime().isBefore(LocalDateTime.now())) {
             throw new BadRequestException("Confirmation code expired");
         }
+        if (confirmationCode.isConfirmed()) {
+            throw new BadRequestException("Confirmation code already confirmed");
+        }
         User user = confirmationCode.getUser();
-        if (user.getStatus().equals(User.Status.DELETED)){
+        if (user.getStatus().equals(User.Status.DELETED)) {
             throw new BadRequestException("User has been deleted");
         }
         confirmationCode.setConfirmed(true);
@@ -179,22 +184,22 @@ public class ConfirmationCodeService implements ConfirmationCodeServiceInterface
 
     /**
      * Checks if the confirmation code has expired.
-     *
+     * <p>
      * This method verifies whether the confirmation code associated with the
      * provided code string has an expiration time that has already passed.
-     * If the confirmation code does not exist, a {@code BadCredentialsException}
+     * If the confirmation code does not exist, a {@code NotFoundException}
      * is thrown.
      *
      * @param code the confirmation code to be checked for expiration
      * @return {@code true} if the confirmation code is expired, otherwise {@code false}
-     * @throws BadCredentialsException if the confirmation code is not found
+     * @throws NotFoundException if the confirmation code is not found
      */
     @Generated
-    @Transactional( readOnly = true)
-    protected boolean isConfirmationCodeExpired(String code) {
+    @Transactional(readOnly = true)
+    public boolean isConfirmationCodeExpired(String code) {
         Optional<ConfirmationCode> confirmationCodeOptional = repository.findByCode(code);
         if (confirmationCodeOptional.isEmpty()) {
-            throw new BadCredentialsException("Confirmation code not found");
+            throw new NotFoundException("Confirmation code not found");
         }
         return confirmationCodeOptional.get().getExpireDataTime().isBefore(LocalDateTime.now());
     }
@@ -209,9 +214,9 @@ public class ConfirmationCodeService implements ConfirmationCodeServiceInterface
      * @throws BadRequestException if the confirmation code is not found in the repository
      */
     @Generated
-    @Transactional( readOnly = true)
-    protected ConfirmationCode getConfirmationCodeByCode(String code) {
+    @Transactional(readOnly = true)
+    public ConfirmationCode getConfirmationCodeByCode(String code) {
         return repository.findByCode(code)
-                .orElseThrow(() -> new BadRequestException("Confirmation code not found"));
+                .orElseThrow(() -> new NotFoundException("Confirmation code not found"));
     }
 }

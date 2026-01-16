@@ -1,123 +1,75 @@
 package org.onlineshop.service;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.onlineshop.dto.user.UserResponseDto;
-import org.onlineshop.entity.ConfirmationCode;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.onlineshop.entity.User;
 import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.exception.NotFoundException;
-import org.onlineshop.repository.ConfirmationCodeRepository;
 import org.onlineshop.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
+import org.onlineshop.service.converter.UserConverter;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@TestPropertySource(locations = "classpath:application-test.yml")
+@ExtendWith(MockitoExtension.class)
 class UserServiceRenewUserTest {
 
-    @Autowired
+    @Mock
     private UserRepository userRepository;
 
-    @Autowired
-    private ConfirmationCodeRepository confirmationCodeRepository;
+    @Mock
+    private UserConverter userConverter;
 
-    @Autowired
+    @Mock
+    private ConfirmationCodeService confirmationCodeService;
+
+    @InjectMocks
     private UserService userService;
 
-    @MockBean
-    private ConfirmationCodeService confirmationCodeService;
-    private String userEmailDeleted;
-    private String userConfirmedEmail;
+    @Test
+    void testRenewUserSuccess() {
+        User user = new User();
+        user.setEmail("test@company.com");
+        user.setStatus(User.Status.DELETED);
 
-    @AfterEach
-    void dropDatabase() {
-        confirmationCodeRepository.deleteAll();
-        userRepository.deleteAll();
-    }
+        when(userRepository.findByEmail(user.getEmail()))
+                .thenReturn(Optional.of(user));
 
-    @BeforeEach
-    void setUp() {
-        User newTestUser = User.builder()
-                .username("newTestUser")
-                .email("testUser@email.com")
-                .hashPassword("$2a$10$WiAt7dmC1vLIxjY9/9n7P.I5RQU1MKKSOI1Dy1pNLPPIts7K5RJR2")
-                .phoneNumber("+494949494949")
-                .status(User.Status.DELETED)
-                .role(User.Role.USER)
-                .build();
+        userService.renewUser(user.getEmail());
 
-        userRepository.save(newTestUser);
-
-        userEmailDeleted = newTestUser.getEmail();
-
-        User newUser = User.builder()
-                .username("newUser")
-                .email("User@email.com")
-                .hashPassword("$2a$10$WiAt7dmC1vLIxjY9/9n7P.I5RQU1MKKSOI1Dy1pNLPPIts7K5RJR2")
-                .phoneNumber("+494945454545")
-                .status(User.Status.CONFIRMED)
-                .role(User.Role.USER)
-                .cart(null)
-                .orders(new ArrayList<>())
-                .favourites(new HashSet<>())
-                .build();
-
-        User savedUser = userRepository.save(newUser);
-
-        userConfirmedEmail = newUser.getEmail();
-
-        ConfirmationCode confirmationCode = ConfirmationCode.builder()
-                .code("someConfirmationCode")
-                .user(savedUser)
-                .expireDataTime(LocalDateTime.now().plusDays(1))
-                .build();
-
-        confirmationCodeRepository.save(confirmationCode);
-
-        doNothing().when(confirmationCodeService).confirmationCodeManager(any(User.class));
+        assertEquals(User.Status.NOT_CONFIRMED, user.getStatus());
     }
 
     @Test
-    @WithMockUser(username = "testUser@email.com", roles = "USER")
-    void testRenewUserIfOk() {
-        UserResponseDto renewUser = userService.renewUser(userEmailDeleted);
+    void testRenewUserIfEmailNotConfirmed() {
+        User user = new User();
+        user.setEmail("test@company.com");
+        user.setStatus(User.Status.NOT_CONFIRMED);
 
-        assertEquals("NOT_CONFIRMED", renewUser.getStatus());
+        when(userRepository.findByEmail(user.getEmail()))
+                .thenReturn(Optional.of(user));
+
+        assertThrows(BadRequestException.class,
+                () -> userService.renewUser(user.getEmail()));
     }
 
     @Test
-    @WithMockUser(username = "User@email.com", roles = "USER")
-    void testRenewUserIfUserNotDeleted() {
-        assertThrows(BadRequestException.class, () -> userService.renewUser(userConfirmedEmail));
-    }
-
-    @Test
-    @WithMockUser(username = "testUser@email.com", roles = "USER")
     void testRenewUserIfUserNotFound() {
-        assertThrows(NotFoundException.class, () -> userService.renewUser("notFound@company.com"));
+        when(userRepository.findByEmail("missing@company.com"))
+                .thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,
+                () -> userService.renewUser("missing@company.com"));
     }
 
     @Test
-    @WithMockUser(username = "testUser@email.com", roles = "USER")
     void testRenewUserIfUserNull() {
-        assertThrows(IllegalArgumentException.class, () -> userService.renewUser(null));
+        assertThrows(IllegalArgumentException.class,
+                () -> userService.renewUser(null));
     }
 }

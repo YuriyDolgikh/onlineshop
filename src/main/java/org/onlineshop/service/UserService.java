@@ -9,6 +9,7 @@ import org.onlineshop.dto.user.UserRequestDto;
 import org.onlineshop.dto.user.UserResponseDto;
 import org.onlineshop.dto.user.UserUpdateRequestDto;
 import org.onlineshop.entity.Cart;
+import org.onlineshop.entity.ConfirmationCode;
 import org.onlineshop.entity.User;
 import org.onlineshop.exception.AlreadyExistException;
 import org.onlineshop.exception.BadRequestException;
@@ -23,6 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Optional;
@@ -120,19 +122,35 @@ public class UserService implements UserServiceInterface {
         if (code == null || code.isBlank()) {
             return "Code is null or blank";
         }
-        User user = confirmationCodeService.getConfirmationCodeByCode(code).getUser();
-        if (confirmationCodeService.isConfirmationCodeExpired(code)) {
-            confirmationCodeService.deleteConfirmationCodeByUser(user);
-            confirmationCodeService.confirmationCodeManager(user);
-            log.info("New confirmation code sent to user {}", user.getEmail());
-            return "Confirmation code for email: " + user.getEmail() + " is expired. " +
-                    "Please, check your email again for the new one.";
+
+        try {
+            ConfirmationCode confirmationCode = confirmationCodeService.getConfirmationCodeByCode(code);
+            User user = confirmationCode.getUser();
+
+            if (confirmationCode.getExpireDataTime().isBefore(LocalDateTime.now())) {
+                confirmationCodeService.deleteConfirmationCodeByUser(user);
+                confirmationCodeService.confirmationCodeManager(user);
+
+                log.info("New confirmation code sent to user {}", user.getEmail());
+                return "Confirmation code for email: " + user.getEmail() + " is expired. " +
+                        "Please, check your email again for the new one.";
+            }
+
+            if (confirmationCode.isConfirmed()) {
+                throw new BadRequestException("Confirmation code already confirmed");
+            }
+            confirmationCode.setConfirmed(true);
+            user.setStatus(User.Status.CONFIRMED);
+            log.info("User {} confirmed successfully", user.getEmail());
+            return "Email " + user.getEmail() + " is successfully confirmed";
+
+        } catch (NotFoundException e) {
+            log.warn("Invalid confirmation code: {}", code);
+            return "Invalid confirmation code";
+        } catch (BadRequestException e) {
+            log.warn("Bad request for confirmation code {}: {}", code, e.getMessage());
+            return e.getMessage();
         }
-        confirmationCodeService.changeConfirmationStatusByCode(code);
-        user.setStatus(User.Status.CONFIRMED);
-        userRepository.save(user);
-        log.info("User {} confirmed successfully", user.getEmail());
-        return "Email " + user.getEmail() + " is successfully confirmed";
     }
 
     /**

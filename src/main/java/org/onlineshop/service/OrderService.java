@@ -74,7 +74,7 @@ public class OrderService implements OrderServiceInterface {
 
         for (CartItem cartItem : cartItems) {
             if (cartItem.getProduct().getDiscountPrice() == null) {
-                throw new BadRequestException("Product discount cannot be null.");
+                cartItem.getProduct().setDiscountPrice(BigDecimal.ZERO);
             }
             OrderItem orderItem = cartItemConverter.cartItemToOrderItem(cartItem);
             orderItems.add(orderItem);

@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -198,14 +199,40 @@ class OrderServiceTransferCartToOrderTest {
     void testTransferCartToOrderWhenProductHasNoDiscount() {
         cartItemTest.getProduct().setDiscountPrice(null);
 
+        BigDecimal originalDiscount = cartItemTest.getProduct().getDiscountPrice();
+        assertNull(originalDiscount, "Discount should be null initially");
+
         when(userService.getCurrentUser()).thenReturn(userTest);
         when(cartService.getCurrentCart()).thenReturn(cartTest);
-        lenient().when(cartRepository.findByUser(userTest)).thenReturn(Optional.of(cartTest));
 
-        assertThrows(BadRequestException.class, () -> orderService.transferCartToOrder());
+        OrderItem orderItemWithZeroDiscount = OrderItem.builder()
+                .orderItemId(500)
+                .product(cartItemTest.getProduct())
+                .quantity(1)
+                .priceAtPurchase(cartItemTest.getProduct().getPrice())
+                .build();
 
-        verify(orderRepository, never()).save(any(Order.class));
-        verify(userService, never()).saveUser(any(User.class));
+        when(cartItemConverter.cartItemToOrderItem(cartItemTest)).thenReturn(orderItemWithZeroDiscount);
+        when(orderRepository.findByUserAndStatus(userTest, Order.Status.PENDING_PAYMENT)).thenReturn(null);
+
+        Order savedOrder = Order.builder()
+                .orderId(200)
+                .user(userTest)
+                .status(Order.Status.PENDING_PAYMENT)
+                .deliveryMethod(Order.DeliveryMethod.PICKUP)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .orderItems(new ArrayList<>())
+                .build();
+
+        when(orderRepository.save(any(Order.class))).thenReturn(savedOrder);
+
+        orderService.transferCartToOrder();
+
+        verify(orderRepository, times(2)).save(any(Order.class));
+        verify(userService, times(1)).saveUser(userTest);
+
+        verify(cartItemConverter, times(1)).cartItemToOrderItem(cartItemTest);
     }
 
     @Test

@@ -64,6 +64,9 @@ public class PdfOrderGenerator {
                 Integer quantity = item.getQuantity();
                 BigDecimal price = item.getProduct().getPrice();
                 BigDecimal discount = item.getProduct().getDiscountPrice();
+                if (discount == null) {
+                    discount = BigDecimal.ZERO;
+                }
 
                 BigDecimal finalPrice = priceCalculator.calculateDiscountedPrice(price, discount);
 
