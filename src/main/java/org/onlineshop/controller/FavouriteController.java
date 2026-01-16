@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
@@ -92,7 +91,7 @@ public class FavouriteController {
                     required = true,
                     example = "123"
             )
-            @Valid @PathVariable Integer productId) {
+            @PathVariable Integer productId) {
         FavouriteResponseDto response = favouriteService.addFavourite(productId);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -127,7 +126,7 @@ public class FavouriteController {
                     required = true,
                     example = "123"
             )
-            @Valid @PathVariable Integer productId) {
+            @PathVariable Integer productId) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(favouriteService.deleteFavourite(productId));

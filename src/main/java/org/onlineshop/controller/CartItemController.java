@@ -83,7 +83,7 @@ public class CartItemController {
                     required = true,
                     example = "123"
             )
-            @Valid @PathVariable Integer productId) {
+            @PathVariable Integer productId) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(cartItemService.removeItemFromCart(productId));

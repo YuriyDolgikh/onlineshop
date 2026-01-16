@@ -55,7 +55,7 @@ public class OrderItemController {
                     required = true,
                     example = "789"
             )
-            @Valid @PathVariable Integer orderItemId) {
+            @PathVariable Integer orderItemId) {
         orderItemService.deleteItemFromOrder(orderItemId);
         return ResponseEntity.ok().build();
     }

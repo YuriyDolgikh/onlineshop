@@ -20,8 +20,12 @@ public class PriceCalculator {
      */
     public BigDecimal calculateDiscountedPrice(BigDecimal price, BigDecimal discountPercentage) {
 
-        if (price == null || discountPercentage == null) {
-            throw new IllegalArgumentException("Price and percent of discount cannot be null.");
+        if (price == null) {
+            throw new IllegalArgumentException("Price cannot be null.");
+        }
+
+        if (discountPercentage == null) {
+            throw new IllegalArgumentException("Discount percentage cannot be null.");
         }
 
         if (price.compareTo(BigDecimal.ZERO) < 0) {

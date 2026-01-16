@@ -32,12 +32,16 @@ public class CartItemConverter {
     }
 
     public CartItemFullResponseDto toFullDto(CartItem cartItem) {
+        BigDecimal discountPrice = cartItem.getProduct().getDiscountPrice();
+        BigDecimal price = cartItem.getProduct().getPrice();
+        discountPrice = discountPrice != null ? discountPrice.setScale(2, RoundingMode.HALF_UP) : BigDecimal.ZERO;
+        price = price != null ? price.setScale(2, RoundingMode.HALF_UP) : BigDecimal.ZERO;
         return CartItemFullResponseDto.builder()
                 .cartItemId(cartItem.getCartItemId())
                 .productName(cartItem.getProduct().getName())
                 .categoryName(cartItem.getProduct().getCategory().getCategoryName())
-                .productPrice(cartItem.getProduct().getPrice().setScale(2, RoundingMode.HALF_UP))
-                .productDiscountPrice(cartItem.getProduct().getDiscountPrice().setScale(2, RoundingMode.HALF_UP))
+                .productPrice(price)
+                .productDiscountPrice(discountPrice)
                 .quantity(cartItem.getQuantity())
                 .build();
     }

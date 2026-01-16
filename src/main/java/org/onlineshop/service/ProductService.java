@@ -13,6 +13,7 @@ import org.onlineshop.repository.ProductRepository;
 import org.onlineshop.service.converter.ProductConverter;
 import org.onlineshop.service.interfaces.ProductServiceInterface;
 import org.onlineshop.service.util.ProductServiceHelper;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -36,12 +37,18 @@ public class ProductService implements ProductServiceInterface {
     private final ProductServiceHelper helper;
 
     /**
-     * Adds a new product to a specified category after validating its uniqueness within the category.
-     * It saves the product details to the repository and returns the saved product as a DTO.
+     * Adds a new product to the system based on the provided product details.
+     * Validates the input and assigns the product to the specified category.
+     * Automatically sets creation and update timestamps.
+     * Throws an exception if the product already exists in the specified category.
      *
-     * @param productRequestDto the data transfer object containing the details of the product to be added
-     * @return a ProductResponseDto containing the details of the newly added product
-     * @throws IllegalArgumentException if a product with the same name already exists in the specified category
+     * @param productRequestDto the data transfer object containing the details of the product to be added.
+     *                          Must not be null and should include product name, description, price,
+     *                          discount price, image URL, and category name.
+     * @return a ProductResponseDto object containing the details of the successfully added product.
+     * @throws IllegalArgumentException if the provided ProductRequestDto is null,
+     *                                  if there's a validation failure, or if a product with the same name
+     *                                  already exists in the specified category.
      */
     @Transactional
     @Override
@@ -53,9 +60,6 @@ public class ProductService implements ProductServiceInterface {
         Category category = categoryService.getCategoryByName(productRequestDto.getProductCategory());
         String normalizedName = productRequestDto.getProductName().trim();
 
-        if (productRepository.existsByNameIgnoreCaseAndCategory(normalizedName, category)) {
-            throw new IllegalArgumentException("Product name '" + normalizedName + "' already exists in category '" + category + "'");
-        }
         LocalDateTime now = LocalDateTime.now();
         final String finalImage = helper.resolveImageUrl(productRequestDto.getImage());
 
@@ -70,9 +74,16 @@ public class ProductService implements ProductServiceInterface {
                 .updatedAt(now)
                 .build();
 
-        Product savedProduct = productRepository.save(productToSave);
-        log.info("Product {} successfully added", savedProduct.getName());
-        return productConverter.toDto(savedProduct);
+        try {
+            Product savedProduct = productRepository.save(productToSave);
+            log.info("Product {} successfully added", savedProduct.getName());
+            return productConverter.toDto(savedProduct);
+        } catch (DataIntegrityViolationException e) {
+            log.warn("Attempt to add duplicate product '{}' in category '{}'", normalizedName, category.getCategoryName());
+
+            throw new IllegalArgumentException("Product with name '" + normalizedName
+                    + "' already exists in category '" + category.getCategoryName() + "'");
+        }
     }
 
     /**
@@ -184,8 +195,9 @@ public class ProductService implements ProductServiceInterface {
         if (newDiscountPrice == null) {
             throw new IllegalArgumentException("New discount price cannot be null");
         }
-        if (newDiscountPrice.compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("New discount price cannot be less than 0");
+        if (newDiscountPrice.compareTo(BigDecimal.ZERO) < 0 ||
+                newDiscountPrice.compareTo(BigDecimal.valueOf(100)) > 0) {
+            throw new IllegalArgumentException("Discount price must be between 0 and 100 percents");
         }
 
         Product product = productRepository.findById(productId)
