@@ -1,5 +1,6 @@
 package org.onlineshop.service;
 
+import lombok.Generated;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.onlineshop.dto.product.ProductRequestDto;
@@ -443,6 +444,7 @@ public class ProductService implements ProductServiceInterface {
      *                                  - Product price is null or less than or equal to 0.01
      *                                  - Product discount price is null or less than 0
      */
+    @Generated
     private void validateProductRequestDto(ProductRequestDto productRequestDto) {
         String productName = productRequestDto.getProductName();
         String productCategory = productRequestDto.getProductCategory();

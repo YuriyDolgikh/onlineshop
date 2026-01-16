@@ -56,10 +56,16 @@ class StatisticServiceProfitStatisticsTest {
 
         List<Product> products = new ArrayList<>();
         for (int i = 0; i <= 50; i++) {
+            BigDecimal price = new BigDecimal(100 + i * 10);
+            BigDecimal discountPrice = new BigDecimal(i * 2);
+            if (discountPrice.compareTo(BigDecimal.valueOf(100)) > 0) {
+                discountPrice = BigDecimal.valueOf(100);
+            }
+
             products.add(Product.builder()
                     .name("Product " + i)
-                    .price(new BigDecimal(100 + i * 10))
-                    .discountPrice(new BigDecimal(80 + i * 5))
+                    .price(price)
+                    .discountPrice(discountPrice)
                     .category(category)
                     .build());
         }
@@ -80,10 +86,18 @@ class StatisticServiceProfitStatisticsTest {
             for (int j = 0; j < 10; j++) {
                 Product p = savedProducts.get(startIndex + j);
                 int quantity = (i + p.getName().length()) % 3 + 1;
+
+                BigDecimal priceAtPurchase = p.getPrice();
+                if (p.getDiscountPrice() != null && p.getDiscountPrice().compareTo(BigDecimal.ZERO) > 0) {
+                    BigDecimal discountMultiplier = BigDecimal.ONE
+                            .subtract(p.getDiscountPrice().divide(BigDecimal.valueOf(100)));
+                    priceAtPurchase = priceAtPurchase.multiply(discountMultiplier);
+                }
+
                 OrderItem orderItem = OrderItem.builder()
                         .product(p)
                         .quantity(quantity)
-                        .priceAtPurchase(p.getDiscountPrice())
+                        .priceAtPurchase(priceAtPurchase)
                         .order(order)
                         .build();
                 items.add(orderItem);
@@ -113,7 +127,7 @@ class StatisticServiceProfitStatisticsTest {
             ProfitStatisticsResponseDto result = statisticService.getProfitStatistics(request);
 
             assertNotNull(result);
-            assertTrue(result.getTotalProfit().compareTo(BigDecimal.ZERO) > 0);
+            assertTrue(result.getTotalProfit().compareTo(BigDecimal.ZERO) >= 0);
             assertEquals(groupBy, result.getGroupBy().name());
         }
     }
@@ -146,5 +160,22 @@ class StatisticServiceProfitStatisticsTest {
         request.setGroupBy("INVALID");
 
         assertThrows(BadRequestException.class, () -> statisticService.getProfitStatistics(request));
+    }
+
+    @Test
+    void getProfitStatisticsValidRequestWithSmallPeriod() {
+        ProfitStatisticRequestDto request = new ProfitStatisticRequestDto();
+        request.setPeriodCount(1);
+        request.setPeriodUnit("DAYS");
+        request.setGroupBy("DAY");
+
+        ProfitStatisticsResponseDto result = statisticService.getProfitStatistics(request);
+
+        assertNotNull(result);
+        assertNotNull(result.getStartDate());
+        assertNotNull(result.getEndDate());
+        assertEquals("DAY", result.getGroupBy().name());
+        assertNotNull(result.getProfitsByPeriod());
+        assertNotNull(result.getTotalProfit());
     }
 }

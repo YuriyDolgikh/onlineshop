@@ -132,7 +132,7 @@ class ProductServiceSetDiscountPriceTest {
 
         Exception exception = assertThrows(IllegalArgumentException.class,
                 () -> productService.setDiscountPrice(product.getId(), BigDecimal.valueOf(-10)));
-        String messageException = "New discount price cannot be less than 0";
+        String messageException = "Discount price must be between 0 and 100 percents";
         assertEquals(messageException, exception.getMessage());
     }
 

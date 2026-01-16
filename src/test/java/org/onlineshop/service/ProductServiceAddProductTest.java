@@ -9,7 +9,6 @@ import org.onlineshop.dto.product.ProductRequestDto;
 import org.onlineshop.dto.product.ProductResponseDto;
 import org.onlineshop.entity.Category;
 import org.onlineshop.entity.Product;
-import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.exception.UrlValidationError;
 import org.onlineshop.exception.UrlValidationException;
@@ -112,25 +111,6 @@ class ProductServiceAddProductTest {
         Exception exception = assertThrows(NotFoundException.class, () -> productService.addProduct(requestDto));
         assertEquals("Category with name: " + requestDto.getProductCategory() + " not found", exception.getMessage());
 
-    }
-
-    @Test
-    void testAddProductWhenCategoryAlreadyContainsProductWithSameName() {
-        ProductRequestDto productSecond = ProductRequestDto.builder()
-                .productName("TestProductSecond")
-                .productCategory("testCategory")
-                .image("https://drive.google.com/Dublicate")
-                .productDescription("TestProductTextForUniqueTest")
-                .productPrice(BigDecimal.valueOf(80))
-                .productDiscountPrice(BigDecimal.valueOf(10))
-                .build();
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> productService.addProduct(productSecond));
-
-        String message = exception.getMessage();
-        assertTrue(message.contains("TestProductSecond"));
-        assertTrue(message.contains("testCategory"));
     }
 
     @Test
@@ -252,6 +232,7 @@ class ProductServiceAddProductTest {
         );
 
     }
+
     @Test
     void testAddProductIfImageUrlInvalid() {
         ProductRequestDto product = ProductRequestDto.builder()

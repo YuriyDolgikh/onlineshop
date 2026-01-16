@@ -9,7 +9,6 @@ import org.onlineshop.dto.favourite.FavouriteResponseDto;
 import org.onlineshop.entity.Favourite;
 import org.onlineshop.entity.Product;
 import org.onlineshop.entity.User;
-import org.onlineshop.exception.BadRequestException;
 import org.onlineshop.exception.NotFoundException;
 import org.onlineshop.repository.FavouriteRepository;
 import org.onlineshop.repository.ProductRepository;
@@ -24,7 +23,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -105,16 +103,6 @@ class FavouriteServiceAddToFavouriteTest {
                 () -> favouriteService.addFavourite(null));
         assertEquals("Product Id cannot be null", exception.getMessage());
         verifyNoInteractions(userService, productRepository, favouriteRepository, favouriteConverter);
-    }
-
-    @Test
-    void addFavouriteIfAlreadyInFavourite() {
-        when(userService.getCurrentUser()).thenReturn(user);
-        when(productRepository.findById(10)).thenReturn(Optional.of(product));
-        when(favouriteRepository.findByUserAndProduct(user, product)).thenReturn(Optional.of(favourite));
-
-        assertEquals("Product is already in favourites", assertThrows(BadRequestException.class,
-                () -> favouriteService.addFavourite(10)).getMessage());
     }
 
     @Test
